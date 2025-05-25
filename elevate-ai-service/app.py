@@ -14,19 +14,24 @@ from typing import Dict, List, Any, Optional, Union
 import google.generativeai as genai
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
-
-# Configure logging
+# Configure logging first
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-# Configuration
-CORE_API_ACCESS_KEY = os.environ.get("CORE_API_ACCESS_KEY", "your-core-api-access-key-here")
+# Load environment variables
+load_dotenv()
+
+# Configuration - Load after environment variables
+CORE_API_ACCESS_KEY = os.environ.get("CORE_API_ACCESS_KEY")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
 MODEL_NAME = os.environ.get("AI_MODEL", "gemini-1.5-flash-latest")
+
+# Verify required environment variables
+if not CORE_API_ACCESS_KEY:
+    logger.error("CORE_API_ACCESS_KEY is not set in environment variables")
+    raise ValueError("CORE_API_ACCESS_KEY environment variable is required")
 
 # Configure Gemini API
 if not GEMINI_API_KEY:
@@ -38,15 +43,38 @@ genai.configure(api_key=GEMINI_API_KEY)
 # Middleware for API key verification
 @app.before_request
 def verify_api_key():
+    logger.info("\n=== New Request ===")
+    logger.info(f"Endpoint: {request.endpoint}")
+    logger.info(f"Headers: {dict(request.headers)}")
+    
     if request.endpoint != 'health':  # Skip auth for health check
         auth_header = request.headers.get('Authorization')
+        logger.info(f"Auth header: {auth_header}")
+        logger.info(f"Expected API key: {CORE_API_ACCESS_KEY} (length: {len(CORE_API_ACCESS_KEY) if CORE_API_ACCESS_KEY else 'None'})")
+        
         if not auth_header:
+            logger.warning("No Authorization header provided")
             return jsonify({"success": False, "error": {"code": "unauthorized", "message": "No API key provided"}}), 401
         
         try:
-            scheme, token = auth_header.split()
+            parts = auth_header.split()
+            if len(parts) != 2:
+                logger.warning(f"Invalid Authorization header format - expected 2 parts, got {len(parts)}")
+                return jsonify({"success": False, "error": {"code": "unauthorized", "message": "Invalid Authorization header format"}}), 401
+                
+            scheme, token = parts
+            logger.info(f"Scheme: {scheme}, Token: {token} (length: {len(token)})")
+            
             if scheme.lower() != 'bearer':
+                logger.warning(f"Invalid scheme: {scheme}")
                 return jsonify({"success": False, "error": {"code": "unauthorized", "message": "Invalid authentication scheme"}}), 401
+            
+            # Debug: Print ASCII values of each character in the tokens
+            expected_chars = [ord(c) for c in CORE_API_ACCESS_KEY]
+            received_chars = [ord(c) for c in token]
+            logger.info(f"Expected chars: {expected_chars}")
+            logger.info(f"Received chars: {received_chars}")
+            logger.info(f"Tokens match: {token == CORE_API_ACCESS_KEY}")
             
             if token != CORE_API_ACCESS_KEY:
                 return jsonify({"success": False, "error": {"code": "unauthorized", "message": "Invalid API key"}}), 401
