@@ -1,23 +1,114 @@
 # Elevate AI Service
 
-This is the AI service component of the Elevate platform, powered by Google's Gemini API. It provides intelligent educational services including answer evaluation, question generation, and conversational AI.
+This is the AI service component of the Elevate platform, powered by Google's Gemini API. It provides intelligent educational services including answer evaluation, question generation, and conversational AI capabilities.
+
+## Table of Contents
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Setup](#setup)
+- [Configuration](#configuration)
+- [API Documentation](#api-documentation)
+- [Testing](#testing)
+- [Deployment](#deployment)
+- [Troubleshooting](#troubleshooting)
+- [License](#license)
 
 ## Features
 
-### Answer Evaluation
-- `/evaluate-answer` endpoint to assess user answers against expected answers
-- Support for different question types (multiple-choice, true-false, short-answer)
+### 📝 Answer Evaluation
+- Intelligent assessment of student answers
+- Support for multiple question types:
+  - Multiple-choice
+  - True/False
+  - Short answer
 - Detailed feedback and scoring
+- Partial credit for partially correct answers
 
-### Question Generation
-- `/generate-questions` endpoint to create educational questions from source text
-- Support for multiple question types and difficulty levels
-- Topic-focused question generation with explanations
+### ❓ Question Generation
+- Generate educational questions from any text
+- Customizable question types and difficulty levels
+- Topic-focused question generation
+- Includes explanations and answer keys
 
-### Conversational AI
-- `/chat` endpoint for educational conversations
-- Context-aware responses with reference citations
-- Suggested follow-up questions
+### 💬 Conversational AI
+- Natural language understanding
+- Context-aware responses
+- Educational content generation
+- Follow-up question suggestions
+
+## Prerequisites
+
+- Python 3.8+
+- pip (Python package manager)
+- Google Gemini API key
+- Virtual environment (recommended)
+
+## Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-username/elevate-ai-api.git
+   cd elevate-ai-api/elevate-ai-service
+   ```
+
+2. **Create and activate a virtual environment**
+   ```bash
+   # On Unix/macOS
+   python -m venv venv
+   source venv/bin/activate
+   
+   # On Windows
+   python -m venv venv
+   .\venv\Scripts\activate
+   ```
+
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+## Configuration
+
+1. **Environment Variables**
+   Copy the example environment file and update it with your configuration:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Required Configuration**
+   Edit the `.env` file with your settings:
+   ```env
+   # Required
+   CORE_API_ACCESS_KEY=your_secure_api_key
+   GEMINI_API_KEY=your_gemini_api_key
+   
+   # Optional (with defaults)
+   FLASK_APP=app.py
+   FLASK_ENV=development
+   PORT=8000
+   AI_MODEL=gemini-1.5-flash-latest
+   ```
+
+## Running the Service
+
+### Development Mode
+```bash
+flask run --port=8000
+```
+
+### Production Mode (using Gunicorn)
+```bash
+gunicorn -w 4 -b 0.0.0.0:8000 app:app
+```
+
+### Using Docker
+```bash
+# Build the image
+docker build -t elevate-ai-service .
+
+# Run the container
+docker run -p 8000:8000 --env-file .env elevate-ai-service
+```
 
 ## Setup
 
@@ -46,25 +137,39 @@ This is the AI service component of the Elevate platform, powered by Google's Ge
    gunicorn -w 4 -b 0.0.0.0:8000 app:app
    ```
 
-## API Endpoints
+## API Documentation
+
+### Base URL
+All endpoints are relative to: `http://localhost:8000`
+
+### Authentication
+Include your API key in the `Authorization` header:
+```
+Authorization: Bearer your_api_key_here
+```
 
 ### Health Check
-
-```
+```http
 GET /health
 ```
 
-Returns the status and version of the service.
+**Response**
+```json
+{
+  "status": "ok",
+  "version": "v1"
+}
+```
 
 ### Evaluate Answer
 
-```
+```http
 POST /evaluate-answer
 ```
 
 Evaluates a user's answer against an expected answer.
 
-#### Request Body
+**Request Body**
 
 ```json
 {
@@ -78,7 +183,7 @@ Evaluates a user's answer against an expected answer.
 }
 ```
 
-#### Response
+**Response**
 
 ```json
 {
@@ -98,13 +203,67 @@ Evaluates a user's answer against an expected answer.
 }
 ```
 
+**Error Responses**
+
+| Status Code | Error Code | Description |
+|-------------|------------|-------------|
+| 400 | invalid_request | Missing or invalid parameters |
+| 401 | unauthorized | Invalid or missing API key |
+| 500 | internal_error | Server error |
+
 ### Generate Questions
 
-```
+```http
 POST /generate-questions
 ```
 
 Generates educational questions from source text.
+
+**Request Body**
+
+```json
+{
+  "sourceText": "The water cycle describes the continuous movement of water on Earth.",
+  "questionCount": 2,
+  "questionTypes": ["multiple-choice", "true-false"],
+  "difficulty": "medium",
+  "topics": ["water cycle", "earth science"],
+  "language": "en"
+}
+```
+
+**Response**
+
+```json
+{
+  "success": true,
+  "questions": [
+    {
+      "text": "What is the water cycle?",
+      "questionType": "multiple-choice",
+      "answer": "The continuous movement of water on Earth",
+      "options": [
+        "The cycle of seasons",
+        "The continuous movement of water on Earth",
+        "The process of water freezing",
+        "The way rivers flow"
+      ],
+      "explanation": "The water cycle describes how water moves through different states and locations on Earth."
+    },
+    {
+      "text": "True or False: The water cycle includes the process of evaporation.",
+      "questionType": "true-false",
+      "answer": "true",
+      "explanation": "Evaporation is a key part of the water cycle where water changes from liquid to vapor."
+    }
+  ],
+  "metadata": {
+    "processingTime": "1.23s",
+    "model": "gemini-1.5-flash-latest",
+    "sourceTextLength": 65
+  }
+}
+```
 
 #### Request Body
 
@@ -155,50 +314,182 @@ Generates educational questions from source text.
 
 ### Chat with AI
 
-```
+```http
 POST /chat
 ```
 
 Provides conversational AI responses with educational content.
 
-#### Request Body
+**Request Body**
 
 ```json
 {
-  "message": "Can you explain the concept of photosynthesis?",
+  "message": "Explain the water cycle",
   "conversation": [
     {
       "role": "user",
-      "content": "What is biology?"
+      "content": "Hello"
     },
     {
       "role": "assistant",
-      "content": "Biology is the scientific study of life and living organisms."
+      "content": "Hi there! How can I help you with your learning today?"
     }
   ],
   "context": {
-    "questionSets": [
-      {
-        "id": 1,
-        "name": "Biology 101",
-        "questions": [
-          {
-            "text": "What is photosynthesis?",
-            "answer": "Photosynthesis is the process by which green plants use sunlight to synthesize foods with the help of chlorophyll."
-          }
-        ]
-      }
-    ],
-    "userLevel": "beginner",
-    "preferredLearningStyle": "visual"
+    "subject": "Science",
+    "gradeLevel": "middle school"
   },
   "language": "en"
 }
 ```
 
-#### Response
+**Response**
 
 ```json
+{
+  "success": true,
+  "message": "The water cycle is the continuous movement of water on, above, and below the Earth's surface. It includes processes like evaporation, condensation, precipitation, and runoff. Water changes between liquid, solid, and gas states as it moves through these processes.",
+  "suggestedQuestions": [
+    "What is evaporation?",
+    "How does condensation form clouds?",
+    "What are the different forms of precipitation?"
+  ],
+  "references": [
+    {
+      "text": "The water cycle describes how water moves through different states and locations on Earth.",
+      "source": "National Geographic"
+    }
+  ],
+  "metadata": {
+    "processingTime": "1.45s",
+    "model": "gemini-1.5-flash-latest",
+    "tokensUsed": 245
+  }
+}
+```
+
+## Testing
+
+### Unit Tests
+
+Run the test suite:
+
+```bash
+# Install test dependencies
+pip install -r requirements-test.txt
+
+# Run all tests
+pytest
+```
+
+### Integration Tests
+
+Test the API endpoints:
+
+```bash
+# Test evaluate-answer endpoint
+python test_evaluate_answer_endpoint.py
+
+# Test generate-questions endpoint
+python test_generate_questions_endpoint.py
+
+# Test chat endpoint
+python test_chat_endpoint.py
+
+# Run all integration tests
+python -m unittest discover -s tests
+```
+
+## Deployment
+
+### Environment Variables
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `CORE_API_ACCESS_KEY` | Yes | - | API key for authentication |
+| `GEMINI_API_KEY` | Yes | - | Google Gemini API key |
+| `FLASK_APP` | No | `app.py` | Flask application entry point |
+| `FLASK_ENV` | No | `development` | Environment (development/production) |
+| `PORT` | No | `8000` | Port to run the server on |
+| `AI_MODEL` | No | `gemini-1.5-flash-latest` | AI model to use |
+
+### Production Deployment
+
+1. **Using Gunicorn**
+   ```bash
+   gunicorn -w 4 -b 0.0.0.0:8000 app:app --timeout 120
+   ```
+
+2. **Using Docker**
+   ```bash
+   # Build the image
+   docker build -t elevate-ai-service .
+   
+   # Run the container
+   docker run -d \
+     --name elevate-ai \
+     -p 8000:8000 \
+     --env-file .env \
+     elevate-ai-service
+   ```
+
+3. **Using Docker Compose**
+   ```yaml
+   version: '3.8'
+   
+   services:
+     ai-service:
+       build: .
+       ports:
+         - "8000:8000"
+       env_file:
+         - .env
+       restart: unless-stopped
+   ```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **API Key Issues**
+   - Ensure the `CORE_API_ACCESS_KEY` is set correctly
+   - Verify the `GEMINI_API_KEY` is valid and has the necessary permissions
+
+2. **Connection Refused**
+   - Make sure the server is running
+   - Check if the port is not blocked by a firewall
+
+3. **Module Not Found**
+   - Ensure all dependencies are installed: `pip install -r requirements.txt`
+   - Check your Python version (requires 3.8+)
+
+### Logs
+
+View logs with:
+
+```bash
+# For Docker
+# docker logs -f elevate-ai
+
+# For direct execution
+# tail -f nohup.out  # If using nohup
+```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## Support
+
+For support, please email support@elevate-ai.com or open an issue in the GitHub repository.
 {
   "success": true,
   "response": {
