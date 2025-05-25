@@ -245,6 +245,377 @@ def call_llm_for_evaluation(prompt: str) -> Dict[str, Any]:
             "suggestedCorrectAnswer": ""
         }
 
+# Generate Questions endpoint
+@app.route('/api/generate-questions', methods=['POST'])
+@app.route('/generate-questions', methods=['POST'])
+def generate_questions():
+    start_time = time.time()
+    
+    try:
+        data = request.json
+        
+        # Validate required fields
+        if not data.get('sourceText'):
+            return jsonify({
+                "success": False,
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Source text is required"
+                }
+            }), 400
+        
+        if not data.get('questionCount') or not isinstance(data.get('questionCount'), int):
+            return jsonify({
+                "success": False,
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Question count must be a positive integer"
+                }
+            }), 400
+        
+        # Extract request parameters
+        source_text = data.get('sourceText')
+        question_count = min(data.get('questionCount'), 10)  # Limit to 10 questions
+        question_types = data.get('questionTypes', ["multiple-choice", "true-false", "short-answer"])
+        difficulty = data.get('difficulty', 'medium')
+        topics = data.get('topics', [])
+        language = data.get('language', 'en')
+        
+        # Check if source text is too short
+        if len(source_text) < 50:
+            return jsonify({
+                "success": False,
+                "error": {
+                    "code": "text_too_short",
+                    "message": "Source text is too short to generate meaningful questions"
+                }
+            }), 400
+        
+        # Create prompt for the LLM
+        prompt = create_questions_prompt(source_text, question_count, question_types, difficulty, topics, language)
+        
+        # Call the LLM to generate questions
+        questions = call_llm_for_questions(prompt)
+        
+        processing_time = time.time() - start_time
+        
+        return jsonify({
+            "success": True,
+            "questions": questions,
+            "metadata": {
+                "processingTime": f"{processing_time:.2f}s",
+                "model": MODEL_NAME,
+                "sourceTextLength": len(source_text)
+            }
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error generating questions: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": {
+                "code": "internal_error",
+                "message": "An internal error occurred while processing your request"
+            }
+        }), 500
+
+# Chat endpoint
+@app.route('/api/chat', methods=['POST'])
+@app.route('/chat', methods=['POST'])
+def chat():
+    start_time = time.time()
+    
+    try:
+        data = request.json
+        
+        # Validate required fields
+        if not data.get('message'):
+            return jsonify({
+                "success": False,
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Message is required"
+                }
+            }), 400
+        
+        # Extract request parameters
+        message = data.get('message')
+        conversation = data.get('conversation', [])
+        context = data.get('context', {})
+        language = data.get('language', 'en')
+        
+        # Check if context is too large
+        if context and len(str(context)) > 10000:  # Arbitrary limit for demonstration
+            return jsonify({
+                "success": False,
+                "error": {
+                    "code": "context_too_large",
+                    "message": "The provided context is too large. Please reduce the amount of context data."
+                }
+            }), 400
+        
+        # Create prompt for the LLM
+        prompt = create_chat_prompt(message, conversation, context, language)
+        
+        # Call the LLM to generate a response
+        response = call_llm_for_chat(prompt, context)
+        
+        processing_time = time.time() - start_time
+        
+        return jsonify({
+            "success": True,
+            "response": response,
+            "metadata": {
+                "processingTime": f"{processing_time:.2f}s",
+                "model": MODEL_NAME,
+                "tokensUsed": len(prompt.split()) + len(str(response).split())  # Simplified token calculation
+            }
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error generating chat response: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": {
+                "code": "internal_error",
+                "message": "An internal error occurred while processing your request"
+            }
+        }), 500
+
+# Helper functions for generating questions
+def create_questions_prompt(source_text: str, question_count: int, question_types: List[str], 
+                          difficulty: str, topics: List[str], language: str) -> str:
+    """Create a prompt for generating questions from source text."""
+    topics_str = ", ".join(topics) if topics else "any relevant topics"
+    question_types_str = ", ".join(question_types)
+    
+    return f"""You are an educational AI assistant tasked with generating questions from source text.
+
+SOURCE TEXT:
+{source_text}
+
+GENERATE {question_count} QUESTIONS with the following parameters:
+- Question types: {question_types_str}
+- Difficulty level: {difficulty}
+- Topics to focus on: {topics_str}
+- Language: {language}
+
+For each question, provide:
+1. The question text
+2. The question type (one of: {question_types_str})
+3. The correct answer
+4. For multiple-choice questions, provide 4 options including the correct answer
+5. A brief explanation of the answer
+
+Return your response as a valid JSON array of question objects, with each object having the following structure:
+- For multiple-choice questions:
+  {{"text": "question text", "questionType": "multiple-choice", "answer": "correct answer", "options": ["option1", "option2", "option3", "option4"], "explanation": "explanation text"}}
+- For true-false questions:
+  {{"text": "statement text", "questionType": "true-false", "answer": "true or false", "explanation": "explanation text"}}
+- For short-answer questions:
+  {{"text": "question text", "questionType": "short-answer", "answer": "correct answer", "explanation": "explanation text"}}
+
+Ensure that the questions are diverse, educational, and directly based on the content of the source text.
+"""
+
+def call_llm_for_questions(prompt: str) -> List[Dict[str, Any]]:
+    """Call the LLM to generate questions from source text."""
+    try:
+        # Create a system prompt to instruct Gemini
+        system_prompt = "You are an educational AI assistant that generates questions from source text. You MUST return your response as a valid JSON array of question objects."
+        
+        # Instantiate the Gemini model
+        model = genai.GenerativeModel(MODEL_NAME)
+        
+        # Configure generation parameters
+        generation_config = genai.GenerationConfig(
+            temperature=0.7,  # Higher temperature for more creative questions
+            max_output_tokens=2000
+        )
+        
+        # Combine system prompt and user prompt
+        full_prompt = f"{system_prompt}\n\n{prompt}"
+        
+        # Call Gemini API
+        response = model.generate_content(
+            full_prompt,
+            generation_config=generation_config
+        )
+        
+        # Extract the content from the response
+        content = response.text
+        logger.info(f"Raw Gemini response for questions: {content[:100]}...")
+        
+        # Try to extract JSON from the response text
+        # Look for JSON content between square brackets
+        import re
+        json_match = re.search(r'\[.*\]', content, re.DOTALL)
+        
+        if json_match:
+            json_str = json_match.group(0)
+            # Parse the JSON response
+            questions = json.loads(json_str)
+        else:
+            # If no JSON found, create a structured response manually
+            logger.warning("No JSON found in Gemini response for questions, creating structured response manually")
+            questions = []
+        
+        # Ensure we have the requested number of questions
+        return questions
+        
+    except Exception as e:
+        logger.error(f"Error calling LLM for questions: {str(e)}")
+        # Return an empty list in case of error
+        return []
+
+# Helper functions for chat
+def create_chat_prompt(message: str, conversation: List[Dict[str, str]], 
+                     context: Dict[str, Any], language: str) -> str:
+    """Create a prompt for the chat functionality."""
+    # Format conversation history
+    conversation_str = ""
+    for msg in conversation:
+        role = msg.get('role', 'user')
+        content = msg.get('content', '')
+        conversation_str += f"{role.upper()}: {content}\n"
+    
+    # Format context information
+    context_str = ""
+    if context:
+        if 'questionSets' in context:
+            context_str += "RELEVANT INFORMATION:\n"
+            for question_set in context['questionSets']:
+                context_str += f"From {question_set.get('name', 'Unknown')}:\n"
+                for question in question_set.get('questions', []):
+                    context_str += f"- Question: {question.get('text', '')}\n"
+                    context_str += f"  Answer: {question.get('answer', '')}\n"
+        
+        if 'userLevel' in context:
+            context_str += f"\nUser knowledge level: {context['userLevel']}\n"
+        
+        if 'preferredLearningStyle' in context:
+            context_str += f"User preferred learning style: {context['preferredLearningStyle']}\n"
+    
+    return f"""You are an educational AI assistant engaged in a conversation with a user.
+
+CONVERSATION HISTORY:
+{conversation_str}
+
+CONTEXT INFORMATION:
+{context_str}
+
+CURRENT USER MESSAGE:
+{message}
+
+Please provide a helpful, educational response in {language} language.
+
+Your response should be informative, accurate, and tailored to the user's knowledge level and learning style if specified.
+
+Also suggest 3 follow-up questions the user might want to ask next.
+
+Return your response in JSON format with the following structure:
+{{
+  "message": "Your detailed response to the user's question",
+  "references": [{{
+    "text": "Referenced information if applicable",
+    "source": "Source of the reference"  
+  }}],
+  "suggestedQuestions": ["Question 1", "Question 2", "Question 3"]
+}}
+"""
+
+def call_llm_for_chat(prompt: str, context: Dict[str, Any]) -> Dict[str, Any]:
+    """Call the LLM to generate a chat response."""
+    try:
+        # Create a system prompt to instruct Gemini
+        system_prompt = "You are an educational AI assistant engaged in a conversation. You MUST return your response in valid JSON format with message, references, and suggestedQuestions fields."
+        
+        # Instantiate the Gemini model
+        model = genai.GenerativeModel(MODEL_NAME)
+        
+        # Configure generation parameters
+        generation_config = genai.GenerationConfig(
+            temperature=0.7,  # Balanced temperature for conversational responses
+            max_output_tokens=2000
+        )
+        
+        # Combine system prompt and user prompt
+        full_prompt = f"{system_prompt}\n\n{prompt}"
+        
+        # Call Gemini API
+        response = model.generate_content(
+            full_prompt,
+            generation_config=generation_config
+        )
+        
+        # Extract the content from the response
+        content = response.text
+        logger.info(f"Raw Gemini response for chat: {content[:100]}...")
+        
+        # Try to extract JSON from the response text
+        # Look for JSON content between curly braces
+        import re
+        json_match = re.search(r'\{.*\}', content, re.DOTALL)
+        
+        if json_match:
+            json_str = json_match.group(0)
+            # Parse the JSON response
+            chat_response = json.loads(json_str)
+        else:
+            # If no JSON found, create a structured response manually
+            logger.warning("No JSON found in Gemini response for chat, creating structured response manually")
+            chat_response = {
+                "message": content,
+                "references": [],
+                "suggestedQuestions": [
+                    "Can you explain more about this topic?",
+                    "What are some practical applications of this?",
+                    "How does this relate to other concepts?"
+                ]
+            }
+        
+        # Extract references from context if available and not already provided
+        if not chat_response.get('references') and context.get('questionSets'):
+            references = []
+            for question_set in context.get('questionSets', []):
+                for question in question_set.get('questions', []):
+                    if question.get('text') and question.get('answer'):
+                        references.append({
+                            "text": question.get('answer'),
+                            "source": f"{question_set.get('name', 'Unknown')} Question Set"
+                        })
+            chat_response['references'] = references[:2]  # Limit to 2 references
+        
+        # Ensure all required fields are present
+        required_fields = ["message", "references", "suggestedQuestions"]
+        for field in required_fields:
+            if field not in chat_response:
+                if field == "references":
+                    chat_response[field] = []
+                elif field == "suggestedQuestions":
+                    chat_response[field] = [
+                        "Can you explain more about this topic?",
+                        "What are some practical applications of this?",
+                        "How does this relate to other concepts?"
+                    ]
+                else:
+                    chat_response[field] = ""
+        
+        return chat_response
+        
+    except Exception as e:
+        logger.error(f"Error calling LLM for chat: {str(e)}")
+        # Return a default response in case of error
+        return {
+            "message": "I apologize, but I encountered an error while processing your request. Please try again.",
+            "references": [],
+            "suggestedQuestions": [
+                "Can you try asking a different question?",
+                "Can you rephrase your question?",
+                "Would you like to start a new conversation?"
+            ]
+        }
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8000))
     app.run(host='0.0.0.0', port=port, debug=True)
