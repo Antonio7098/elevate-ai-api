@@ -371,9 +371,19 @@ def chat():
     
     try:
         data = request.json
+        logger.info("\n=== Chat Request Received ===")
+        logger.info(f"Endpoint: {request.path}")
+        
+        # Log the incoming request data (sanitized for privacy/security)
+        sanitized_data = data.copy() if data else {}
+        if 'conversation' in sanitized_data:
+            # Truncate conversation history for log readability
+            sanitized_data['conversation'] = f"[{len(sanitized_data['conversation'])} messages]"
+        logger.info(f"Request data: {json.dumps(sanitized_data, indent=2, default=str)}")
         
         # Validate required fields
         if not data.get('message'):
+            logger.warning("Missing required field: message")
             return jsonify({
                 "success": False,
                 "error": {
@@ -516,6 +526,42 @@ def call_llm_for_questions(prompt: str) -> List[Dict[str, Any]]:
 def create_chat_prompt(message: str, conversation: List[Dict[str, str]], 
                       context: Dict[str, Any], language: str) -> str:
     """Create a prompt for the chat functionality with enhanced context handling."""
+    # Log the context object received from Node.js
+    logger.info("\n=== Chat Context from Node.js ===")
+    # Create a sanitized copy for logging (to avoid exposing sensitive data)
+    sanitized_context = {}
+    for key, value in context.items():
+        if key == 'user' and isinstance(value, dict):
+            # Include user preferences but exclude personal info
+            sanitized_context[key] = {
+                k: v for k, v in value.items() 
+                if k in ['level', 'learningStyle', 'verbosityPreference']
+            }
+        elif key == 'folder' and isinstance(value, dict):
+            # Include folder metadata but exclude sensitive data
+            sanitized_context[key] = {
+                k: v for k, v in value.items()
+                if k in ['name', 'description', 'questionSetCount']
+            }
+        elif key == 'questionSets' and isinstance(value, list):
+            # Include basic question set info but limit the amount of data
+            sanitized_context[key] = []
+            for qs in value:
+                if isinstance(qs, dict):
+                    qs_copy = {
+                        k: v for k, v in qs.items()
+                        if k in ['name', 'description', 'topics']
+                    }
+                    # Just count questions instead of including full content
+                    if 'questions' in qs and isinstance(qs['questions'], list):
+                        qs_copy['questionCount'] = len(qs['questions'])
+                    sanitized_context[key].append(qs_copy)
+        else:
+            # Include other context keys as is
+            sanitized_context[key] = value
+    
+    logger.info(f"Context: {json.dumps(sanitized_context, indent=2, default=str)}")
+    
     # Format conversation history
     conversation_str = ""
     for msg in conversation:
@@ -582,7 +628,7 @@ def create_chat_prompt(message: str, conversation: List[Dict[str, str]],
         if 'preferredLearningStyle' in context and 'user' not in context:
             context_str += f"User preferred learning style: {context['preferredLearningStyle']}\n"
     
-    return f"""You are an educational AI assistant engaged in a conversation with a user.
+    final_prompt = f"""You are an educational AI assistant engaged in a conversation with a user.
 
 CONVERSATION HISTORY:
 {conversation_str}
@@ -609,71 +655,208 @@ Return your response in JSON format with the following structure:
   "suggestedQuestions": ["Question 1", "Question 2", "Question 3"]
 }}
 """
+    
+    # Log the final prompt sent to Gemini (truncated for readability if too long)
+    logger.info("\n=== Final Prompt to Gemini ===")
+    if len(final_prompt) > 1000:
+        # Log the first and last parts of a long prompt
+        logger.info(f"Prompt (truncated): {final_prompt[:500]}...\n...{final_prompt[-500:]}")
+        logger.info(f"Total prompt length: {len(final_prompt)} characters")
+    else:
+        logger.info(f"Prompt: {final_prompt}")
+    
+    return final_prompt
 
 def call_llm_for_chat(prompt: str, context: Dict[str, Any]) -> Dict[str, Any]:
-    """Call the LLM to generate a chat response."""
+    """Call the LLM to generate a chat response with enhanced context utilization."""
     try:
-        # Create a system prompt to instruct Gemini
-        system_prompt = "You are an educational AI assistant engaged in a conversation. You MUST return your response in valid JSON format with message, references, and suggestedQuestions fields."
+        # Adjust model parameters based on context
+        temperature = 0.7  # Default temperature
+        max_tokens = 1024  # Default token limit
         
-        # Instantiate the Gemini model
-        model = genai.GenerativeModel(MODEL_NAME)
+        # Personalize model parameters based on user preferences if available
+        if context.get('user'):
+            user = context.get('user', {})
+            # Adjust temperature based on user's learning style
+            if user.get('learningStyle') == 'creative' or context.get('preferredLearningStyle') == 'creative':
+                temperature = 0.8  # More creative responses
+            elif user.get('learningStyle') == 'precise' or context.get('preferredLearningStyle') == 'precise':
+                temperature = 0.3  # More precise, factual responses
+            
+            # Adjust token limit based on user's verbosity preference
+            if user.get('verbosityPreference') == 'concise':
+                max_tokens = 512  # Shorter responses
+            elif user.get('verbosityPreference') == 'detailed':
+                max_tokens = 1536  # Longer, more detailed responses
         
-        # Configure generation parameters
-        generation_config = genai.GenerationConfig(
-            temperature=0.7,  # Balanced temperature for conversational responses
-            max_output_tokens=2000
+        # Configure the model
+        generation_config = {
+            "temperature": temperature,
+            "top_p": 0.95,
+            "top_k": 40,
+            "max_output_tokens": max_tokens,
+        }
+        
+        safety_settings = [
+            {
+                "category": "HARM_CATEGORY_HARASSMENT",
+                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+                "category": "HARM_CATEGORY_HATE_SPEECH",
+                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+                "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+                "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            },
+        ]
+        
+        model = genai.GenerativeModel(
+            model_name=MODEL_NAME,
+            generation_config=generation_config,
+            safety_settings=safety_settings
         )
         
-        # Combine system prompt and user prompt
-        full_prompt = f"{system_prompt}\n\n{prompt}"
+        # Generate response
+        logger.info("Calling Gemini API...")
+        start_call_time = time.time()
+        response = model.generate_content(prompt)
+        call_duration = time.time() - start_call_time
         
-        # Call Gemini API
-        response = model.generate_content(
-            full_prompt,
-            generation_config=generation_config
-        )
-        
-        # Extract the content from the response
-        content = response.text
-        logger.info(f"Raw Gemini response for chat: {content[:100]}...")
-        
-        # Try to extract JSON from the response text
-        # Look for JSON content between curly braces
-        import re
-        json_match = re.search(r'\{.*\}', content, re.DOTALL)
-        
-        if json_match:
-            json_str = json_match.group(0)
-            # Parse the JSON response
-            chat_response = json.loads(json_str)
+        # Log the response from Gemini
+        logger.info(f"\n=== Gemini API Response (took {call_duration:.2f}s) ===")
+        if response.text:
+            if len(response.text) > 1000:
+                # Log truncated response for readability
+                logger.info(f"Response (truncated): {response.text[:500]}...\n...{response.text[-500:]}")
+                logger.info(f"Total response length: {len(response.text)} characters")
+            else:
+                logger.info(f"Response: {response.text}")
         else:
-            # If no JSON found, create a structured response manually
-            logger.warning("No JSON found in Gemini response for chat, creating structured response manually")
-            chat_response = {
-                "message": content,
-                "references": [],
-                "suggestedQuestions": [
-                    "Can you explain more about this topic?",
-                    "What are some practical applications of this?",
-                    "How does this relate to other concepts?"
-                ]
+            logger.warning("Empty response received from Gemini API")
+        
+        # Process the response
+        if not response.text:
+            return {
+                "message": "I'm sorry, I couldn't generate a response. Please try again.",
+                "suggestedQuestions": [],
+                "references": []
             }
         
-        # Extract references from context if available and not already provided
-        if not chat_response.get('references') and context.get('questionSets'):
-            references = []
-            for question_set in context.get('questionSets', []):
-                for question in question_set.get('questions', []):
-                    if question.get('text') and question.get('answer'):
-                        references.append({
-                            "text": question.get('answer'),
-                            "source": f"{question_set.get('name', 'Unknown')} Question Set"
-                        })
-            chat_response['references'] = references[:2]  # Limit to 2 references
+        # Extract message, suggested follow-up questions, and references
+        text_lines = response.text.split('\n')
+        message = ""
+        suggested_questions = []
+        references = []
+        
+        # Parse the response more intelligently
+        in_questions = False
+        in_references = False
+        
+        for line in text_lines:
+            line = line.strip()
+            
+            if not line:
+                continue
+                
+            # Detect sections for suggested questions
+            if any(q in line.lower() for q in ['suggested questions', 'follow-up questions', 'you might also ask', 'you may want to ask']):
+                in_questions = True
+                in_references = False
+                continue
+                
+            # Detect sections for references
+            if any(r in line.lower() for r in ['references', 'sources', 'citations', 'from your content']):
+                in_questions = False
+                in_references = True
+                continue
+                
+            if in_questions:
+                # Extract question from bullet points, numbers, etc.
+                question = line
+                for prefix in ['- ', '• ', '* ', '1. ', '2. ', '3. ', '4. ', '5. ', '? ']:
+                    if line.startswith(prefix):
+                        question = line[len(prefix):]
+                        break
+                        
+                # Clean up the question
+                if question and not question.endswith('?'):
+                    question += '?'
+                    
+                if question and len(suggested_questions) < 3:  # Limit to 3 suggestions
+                    suggested_questions.append(question)
+                    
+            elif in_references:
+                # Extract reference with source attribution if possible
+                reference = line
+                source = "AI Generated"
+                
+                # Clean up the reference
+                for prefix in ['- ', '• ', '* ', '1. ', '2. ', '3. ', '4. ', '5. ']:
+                    if line.startswith(prefix):
+                        reference = line[len(prefix):]
+                        break
+                
+                # Try to extract source information
+                if ' - ' in reference:
+                    parts = reference.split(' - ', 1)
+                    reference = parts[0].strip()
+                    source = parts[1].strip() if len(parts) > 1 else source
+                        
+                if reference and len(references) < 3:  # Limit to 3 references
+                    references.append({"text": reference, "source": source})
+                    
+            else:
+                message += line + " "
+        
+        # If we didn't extract any suggested questions but have folder/question set context,
+        # generate some based on the available context
+        if not suggested_questions and (context.get('folder') or context.get('questionSets')):
+            # Generate questions based on folder content
+            if context.get('folder'):
+                folder_name = context.get('folder', {}).get('name', '')
+                if folder_name:
+                    suggested_questions.append(f"Tell me more about the content in my '{folder_name}' folder?")
+            
+            # Generate questions based on question sets
+            if context.get('questionSets'):
+                for qs in context.get('questionSets', [])[:2]:  # Use up to 2 question sets
+                    qs_name = qs.get('name', '')
+                    if qs_name:
+                        suggested_questions.append(f"Can you help me study the '{qs_name}' question set?")
+                        
+                    # If we have topics, suggest a topic-based question
+                    topics = qs.get('topics', [])
+                    if topics and len(topics) > 0:
+                        topic = topics[0]
+                        suggested_questions.append(f"What are the key concepts I should understand about {topic}?")
+        
+        # If we still don't have enough suggested questions, add generic ones
+        while len(suggested_questions) < 3:
+            generic_questions = [
+                "Can you explain this in simpler terms?",
+                "How can I apply this knowledge in practice?",
+                "What are the most important points to remember?",
+                "Can you provide some examples?",
+                "How does this relate to other topics I'm studying?"
+            ]
+            for q in generic_questions:
+                if q not in suggested_questions and len(suggested_questions) < 3:
+                    suggested_questions.append(q)
         
         # Ensure all required fields are present
         required_fields = ["message", "references", "suggestedQuestions"]
+        chat_response = {
+            "message": message.strip(),
+            "references": references,
+            "suggestedQuestions": suggested_questions
+        }
+        
         for field in required_fields:
             if field not in chat_response:
                 if field == "references":
