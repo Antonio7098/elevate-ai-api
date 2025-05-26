@@ -156,7 +156,21 @@ def evaluate_answer():
 
 def create_evaluation_prompt(question_text: str, expected_answer: str, user_answer: str, question_type: str) -> str:
     """
-    Create a prompt for the LLM to evaluate the user's answer.
+    Create a prompt for the LLM to evaluate✅ [apiClient] Token added to headers
+2apiClient.ts:32 ✅ [apiClient] 200 GET /folders
+apiClient.ts:13 🔑 [apiClient] Adding auth token to request: /api/ai/generate-from-source
+apiClient.ts:17 ✅ [apiClient] Token added to headers
+:3000/api/api/ai/generate-from-source:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+apiClient.ts:37 ❌ [apiClient] 404 POST /api/ai/generate-from-source
+(anonymous) @ apiClient.ts:37
+apiClient.ts:55 🔍 [apiClient] 404 Not Found - Resource does not exist
+(anonymous) @ apiClient.ts:55
+aiService.ts:20 Failed to generate AI-powered question set: AxiosError
+generateAiPoweredSet @ aiService.ts:20
+CreateAiQuestionSetPage.tsx:110  the user's answer.
     
     Args:
         question_text: The original question text
@@ -274,6 +288,7 @@ def call_llm_for_evaluation(prompt: str) -> Dict[str, Any]:
         }
 
 # Generate Questions endpoint
+@app.route('/api/ai/generate-from-source', methods=['POST'])
 @app.route('/api/generate-questions', methods=['POST'])
 @app.route('/generate-questions', methods=['POST'])
 def generate_questions():
@@ -348,6 +363,7 @@ def generate_questions():
         }), 500
 
 # Chat endpoint
+@app.route('/api/ai/chat', methods=['POST'])
 @app.route('/api/chat', methods=['POST'])
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -498,8 +514,8 @@ def call_llm_for_questions(prompt: str) -> List[Dict[str, Any]]:
 
 # Helper functions for chat
 def create_chat_prompt(message: str, conversation: List[Dict[str, str]], 
-                     context: Dict[str, Any], language: str) -> str:
-    """Create a prompt for the chat functionality."""
+                      context: Dict[str, Any], language: str) -> str:
+    """Create a prompt for the chat functionality with enhanced context handling."""
     # Format conversation history
     conversation_str = ""
     for msg in conversation:
@@ -507,21 +523,63 @@ def create_chat_prompt(message: str, conversation: List[Dict[str, str]],
         content = msg.get('content', '')
         conversation_str += f"{role.upper()}: {content}\n"
     
-    # Format context information
+    # Format context information with enhanced handling for enriched data
     context_str = ""
     if context:
+        # Handle folder information
+        if 'folder' in context:
+            folder = context['folder']
+            context_str += f"FOLDER INFORMATION:\n"
+            context_str += f"Name: {folder.get('name', 'Unknown')}\n"
+            if folder.get('description'):
+                context_str += f"Description: {folder.get('description')}\n"
+            if folder.get('createdAt'):
+                context_str += f"Created: {folder.get('createdAt')}\n"
+            context_str += f"Contains {folder.get('questionSetCount', 0)} question sets\n\n"
+        
+        # Handle question sets with enhanced information
         if 'questionSets' in context:
-            context_str += "RELEVANT INFORMATION:\n"
+            context_str += "QUESTION SET INFORMATION:\n"
             for question_set in context['questionSets']:
-                context_str += f"From {question_set.get('name', 'Unknown')}:\n"
-                for question in question_set.get('questions', []):
-                    context_str += f"- Question: {question.get('text', '')}\n"
-                    context_str += f"  Answer: {question.get('answer', '')}\n"
+                context_str += f"Set: {question_set.get('name', 'Unknown')}\n"
+                if question_set.get('description'):
+                    context_str += f"Description: {question_set.get('description')}\n"
+                context_str += f"Contains {len(question_set.get('questions', []))} questions\n"
+                
+                # Add topic information if available
+                if question_set.get('topics'):
+                    topics = question_set.get('topics', [])
+                    context_str += f"Topics: {', '.join(topics)}\n"
+                
+                # Include sample questions (limit to 5 for brevity)
+                sample_questions = question_set.get('questions', [])[:5]
+                if sample_questions:
+                    context_str += "Sample questions:\n"
+                    for question in sample_questions:
+                        context_str += f"- {question.get('text', '')}\n"
+                        if question.get('answer'):
+                            context_str += f"  Answer: {question.get('answer')}\n"
+                        if question.get('questionType'):
+                            context_str += f"  Type: {question.get('questionType')}\n"
+                context_str += "\n"
         
-        if 'userLevel' in context:
-            context_str += f"\nUser knowledge level: {context['userLevel']}\n"
+        # Handle user information
+        if 'user' in context:
+            user = context['user']
+            context_str += "USER INFORMATION:\n"
+            if user.get('name'):
+                context_str += f"Name: {user.get('name')}\n"
+            if user.get('level') or context.get('userLevel'):
+                context_str += f"Knowledge level: {user.get('level') or context.get('userLevel', 'intermediate')}\n"
+            if user.get('learningStyle') or context.get('preferredLearningStyle'):
+                context_str += f"Learning style: {user.get('learningStyle') or context.get('preferredLearningStyle', 'balanced')}\n"
+            context_str += "\n"
         
-        if 'preferredLearningStyle' in context:
+        # Handle legacy context format for backward compatibility
+        elif 'userLevel' in context:
+            context_str += f"User knowledge level: {context['userLevel']}\n"
+        
+        if 'preferredLearningStyle' in context and 'user' not in context:
             context_str += f"User preferred learning style: {context['preferredLearningStyle']}\n"
     
     return f"""You are an educational AI assistant engaged in a conversation with a user.
