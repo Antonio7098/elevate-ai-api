@@ -71,10 +71,16 @@ Evaluates a user's answer against an expected answer.
   "questionContext": {
     "questionId": "q123",
     "questionText": "What is the capital of France?",
-    "expectedAnswer": "Paris",
-    "questionType": "short-answer"
+    "expectedAnswer": "Paris", // Optional: The known correct answer, if available
+    "questionType": "short-answer", // e.g., "short-answer", "multiple-choice", "true-false"
+    "options": ["Paris", "London", "Berlin", "Madrid"], // Optional: Only for "multiple-choice" type
+    "marksAvailable": 1 // Optional: The total marks this question is worth (defaults to 1 if not provided)
   },
-  "userAnswer": "Paris is the capital of France"
+  "userAnswer": "Paris is the capital of France",
+  "context": { // Optional: Additional context about the question's origin
+    "questionSetName": "European Capitals Quiz",
+    "folderName": "Geography"
+  }
 }
 ```
 
