@@ -6,6 +6,7 @@ It provides endpoints for evaluating user answers using LLM technology.
 """
 
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import time
 import os
 import logging
@@ -19,6 +20,12 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+
+# Enable CORS for all routes and origins
+# Get allowed origins from environment variable or default to all (*)
+ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "*").split(',')
+logger.info(f"Configuring CORS with allowed origins: {ALLOWED_ORIGINS}")
+CORS(app, resources={r"/*": {"origins": ALLOWED_ORIGINS}}, supports_credentials=True)
 
 # Load environment variables
 load_dotenv()
@@ -47,7 +54,8 @@ def verify_api_key():
     logger.info(f"Endpoint: {request.endpoint}")
     logger.info(f"Headers: {dict(request.headers)}")
     
-    if request.endpoint != 'health':  # Skip auth for health check
+    # Skip auth for health check and OPTIONS requests (CORS preflight)
+    if request.endpoint != 'health' and request.method != 'OPTIONS':
         auth_header = request.headers.get('Authorization')
         logger.info(f"Auth header: {auth_header}")
         logger.info(f"Expected API key: {CORE_API_ACCESS_KEY} (length: {len(CORE_API_ACCESS_KEY) if CORE_API_ACCESS_KEY else 'None'})")
@@ -81,9 +89,11 @@ def verify_api_key():
         except ValueError:
             return jsonify({"success": False, "error": {"code": "unauthorized", "message": "Invalid authorization header format"}}), 401
 
-# Health check endpoint
+# Health check endpoints
 @app.route('/health', methods=['GET'])
+@app.route('/api/health', methods=['GET'])
 def health():
+    logger.info("Health check endpoint accessed")
     return jsonify({"status": "ok", "version": "v1"}), 200
 
 # Evaluate Answer endpoint
