@@ -98,6 +98,7 @@ def health():
 
 # Evaluate Answer endpoint
 @app.route('/evaluate-answer', methods=['POST'])
+@app.route('/api/ai/evaluate-answer', methods=['POST'])
 def evaluate_answer():
     start_time = time.time()
     
@@ -166,21 +167,7 @@ def evaluate_answer():
 
 def create_evaluation_prompt(question_text: str, expected_answer: str, user_answer: str, question_type: str) -> str:
     """
-    Create a prompt for the LLM to evaluate✅ [apiClient] Token added to headers
-2apiClient.ts:32 ✅ [apiClient] 200 GET /folders
-apiClient.ts:13 🔑 [apiClient] Adding auth token to request: /api/ai/generate-from-source
-apiClient.ts:17 ✅ [apiClient] Token added to headers
-:3000/api/api/ai/generate-from-source:1 
-            
-            
-           Failed to load resource: the server responded with a status of 404 (Not Found)
-apiClient.ts:37 ❌ [apiClient] 404 POST /api/ai/generate-from-source
-(anonymous) @ apiClient.ts:37
-apiClient.ts:55 🔍 [apiClient] 404 Not Found - Resource does not exist
-(anonymous) @ apiClient.ts:55
-aiService.ts:20 Failed to generate AI-powered question set: AxiosError
-generateAiPoweredSet @ aiService.ts:20
-CreateAiQuestionSetPage.tsx:110  the user's answer.
+    Create a prompt for the LLM to evaluate the user's answer.
     
     Args:
         question_text: The original question text
@@ -470,14 +457,26 @@ For each question, provide:
 3. The correct answer
 4. For multiple-choice questions, provide 4 options including the correct answer
 5. A brief explanation of the answer
+6. The total marks available for the question (an integer from 1 to 5)
+7. Marking criteria that explains how to achieve each mark
+
+Guidelines for determining total marks available:
+- Multiple-choice and true-false questions are typically worth 1 mark
+- Short-answer questions can be worth 1-5 marks depending on complexity
+- Consider the depth and breadth of knowledge required to answer correctly
+
+Guidelines for marking criteria:
+- If a question is worth 1 mark, provide a single string explaining what constitutes a correct answer
+- If a question is worth multiple marks (2-5), provide an array of strings where each string describes what is needed for each successive mark
+- Example for a 3-mark question: ["Mark 1: Identifies the primary concept correctly", "Mark 2: Provides a supporting detail or example", "Mark 3: Explains the implication or connects it to another concept"]
 
 Return your response as a valid JSON array of question objects, with each object having the following structure:
 - For multiple-choice questions:
-  {{"text": "question text", "questionType": "multiple-choice", "answer": "correct answer", "options": ["option1", "option2", "option3", "option4"], "explanation": "explanation text"}}
+  {{"text": "question text", "questionType": "multiple-choice", "answer": "correct answer", "options": ["option1", "option2", "option3", "option4"], "explanation": "explanation text", "totalMarksAvailable": 1, "markingCriteria": ["Selects the correct option"]}}
 - For true-false questions:
-  {{"text": "statement text", "questionType": "true-false", "answer": "true or false", "explanation": "explanation text"}}
+  {{"text": "statement text", "questionType": "true-false", "answer": "true or false", "explanation": "explanation text", "totalMarksAvailable": 1, "markingCriteria": ["Correctly identifies whether the statement is true or false"]}}
 - For short-answer questions:
-  {{"text": "question text", "questionType": "short-answer", "answer": "correct answer", "explanation": "explanation text"}}
+  {{"text": "question text", "questionType": "short-answer", "answer": "correct answer", "explanation": "explanation text", "totalMarksAvailable": 3, "markingCriteria": ["Mark 1: [detail]", "Mark 2: [detail]", "Mark 3: [detail]"]}}
 
 Ensure that the questions are diverse, educational, and directly based on the content of the source text.
 """
@@ -486,7 +485,7 @@ def call_llm_for_questions(prompt: str) -> List[Dict[str, Any]]:
     """Call the LLM to generate questions from source text."""
     try:
         # Create a system prompt to instruct Gemini
-        system_prompt = "You are an educational AI assistant that generates questions from source text. You MUST return your response as a valid JSON array of question objects."
+        system_prompt = "You are an educational AI assistant that generates questions from source text. You MUST return your response as a valid JSON array of question objects with totalMarksAvailable and markingCriteria fields."
         
         # Instantiate the Gemini model
         model = genai.GenerativeModel(MODEL_NAME)
@@ -524,8 +523,89 @@ def call_llm_for_questions(prompt: str) -> List[Dict[str, Any]]:
             logger.warning("No JSON found in Gemini response for questions, creating structured response manually")
             questions = []
         
-        # Ensure we have the requested number of questions
-        return questions
+        # Process each question to ensure required fields are present and properly formatted
+        processed_questions = []
+        for question in questions:
+            # Ensure all required fields are present
+            processed_question = {
+                "text": question.get("text", ""),
+                "questionType": question.get("questionType", "multiple-choice"),
+                "answer": question.get("answer", ""),
+                "explanation": question.get("explanation", "")
+            }
+            
+            # Add options for multiple-choice questions
+            if processed_question["questionType"] == "multiple-choice":
+                processed_question["options"] = question.get("options", [])
+                
+                # Ensure we have at least 4 options
+                while len(processed_question.get("options", [])) < 4:
+                    processed_question["options"] = processed_question.get("options", []) + [f"Option {len(processed_question.get('options', [])) + 1}"]
+            
+            # Process totalMarksAvailable
+            total_marks = question.get("totalMarksAvailable", None)
+            
+            # Default marks based on question type if not provided
+            if total_marks is None:
+                if processed_question["questionType"] in ["multiple-choice", "true-false"]:
+                    total_marks = 1
+                else:  # short-answer
+                    total_marks = 3  # Default for short answer
+            
+            # Ensure total marks is an integer between 1 and 5
+            try:
+                total_marks = int(total_marks)
+                if total_marks < 1 or total_marks > 5:
+                    total_marks = max(1, min(5, total_marks))  # Clamp between 1 and 5
+            except (ValueError, TypeError):
+                # Default based on question type if conversion fails
+                if processed_question["questionType"] in ["multiple-choice", "true-false"]:
+                    total_marks = 1
+                else:  # short-answer
+                    total_marks = 3
+            
+            processed_question["totalMarksAvailable"] = total_marks
+            
+            # Process marking criteria
+            marking_criteria = question.get("markingCriteria", [])
+            
+            # Ensure marking criteria is properly formatted
+            if not marking_criteria:
+                # Generate default marking criteria based on question type and total marks
+                if processed_question["questionType"] == "multiple-choice":
+                    marking_criteria = ["Selects the correct option from the given choices."]
+                elif processed_question["questionType"] == "true-false":
+                    marking_criteria = ["Correctly identifies whether the statement is true or false."]
+                else:  # short-answer
+                    if total_marks == 1:
+                        marking_criteria = ["Provides a correct and complete answer."]
+                    else:
+                        marking_criteria = []
+                        for i in range(1, total_marks + 1):
+                            if i == 1:
+                                marking_criteria.append(f"Mark {i}: Identifies the main concept correctly.")
+                            elif i == total_marks:
+                                marking_criteria.append(f"Mark {i}: Demonstrates comprehensive understanding with examples or implications.")
+                            else:
+                                marking_criteria.append(f"Mark {i}: Provides accurate supporting details or explanations.")
+            
+            # If marking criteria is a string, convert to a list
+            if isinstance(marking_criteria, str):
+                marking_criteria = [marking_criteria]
+                
+            # Ensure we have the right number of marking criteria items
+            while len(marking_criteria) < total_marks:
+                marking_criteria.append(f"Mark {len(marking_criteria) + 1}: Demonstrates additional understanding or detail.")
+            
+            # Trim excess marking criteria if needed
+            if len(marking_criteria) > total_marks:
+                marking_criteria = marking_criteria[:total_marks]
+                
+            processed_question["markingCriteria"] = marking_criteria
+            
+            processed_questions.append(processed_question)
+        
+        return processed_questions
         
     except Exception as e:
         logger.error(f"Error calling LLM for questions: {str(e)}")
