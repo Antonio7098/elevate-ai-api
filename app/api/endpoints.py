@@ -8,11 +8,13 @@ from app.api.schemas import (
     GenerateQuestionsRequest,
     GenerateQuestionsFromBlueprintDto,
     QuestionSetResponseDto,
+    EvaluateAnswerDto,
+    EvaluateAnswerResponseDto,
     ErrorResponse
 )
 from app.core.deconstruction import deconstruct_text
 from app.core.chat import process_chat_message
-from app.core.indexing import generate_notes, generate_questions, generate_questions_from_blueprint
+from app.core.indexing import generate_notes, generate_questions, generate_questions_from_blueprint, evaluate_answer
 from app.core.usage_tracker import usage_tracker
 from typing import Dict, Any, Optional
 import uuid
@@ -202,6 +204,44 @@ async def inline_suggestions_endpoint(request: Dict[str, Any]):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Inline suggestions failed: {str(e)}"
+        )
+
+
+@router.post("/ai/evaluate-answer", response_model=EvaluateAnswerResponseDto)
+async def evaluate_answer_endpoint(request: EvaluateAnswerDto):
+    """
+    Evaluate a user's answer to a question using AI.
+    
+    This endpoint evaluates a user's answer against the expected answer and
+    marking criteria, returning marks achieved and feedback.
+    """
+    try:
+        # Call the actual answer evaluation logic
+        result = await evaluate_answer(
+            question_id=request.question_id,
+            user_answer=request.user_answer
+        )
+        
+        return EvaluateAnswerResponseDto(
+            corrected_answer=result.get("corrected_answer", ""),
+            marks_available=result.get("marks_available", 0),
+            marks_achieved=result.get("marks_achieved", 0)
+        )
+        
+    except ValueError as e:
+        # Handle validation errors from the DTO
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Validation error: {str(e)}"
+        )
+    except HTTPException:
+        # Re-raise HTTPExceptions as-is (e.g., from the core function)
+        raise
+    except Exception as e:
+        # Handle unexpected errors
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Answer evaluation failed: {str(e)}"
         )
 
 

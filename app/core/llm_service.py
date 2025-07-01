@@ -414,4 +414,67 @@ IMPORTANT:
 - Only include relationships that are directly mentioned
 
 Return only the JSON array, no additional text.
-""" 
+"""
+
+
+def create_answer_evaluation_prompt(payload: Dict[str, Any]) -> str:
+    """Create prompt for answer evaluation (marks_achieved, corrected_answer, feedback only)."""
+    question_text = payload.get("question_text", "")
+    expected_answer = payload.get("expected_answer", "")
+    user_answer = payload.get("user_answer", "")
+    question_type = payload.get("question_type", "understand")
+    total_marks_available = payload.get("total_marks_available", 1)
+    marking_criteria = payload.get("marking_criteria", "")
+    context = payload.get("context", {})
+    
+    # Build context information
+    context_info = ""
+    if context:
+        context_info = f"""
+CONTEXT:
+- Question Set: {context.get('question_set_name', 'Unknown')}
+- Folder: {context.get('folder_name', 'Unknown')}
+- Blueprint: {context.get('blueprint_title', 'Unknown')}
+"""
+    
+    # Create the prompt
+    prompt = f"""
+You are an expert educational assessor. Evaluate the user's answer against the expected answer and marking criteria.
+
+QUESTION:
+{question_text}
+
+EXPECTED ANSWER:
+{expected_answer}
+
+USER'S ANSWER:
+{user_answer}
+
+QUESTION TYPE: {question_type}
+TOTAL MARKS AVAILABLE: {total_marks_available}
+MARKING CRITERIA:
+{marking_criteria}{context_info}
+
+TASK:
+1. Compare the user's answer with the expected answer
+2. Apply the marking criteria to determine the number of marks achieved (integer, 0 to {total_marks_available})
+3. Provide a corrected/improved version of the answer
+4. Give constructive feedback
+
+Return a JSON object with the following structure:
+{{
+  "marks_achieved": <integer between 0 and {total_marks_available}>,
+  "corrected_answer": "The ideal/correct answer",
+  "feedback": "Constructive feedback explaining the marks and suggestions for improvement"
+}}
+
+IMPORTANT:
+- Only return marks_achieved (integer, 0 to {total_marks_available}), corrected_answer (string), and feedback (string)
+- Do NOT return a score or percentage
+- Be fair and consistent in your evaluation
+- Provide specific, actionable feedback
+- The corrected answer should be comprehensive and accurate
+
+Return only the JSON object, no additional text.
+"""
+    return prompt 

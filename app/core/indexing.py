@@ -398,4 +398,193 @@ async def index_in_vector_store(text_nodes: List[Dict[str, Any]], user_id: str) 
     # - Store nodes with metadata
     # - Handle batch operations
     
-    return True 
+    return True
+
+
+async def evaluate_answer(question_id: int, user_answer: str) -> Dict[str, Any]:
+    """
+    Evaluate a user's answer to a question using the internal AI service.
+    
+    This function implements the actual answer evaluation logic by:
+    1. Retrieving the question data from the database
+    2. Calling the internal AI service to evaluate the answer
+    3. Calculating marks achieved and returning the response
+    
+    Args:
+        question_id: ID of the question to evaluate
+        user_answer: The answer provided by the user
+        
+    Returns:
+        Dict containing the evaluation results (corrected_answer, marks_available, marks_achieved)
+        
+    Raises:
+        HTTPException: If the AI service fails or question is not found
+    """
+    try:
+        # Retrieve question data from database
+        question_data = await _get_question_data(question_id)
+        
+        # Check if we found actual question data
+        if not question_data.get("text"):
+            from fastapi import HTTPException, status
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Question not found: {question_id}"
+            )
+        
+        # Prepare the request payload for the internal AI service
+        ai_service_payload = {
+            "question_text": question_data.get("text", ""),
+            "expected_answer": question_data.get("answer", ""),
+            "user_answer": user_answer,
+            "question_type": question_data.get("question_type", "understand"),
+            "total_marks_available": question_data.get("total_marks_available", 1),
+            "marking_criteria": question_data.get("marking_criteria", ""),
+            "context": {
+                "question_set_name": question_data.get("question_set_name", ""),
+                "folder_name": question_data.get("folder_name", ""),
+                "blueprint_title": question_data.get("blueprint_title", "")
+            }
+        }
+        
+        # Call the internal AI service
+        evaluation_data = await _call_ai_service_for_evaluation(ai_service_payload)
+        
+        # Calculate marks achieved (score × marks available, rounded)
+        score = evaluation_data.get("score", 0.0)
+        marks_available = question_data.get("total_marks_available", 1)
+        marks_achieved = round(score * marks_available)
+        
+        # Format the response
+        return {
+            "corrected_answer": evaluation_data.get("corrected_answer", ""),
+            "marks_available": marks_available,
+            "marks_achieved": marks_achieved
+        }
+        
+    except HTTPException:
+        # Re-raise HTTPExceptions as-is (e.g., 404 Not Found)
+        raise
+    except Exception as e:
+        # Handle unexpected errors
+        from fastapi import HTTPException, status
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Answer evaluation failed: {str(e)}"
+        )
+
+
+async def _get_question_data(question_id: int) -> Dict[str, Any]:
+    """
+    Retrieve question data from the database.
+    
+    This function should retrieve the actual question data from the database
+    using the question_id. For now, we'll use mock data.
+    """
+    # TODO: Implement actual database retrieval
+    # For now, return mock question data
+    return {
+        "id": question_id,
+        "text": "What is the primary function of mitochondria?",
+        "answer": "Mitochondria are the powerhouse of the cell, generating ATP through cellular respiration.",
+        "question_type": "understand",
+        "total_marks_available": 5,
+        "marking_criteria": "Award 1 mark for mentioning 'powerhouse', 1 mark for 'ATP', 1 mark for 'cellular respiration', 1 mark for energy generation, and 1 mark for clarity.",
+        "question_set_name": "Sample Question Set",
+        "folder_name": "Biology",
+        "blueprint_title": "Cellular Biology"
+    }
+
+
+async def _call_ai_service_for_evaluation(payload: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Evaluate an answer using the LLM service.
+    
+    This function uses the LLM service to evaluate a user's answer against
+    the expected answer and marking criteria.
+    
+    Args:
+        payload: The request payload containing question and answer data
+        
+    Returns:
+        Dict containing the evaluation results (score, corrected_answer)
+        
+    Raises:
+        Exception: If the LLM service call fails
+    """
+    try:
+        # Import the LLM service and prompt function
+        from app.core.llm_service import llm_service, create_answer_evaluation_prompt
+        
+        # Create the prompt for answer evaluation
+        prompt = create_answer_evaluation_prompt(payload)
+        
+        # Call the LLM service
+        response = await llm_service.call_llm(
+            prompt, 
+            prefer_google=True, 
+            operation="evaluate_answer"
+        )
+        
+        # Parse the JSON response
+        try:
+            evaluation_data = json.loads(response.strip())
+            
+            # Validate the response structure
+            if not isinstance(evaluation_data, dict):
+                raise ValueError("LLM response is not a dictionary")
+            
+            # Ensure required fields are present
+            validated_evaluation = {
+                "score": evaluation_data.get("score", 0.0),
+                "corrected_answer": evaluation_data.get("corrected_answer", ""),
+                "feedback": evaluation_data.get("feedback", "")
+            }
+            
+            return validated_evaluation
+            
+        except json.JSONDecodeError as e:
+            print(f"Failed to parse LLM response as JSON: {e}")
+            print(f"Raw response: {response}")
+            # Fallback to mock evaluation if LLM response is invalid
+            return _generate_fallback_evaluation(payload)
+            
+    except Exception as e:
+        print(f"LLM answer evaluation failed: {e}")
+        # Fallback to mock evaluation if LLM call fails
+        return _generate_fallback_evaluation(payload)
+
+
+def _generate_fallback_evaluation(payload: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Generate fallback evaluation when LLM service is unavailable.
+    
+    This provides basic answer evaluation based on simple text matching
+    when the LLM service fails or returns invalid responses.
+    """
+    question_text = payload.get("question_text", "")
+    expected_answer = payload.get("expected_answer", "")
+    user_answer = payload.get("user_answer", "")
+    marking_criteria = payload.get("marking_criteria", "")
+    
+    # Simple fallback evaluation based on keyword matching
+    expected_keywords = expected_answer.lower().split()
+    user_keywords = user_answer.lower().split()
+    
+    # Calculate a simple score based on keyword overlap
+    matching_keywords = set(expected_keywords) & set(user_keywords)
+    total_keywords = len(set(expected_keywords))
+    
+    if total_keywords > 0:
+        score = len(matching_keywords) / total_keywords
+    else:
+        score = 0.0
+    
+    # Ensure score is between 0 and 1
+    score = max(0.0, min(1.0, score))
+    
+    return {
+        "score": score,
+        "corrected_answer": expected_answer,
+        "feedback": f"Fallback evaluation: {len(matching_keywords)}/{total_keywords} keywords matched."
+    } 

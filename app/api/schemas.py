@@ -90,4 +90,32 @@ class QuestionSetResponseDto(BaseModel):
 class ErrorResponse(BaseModel):
     """Standard error response schema."""
     detail: str = Field(..., description="Error message")
-    error_code: Optional[str] = Field(None, description="Error code for client handling") 
+    error_code: Optional[str] = Field(None, description="Error code for client handling")
+
+
+# New schemas for the answer evaluation endpoint
+class EvaluateAnswerDto(BaseModel):
+    """Request schema for the /api/ai/evaluate-answer endpoint."""
+    question_id: int = Field(..., description="The ID of the question to be evaluated")
+    user_answer: str = Field(..., description="The answer provided by the user")
+    
+    @field_validator('question_id')
+    @classmethod
+    def validate_question_id(cls, v):
+        if v <= 0:
+            raise ValueError('Question ID must be a positive integer')
+        return v
+    
+    @field_validator('user_answer')
+    @classmethod
+    def validate_user_answer(cls, v):
+        if not v or not v.strip():
+            raise ValueError('User answer cannot be empty')
+        return v.strip()
+
+
+class EvaluateAnswerResponseDto(BaseModel):
+    """Response schema for the answer evaluation endpoint."""
+    corrected_answer: str = Field(..., description="The ideal/correct answer as determined by the AI")
+    marks_available: int = Field(..., description="The total marks available for this question")
+    marks_achieved: int = Field(..., description="The marks awarded to the user's answer (rounded integer)") 
