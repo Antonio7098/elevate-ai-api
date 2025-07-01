@@ -1,0 +1,561 @@
+{
+  "blueprint_id": "ca38f9e9-fcc9-41cf-a742-44315f7fd305",
+  "source_text": "# Photosynthesis\n\nPhotosynthesis is the process by which plants convert light energy into chemical energy. \nThis process occurs in chloroplasts and involves multiple steps.\n\n## Light Reactions\nThe light reactions capture solar energy and convert it to chemical energy in the form of ATP and NADPH.\n\n## Calvin Cycle\nThe Calvin cycle uses the products of light reactions to fix carbon dioxide and produce sugars.",
+  "blueprint_json": {
+    "source_id": "ca38f9e9-fcc9-41cf-a742-44315f7fd305",
+    "source_title": "Photosynthesis: Light Reactions and Calvin Cycle",
+    "source_type": "chapter",
+    "source_summary": {
+      "core_thesis_or_main_argument": "Photosynthesis is a two-stage process: light reactions convert light energy into ATP and NADPH, which the Calvin cycle then uses to fix carbon dioxide and produce sugars.",
+      "inferred_purpose": "To explain the fundamental process of photosynthesis, outlining its two main stages: the light reactions and the Calvin cycle."
+    },
+    "sections": [
+      {
+        "section_id": "s1",
+        "section_name": "Photosynthesis",
+        "description": "The process by which plants convert light energy into chemical energy.",
+        "parent_section_id": null
+      },
+      {
+        "section_id": "s2",
+        "section_name": "Light Reactions",
+        "description": "Captures solar energy and converts it to chemical energy in the form of ATP and NADPH.",
+        "parent_section_id": "s1"
+      },
+      {
+        "section_id": "s3",
+        "section_name": "Calvin Cycle",
+        "description": "Uses the products of light reactions to fix carbon dioxide and produce sugars.",
+        "parent_section_id": "s1"
+      }
+    ],
+    "knowledge_primitives": {
+      "key_propositions_and_facts": [
+        {
+          "id": "prop1",
+          "statement": "Photosynthesis is the process by which plants convert light energy into chemical energy.",
+          "supporting_evidence": [
+            "Photosynthesis is the process by which plants convert light energy into chemical energy."
+          ],
+          "sections": [
+            "s1"
+          ]
+        },
+        {
+          "id": "prop2",
+          "statement": "Photosynthesis occurs in chloroplasts and involves multiple steps.",
+          "supporting_evidence": [
+            "This process occurs in chloroplasts and involves multiple steps."
+          ],
+          "sections": [
+            "s1"
+          ]
+        },
+        {
+          "id": "prop3",
+          "statement": "The light reactions in photosynthesis capture solar energy and convert it to chemical energy in the form of ATP and NADPH.",
+          "supporting_evidence": [
+            "The light reactions capture solar energy and convert it to chemical energy in the form of ATP and NADPH."
+          ],
+          "sections": [
+            "s1"
+          ]
+        },
+        {
+          "id": "prop4",
+          "statement": "The Calvin cycle uses the products of the light reactions (ATP and NADPH) to fix carbon dioxide and produce sugars.",
+          "supporting_evidence": [
+            "The Calvin cycle uses the products of light reactions to fix carbon dioxide and produce sugars."
+          ],
+          "sections": [
+            "s1"
+          ]
+        },
+        {
+          "id": "prop1",
+          "statement": "Photosynthesis is the process by which plants convert light energy into chemical energy.",
+          "supporting_evidence": [
+            "Photosynthesis is the process by which plants convert light energy into chemical energy."
+          ],
+          "sections": [
+            "s2"
+          ]
+        },
+        {
+          "id": "prop2",
+          "statement": "Photosynthesis occurs in chloroplasts and involves multiple steps.",
+          "supporting_evidence": [
+            "This process occurs in chloroplasts and involves multiple steps."
+          ],
+          "sections": [
+            "s2"
+          ]
+        },
+        {
+          "id": "prop3",
+          "statement": "The light reactions in photosynthesis capture solar energy and convert it to chemical energy in the form of ATP and NADPH.",
+          "supporting_evidence": [
+            "The light reactions capture solar energy and convert it to chemical energy in the form of ATP and NADPH."
+          ],
+          "sections": [
+            "s2"
+          ]
+        },
+        {
+          "id": "prop4",
+          "statement": "The Calvin cycle uses the products of the light reactions (ATP and NADPH) to fix carbon dioxide and produce sugars.",
+          "supporting_evidence": [
+            "The Calvin cycle uses the products of light reactions to fix carbon dioxide and produce sugars."
+          ],
+          "sections": [
+            "s2"
+          ]
+        },
+        {
+          "id": "prop1",
+          "statement": "Photosynthesis is the process by which plants convert light energy into chemical energy.",
+          "supporting_evidence": [],
+          "sections": [
+            "s3"
+          ]
+        },
+        {
+          "id": "prop2",
+          "statement": "Photosynthesis occurs in chloroplasts and involves multiple steps.",
+          "supporting_evidence": [],
+          "sections": [
+            "s3"
+          ]
+        },
+        {
+          "id": "prop3",
+          "statement": "The light reactions of photosynthesis capture solar energy and convert it to chemical energy in the form of ATP and NADPH.",
+          "supporting_evidence": [],
+          "sections": [
+            "s3"
+          ]
+        },
+        {
+          "id": "prop4",
+          "statement": "The Calvin cycle uses the products of light reactions (ATP and NADPH) to fix carbon dioxide and produce sugars.",
+          "supporting_evidence": [],
+          "sections": [
+            "s3"
+          ]
+        }
+      ],
+      "key_entities_and_definitions": [
+        {
+          "id": "e1",
+          "entity": "Photosynthesis",
+          "definition": "The process by which plants convert light energy into chemical energy.",
+          "category": "Concept",
+          "sections": [
+            "s1"
+          ]
+        },
+        {
+          "id": "e2",
+          "entity": "Chloroplasts",
+          "definition": "The organelles where photosynthesis occurs.",
+          "category": "Object",
+          "sections": [
+            "s1"
+          ]
+        },
+        {
+          "id": "e3",
+          "entity": "Light Reactions",
+          "definition": "The stage of photosynthesis that captures solar energy and converts it to chemical energy in the form of ATP and NADPH.",
+          "category": "Concept",
+          "sections": [
+            "s1"
+          ]
+        },
+        {
+          "id": "e4",
+          "entity": "ATP",
+          "definition": "A molecule that carries chemical energy.",
+          "category": "Concept",
+          "sections": [
+            "s1"
+          ]
+        },
+        {
+          "id": "e5",
+          "entity": "NADPH",
+          "definition": "A molecule that carries electrons and energy.",
+          "category": "Concept",
+          "sections": [
+            "s1"
+          ]
+        },
+        {
+          "id": "e6",
+          "entity": "Calvin Cycle",
+          "definition": "The stage of photosynthesis that uses the products of light reactions to fix carbon dioxide and produce sugars.",
+          "category": "Concept",
+          "sections": [
+            "s1"
+          ]
+        },
+        {
+          "id": "e1",
+          "entity": "Photosynthesis",
+          "definition": "The process by which plants convert light energy into chemical energy.",
+          "category": "Concept",
+          "sections": [
+            "s2"
+          ]
+        },
+        {
+          "id": "e2",
+          "entity": "Chloroplasts",
+          "definition": "The organelles in plant cells where photosynthesis takes place.",
+          "category": "Object",
+          "sections": [
+            "s2"
+          ]
+        },
+        {
+          "id": "e3",
+          "entity": "Light Reactions",
+          "definition": "The stage of photosynthesis that captures solar energy and converts it to chemical energy in the form of ATP and NADPH.",
+          "category": "Concept",
+          "sections": [
+            "s2"
+          ]
+        },
+        {
+          "id": "e4",
+          "entity": "ATP",
+          "definition": "Adenosine triphosphate; a molecule that carries energy within cells.",
+          "category": "Concept",
+          "sections": [
+            "s2"
+          ]
+        },
+        {
+          "id": "e5",
+          "entity": "NADPH",
+          "definition": "Nicotinamide adenine dinucleotide phosphate; a molecule that carries electrons and energy.",
+          "category": "Concept",
+          "sections": [
+            "s2"
+          ]
+        },
+        {
+          "id": "e6",
+          "entity": "Calvin Cycle",
+          "definition": "The stage of photosynthesis that uses the products of light reactions to fix carbon dioxide and produce sugars.",
+          "category": "Concept",
+          "sections": [
+            "s2"
+          ]
+        },
+        {
+          "id": "e1",
+          "entity": "Photosynthesis",
+          "definition": "The process by which plants convert light energy into chemical energy.",
+          "category": "Concept",
+          "sections": [
+            "s3"
+          ]
+        },
+        {
+          "id": "e2",
+          "entity": "Chloroplasts",
+          "definition": "The organelles in plant cells where photosynthesis occurs.",
+          "category": "Object",
+          "sections": [
+            "s3"
+          ]
+        },
+        {
+          "id": "e3",
+          "entity": "Light Reactions",
+          "definition": "The stage of photosynthesis that captures solar energy and converts it to chemical energy in the form of ATP and NADPH.",
+          "category": "Concept",
+          "sections": [
+            "s3"
+          ]
+        },
+        {
+          "id": "e4",
+          "entity": "ATP",
+          "definition": "Adenosine triphosphate; a molecule that carries chemical energy.",
+          "category": "Object",
+          "sections": [
+            "s3"
+          ]
+        },
+        {
+          "id": "e5",
+          "entity": "NADPH",
+          "definition": "Nicotinamide adenine dinucleotide phosphate; a molecule that carries chemical energy and reducing power.",
+          "category": "Object",
+          "sections": [
+            "s3"
+          ]
+        },
+        {
+          "id": "e6",
+          "entity": "Calvin Cycle",
+          "definition": "The stage of photosynthesis that uses the products of light reactions to fix carbon dioxide and produce sugars.",
+          "category": "Concept",
+          "sections": [
+            "s3"
+          ]
+        }
+      ],
+      "described_processes_and_steps": [
+        {
+          "id": "photosynthesis_1",
+          "process_name": "Photosynthesis",
+          "steps": [
+            "Convert light energy into chemical energy"
+          ],
+          "sections": [
+            "s1"
+          ]
+        },
+        {
+          "id": "light_reactions_1",
+          "process_name": "Light Reactions",
+          "steps": [
+            "Capture solar energy",
+            "Convert solar energy to chemical energy in the form of ATP and NADPH"
+          ],
+          "sections": [
+            "s1"
+          ]
+        },
+        {
+          "id": "calvin_cycle_1",
+          "process_name": "Calvin Cycle",
+          "steps": [
+            "Use products of light reactions",
+            "Fix carbon dioxide",
+            "Produce sugars"
+          ],
+          "sections": [
+            "s1"
+          ]
+        },
+        {
+          "id": "photosynthesis_1",
+          "process_name": "Photosynthesis",
+          "steps": [
+            "Light Reactions",
+            "Calvin Cycle"
+          ],
+          "sections": [
+            "s2"
+          ]
+        },
+        {
+          "id": "light_reactions_1",
+          "process_name": "Light Reactions",
+          "steps": [
+            "Capture solar energy",
+            "Convert solar energy to ATP and NADPH"
+          ],
+          "sections": [
+            "s2"
+          ]
+        },
+        {
+          "id": "calvin_cycle_1",
+          "process_name": "Calvin Cycle",
+          "steps": [
+            "Use ATP and NADPH from light reactions",
+            "Fix carbon dioxide",
+            "Produce sugars"
+          ],
+          "sections": [
+            "s2"
+          ]
+        },
+        {
+          "id": "photosynthesis_overall",
+          "process_name": "Photosynthesis",
+          "steps": [
+            "Convert light energy into chemical energy"
+          ],
+          "sections": [
+            "s3"
+          ]
+        },
+        {
+          "id": "light_reactions",
+          "process_name": "Light Reactions",
+          "steps": [
+            "Capture solar energy",
+            "Convert solar energy to chemical energy in the form of ATP and NADPH"
+          ],
+          "sections": [
+            "s3"
+          ]
+        },
+        {
+          "id": "calvin_cycle",
+          "process_name": "Calvin Cycle",
+          "steps": [
+            "Use products of light reactions",
+            "Fix carbon dioxide",
+            "Produce sugars"
+          ],
+          "sections": [
+            "s3"
+          ]
+        }
+      ],
+      "identified_relationships": [
+        {
+          "id": "rel1",
+          "relationship_type": "part-of",
+          "source_primitive_id": "e3",
+          "target_primitive_id": "e1",
+          "description": "Light reactions are a part of photosynthesis.",
+          "sections": [
+            "s1",
+            "s2",
+            "s3"
+          ]
+        },
+        {
+          "id": "rel2",
+          "relationship_type": "part-of",
+          "source_primitive_id": "e6",
+          "target_primitive_id": "e1",
+          "description": "Calvin cycle is a part of photosynthesis.",
+          "sections": [
+            "s1",
+            "s2",
+            "s3"
+          ]
+        },
+        {
+          "id": "rel3",
+          "relationship_type": "component-of",
+          "source_primitive_id": "e2",
+          "target_primitive_id": "e1",
+          "description": "Chloroplasts are a component of the photosynthesis process.",
+          "sections": [
+            "s1",
+            "s2",
+            "s3"
+          ]
+        },
+        {
+          "id": "rel4",
+          "relationship_type": "causal",
+          "source_primitive_id": "light_reactions_1",
+          "target_primitive_id": "e4",
+          "description": "Light reactions produce ATP.",
+          "sections": [
+            "s1",
+            "s2"
+          ]
+        },
+        {
+          "id": "rel5",
+          "relationship_type": "causal",
+          "source_primitive_id": "light_reactions_1",
+          "target_primitive_id": "e5",
+          "description": "Light reactions produce NADPH.",
+          "sections": [
+            "s1",
+            "s2"
+          ]
+        },
+        {
+          "id": "rel6",
+          "relationship_type": "causal",
+          "source_primitive_id": "light_reactions_1",
+          "target_primitive_id": "calvin_cycle_1",
+          "description": "Light reactions provide ATP and NADPH for the Calvin cycle.",
+          "sections": [
+            "s1",
+            "s2"
+          ]
+        },
+        {
+          "id": "rel7",
+          "relationship_type": "causal",
+          "source_primitive_id": "calvin_cycle_1",
+          "target_primitive_id": "prop4",
+          "description": "The Calvin cycle produces sugars.",
+          "sections": [
+            "s1",
+            "s2",
+            "s3"
+          ]
+        },
+        {
+          "id": "rel8",
+          "relationship_type": "prerequisite",
+          "source_primitive_id": "light_reactions_1",
+          "target_primitive_id": "calvin_cycle_1",
+          "description": "The Calvin cycle requires the products of the light reactions.",
+          "sections": [
+            "s1",
+            "s2",
+            "s3"
+          ]
+        },
+        {
+          "id": "rel9",
+          "relationship_type": "similar-to",
+          "source_primitive_id": "prop1",
+          "target_primitive_id": "e1",
+          "description": "Proposition 1 defines Photosynthesis similarly to entity e1.",
+          "sections": [
+            "s1",
+            "s2",
+            "s3"
+          ]
+        },
+        {
+          "id": "rel10",
+          "relationship_type": "similar-to",
+          "source_primitive_id": "prop2",
+          "target_primitive_id": "e2",
+          "description": "Proposition 2 describes where Photosynthesis occurs, similar to entity e2.",
+          "sections": [
+            "s1",
+            "s2",
+            "s3"
+          ]
+        },
+        {
+          "id": "rel11",
+          "relationship_type": "similar-to",
+          "source_primitive_id": "prop3",
+          "target_primitive_id": "e3",
+          "description": "Proposition 3 describes the Light Reactions similarly to entity e3.",
+          "sections": [
+            "s1",
+            "s2",
+            "s3"
+          ]
+        },
+        {
+          "id": "rel12",
+          "relationship_type": "similar-to",
+          "source_primitive_id": "prop4",
+          "target_primitive_id": "e6",
+          "description": "Proposition 4 describes the Calvin cycle similarly to entity e6.",
+          "sections": [
+            "s1",
+            "s2",
+            "s3"
+          ]
+        }
+      ],
+      "implicit_and_open_questions": []
+    }
+  },
+  "created_at": "2025-06-30T09:34:31.734201",
+  "status": "completed"
+}

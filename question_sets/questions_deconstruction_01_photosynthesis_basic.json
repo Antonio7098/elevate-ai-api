@@ -1,0 +1,31 @@
+{
+  "id": 1,
+  "name": "Questions for deconstruction_01_photosynthesis_basic",
+  "blueprint_id": "7cbc7618-ca2e-4a33-8c6c-5b0627c7aa92",
+  "folder_id": null,
+  "questions": [
+    {
+      "text": "Identify the primary topic addressed in the provided text.",
+      "answer": "Photosynthesis.",
+      "question_type": "understand",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 2 marks for correctly identifying 'photosynthesis' as the primary topic. Award 1 mark for a partially correct answer (e.g., mentioning a related concept but not the central topic)."
+    },
+    {
+      "text": "Based on the provided text, explain how the statement 'This section is about photosynthesis' relates to the content presented.",
+      "answer": "The statement 'This section is about photosynthesis' accurately reflects the content of the provided text, as the entire text is explicitly labeled as a 'test section about photosynthesis'.",
+      "question_type": "use",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for stating that the statement accurately reflects the content. Award 1 mark for providing a justification based on the text's explicit labeling as a 'test section about photosynthesis'."
+    },
+    {
+      "text": "Analyze the limitations of the provided text in terms of its contribution to a comprehensive understanding of photosynthesis.  What essential information is missing?",
+      "answer": "The provided text offers a very limited understanding of photosynthesis.  It only states that it's about photosynthesis, without providing any actual information on the process itself.  Essential information, such as the chemical equation, the roles of chloroplasts, light-dependent and light-independent reactions, etc. are missing.",
+      "question_type": "explore",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for identifying the text's limited scope and lack of detail. Award 1 mark for naming at least one key missing aspect of photosynthesis (e.g., chemical equation, chloroplast role, specific reactions)."
+    }
+  ],
+  "created_at": "2025-01-27T10:00:00.000Z",
+  "updated_at": "2025-01-27T10:00:00.000Z"
+}

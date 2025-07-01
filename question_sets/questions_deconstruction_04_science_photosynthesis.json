@@ -1,0 +1,80 @@
+{
+  "id": 1,
+  "name": "Questions for deconstruction_04_science_photosynthesis",
+  "blueprint_id": "3bfb8099-eb04-4060-9666-7376f33152a8",
+  "folder_id": null,
+  "questions": [
+    {
+      "text": "Define photosynthesis in your own words.",
+      "answer": "Photosynthesis is the process by which plants transform light energy into chemical energy.",
+      "question_type": "understand",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for correctly identifying the process as energy transformation; award 1 mark for mentioning both light and chemical energy."
+    },
+    {
+      "text": "What is the primary source of energy used in photosynthesis?",
+      "answer": "Light energy.",
+      "question_type": "understand",
+      "total_marks_available": 1,
+      "marking_criteria": "Award 1 mark for correctly identifying light energy."
+    },
+    {
+      "text": "What type of energy is produced as a result of photosynthesis?",
+      "answer": "Chemical energy.",
+      "question_type": "understand",
+      "total_marks_available": 1,
+      "marking_criteria": "Award 1 mark for correctly identifying chemical energy."
+    },
+    {
+      "text": "Explain the conversion process described in the text regarding photosynthesis. What is being converted and into what?",
+      "answer": "Light energy is converted into chemical energy.",
+      "question_type": "use",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for identifying light energy as the input; award 1 mark for identifying chemical energy as the output."
+    },
+    {
+      "text": "How does the process of photosynthesis benefit plants?",
+      "answer": "It provides them with the chemical energy needed for survival and growth.  (Inference based on the definition)",
+      "question_type": "use",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for mentioning energy provision; award 1 mark for linking this to survival or growth."
+    },
+    {
+      "text": "Based on the text, what organisms are primarily involved in photosynthesis?",
+      "answer": "Plants.",
+      "question_type": "understand",
+      "total_marks_available": 1,
+      "marking_criteria": "Award 1 mark for correctly identifying plants."
+    },
+    {
+      "text": "Can you suggest another biological process that involves the conversion of one form of energy into another?  Explain briefly.",
+      "answer": "Cellular respiration converts chemical energy (from food) into usable energy (ATP).",
+      "question_type": "explore",
+      "total_marks_available": 3,
+      "marking_criteria": "Award 1 mark for a correct example of another energy conversion process; award 1 mark for correctly identifying the initial energy form; award 1 mark for correctly identifying the final energy form."
+    },
+    {
+      "text": "If photosynthesis didn't occur, what would be a likely consequence for plants?",
+      "answer": "Plants would lack the chemical energy necessary for survival and growth.",
+      "question_type": "explore",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for mentioning lack of energy; award 1 mark for linking this to impaired survival or growth."
+    },
+    {
+      "text": "In your own words, describe the relationship between light and chemical energy in photosynthesis.",
+      "answer": "Light energy is the input, and it's transformed into chemical energy, which is the output, during photosynthesis.",
+      "question_type": "use",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for correctly identifying light energy as input; award 1 mark for correctly identifying chemical energy as output."
+    },
+    {
+      "text": "Explain how the statement 'Photosynthesis is the process by which plants convert light energy into chemical energy' defines photosynthesis.",
+      "answer": "The statement provides a concise definition of photosynthesis by specifying the process (conversion), the input (light energy), and the output (chemical energy), and the organisms involved (plants).",
+      "question_type": "explore",
+      "total_marks_available": 3,
+      "marking_criteria": "Award 1 mark for mentioning the process of conversion; award 1 mark for correctly identifying light energy as the input; award 1 mark for correctly identifying chemical energy as the output and/or mentioning plants."
+    }
+  ],
+  "created_at": "2025-01-27T10:00:00.000Z",
+  "updated_at": "2025-01-27T10:00:00.000Z"
+}

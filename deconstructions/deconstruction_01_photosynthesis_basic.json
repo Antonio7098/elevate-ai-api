@@ -1,0 +1,63 @@
+{
+  "blueprint_id": "7cbc7618-ca2e-4a33-8c6c-5b0627c7aa92",
+  "source_text": "# Test\nThis is a test section about photosynthesis.",
+  "blueprint_json": {
+    "source_id": "7cbc7618-ca2e-4a33-8c6c-5b0627c7aa92",
+    "source_title": "Photosynthesis: A Test Summary",
+    "source_type": "article",
+    "source_summary": {
+      "core_thesis_or_main_argument": "This text section provides a brief overview of photosynthesis (limited to the first 2000 characters).",
+      "inferred_purpose": "To present a concise, introductory explanation of photosynthesis within a limited character count; possibly for testing or demonstration."
+    },
+    "sections": [
+      {
+        "section_id": "section_1",
+        "section_name": "Test",
+        "description": "This section covers photosynthesis.",
+        "parent_section_id": null
+      }
+    ],
+    "knowledge_primitives": {
+      "key_propositions_and_facts": [
+        {
+          "id": "prop_1",
+          "statement": "This section is about photosynthesis.",
+          "supporting_evidence": [
+            "# Test",
+            "This is a test section about photosynthesis."
+          ],
+          "sections": [
+            "section_1"
+          ]
+        }
+      ],
+      "key_entities_and_definitions": [
+        {
+          "id": "e1",
+          "entity": "photosynthesis",
+          "definition": "The process by which green plants and some other organisms use sunlight to synthesize foods from carbon dioxide and water.",
+          "category": "Concept",
+          "sections": [
+            "section_1"
+          ]
+        }
+      ],
+      "described_processes_and_steps": [],
+      "identified_relationships": [
+        {
+          "id": "rel_1",
+          "relationship_type": "component-of",
+          "source_primitive_id": "e1",
+          "target_primitive_id": "prop_1",
+          "description": "Photosynthesis is the topic of the section described in the proposition.",
+          "sections": [
+            "section_1"
+          ]
+        }
+      ],
+      "implicit_and_open_questions": []
+    }
+  },
+  "created_at": "2025-06-30T09:33:19.224544",
+  "status": "completed"
+}

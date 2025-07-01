@@ -1,0 +1,191 @@
+{
+  "blueprint_id": "9159f100-7ed4-48fa-9b24-050879b442c4",
+  "source_text": "# Intro\nIntro text.\n## Details\nDetails about the topic.\n## Conclusion\nFinal thoughts.",
+  "blueprint_json": {
+    "source_id": "9159f100-7ed4-48fa-9b24-050879b442c4",
+    "source_title": "Summary of Topic Details",
+    "source_type": "chapter",
+    "source_summary": {
+      "core_thesis_or_main_argument": "The provided text lacks a clear thesis statement.  It presents introductory information, details about a topic, and concluding remarks, but doesn't offer a central argument or claim.",
+      "inferred_purpose": "To provide a brief overview or summary of an unspecified topic.  The purpose is informational, lacking a persuasive or argumentative element due to the absence of a clear thesis."
+    },
+    "sections": [
+      {
+        "section_id": "section_1",
+        "section_name": "Intro",
+        "description": "Intro text.",
+        "parent_section_id": null
+      },
+      {
+        "section_id": "section_2",
+        "section_name": "Details",
+        "description": "Details about the topic.",
+        "parent_section_id": null
+      },
+      {
+        "section_id": "section_3",
+        "section_name": "Conclusion",
+        "description": "Final thoughts.",
+        "parent_section_id": null
+      }
+    ],
+    "knowledge_primitives": {
+      "key_propositions_and_facts": [],
+      "key_entities_and_definitions": [
+        {
+          "id": "unique_id_1",
+          "entity": "Intro",
+          "definition": "Introductory text providing a brief overview of the topic.",
+          "category": "Concept",
+          "sections": [
+            "section_2"
+          ]
+        },
+        {
+          "id": "unique_id_2",
+          "entity": "Details",
+          "definition": "Specific information and explanations about the topic.",
+          "category": "Concept",
+          "sections": [
+            "section_2"
+          ]
+        },
+        {
+          "id": "unique_id_3",
+          "entity": "Conclusion",
+          "definition": "Summary and final remarks on the topic.",
+          "category": "Concept",
+          "sections": [
+            "section_2"
+          ]
+        },
+        {
+          "id": "section_3_intro",
+          "entity": "Intro",
+          "definition": "Introductory text providing an overview.",
+          "category": "Concept",
+          "sections": [
+            "section_3"
+          ]
+        },
+        {
+          "id": "section_3_details",
+          "entity": "Details",
+          "definition": "Specific information about the topic.",
+          "category": "Concept",
+          "sections": [
+            "section_3"
+          ]
+        },
+        {
+          "id": "section_3_conclusion",
+          "entity": "Conclusion",
+          "definition": "Summary and final thoughts.",
+          "category": "Concept",
+          "sections": [
+            "section_3"
+          ]
+        }
+      ],
+      "described_processes_and_steps": [],
+      "identified_relationships": [
+        {
+          "id": "relationship_1",
+          "relationship_type": "part-of",
+          "source_primitive_id": "unique_id_1",
+          "target_primitive_id": "section_2",
+          "description": "Intro is a part of section 2",
+          "sections": [
+            "section_2"
+          ]
+        },
+        {
+          "id": "relationship_2",
+          "relationship_type": "part-of",
+          "source_primitive_id": "unique_id_2",
+          "target_primitive_id": "section_2",
+          "description": "Details is a part of section 2",
+          "sections": [
+            "section_2"
+          ]
+        },
+        {
+          "id": "relationship_3",
+          "relationship_type": "part-of",
+          "source_primitive_id": "unique_id_3",
+          "target_primitive_id": "section_2",
+          "description": "Conclusion is a part of section 2",
+          "sections": [
+            "section_2"
+          ]
+        },
+        {
+          "id": "relationship_4",
+          "relationship_type": "part-of",
+          "source_primitive_id": "section_3_intro",
+          "target_primitive_id": "section_3",
+          "description": "Intro is a part of section 3",
+          "sections": [
+            "section_3"
+          ]
+        },
+        {
+          "id": "relationship_5",
+          "relationship_type": "part-of",
+          "source_primitive_id": "section_3_details",
+          "target_primitive_id": "section_3",
+          "description": "Details is a part of section 3",
+          "sections": [
+            "section_3"
+          ]
+        },
+        {
+          "id": "relationship_6",
+          "relationship_type": "part-of",
+          "source_primitive_id": "section_3_conclusion",
+          "target_primitive_id": "section_3",
+          "description": "Conclusion is a part of section 3",
+          "sections": [
+            "section_3"
+          ]
+        },
+        {
+          "id": "relationship_7",
+          "relationship_type": "similar-to",
+          "source_primitive_id": "unique_id_1",
+          "target_primitive_id": "section_3_intro",
+          "description": "Both are introductory texts",
+          "sections": [
+            "section_2",
+            "section_3"
+          ]
+        },
+        {
+          "id": "relationship_8",
+          "relationship_type": "similar-to",
+          "source_primitive_id": "unique_id_2",
+          "target_primitive_id": "section_3_details",
+          "description": "Both provide details about the topic",
+          "sections": [
+            "section_2",
+            "section_3"
+          ]
+        },
+        {
+          "id": "relationship_9",
+          "relationship_type": "similar-to",
+          "source_primitive_id": "unique_id_3",
+          "target_primitive_id": "section_3_conclusion",
+          "description": "Both are concluding remarks",
+          "sections": [
+            "section_2",
+            "section_3"
+          ]
+        }
+      ],
+      "implicit_and_open_questions": []
+    }
+  },
+  "created_at": "2025-06-30T09:33:38.181160",
+  "status": "completed"
+}

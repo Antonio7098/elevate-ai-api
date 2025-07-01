@@ -1,0 +1,115 @@
+{
+  "id": 1,
+  "name": "Questions for deconstruction_05_photosynthesis_detailed",
+  "blueprint_id": "ca38f9e9-fcc9-41cf-a742-44315f7fd305",
+  "folder_id": null,
+  "questions": [
+    {
+      "text": "Define photosynthesis in your own words.",
+      "answer": "Photosynthesis is the process by which plants convert light energy into chemical energy.",
+      "question_type": "understand",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for correctly identifying the conversion of light energy. Award 1 mark for mentioning the creation of chemical energy."
+    },
+    {
+      "text": "Where does photosynthesis take place within a plant cell?",
+      "answer": "Photosynthesis occurs in chloroplasts.",
+      "question_type": "understand",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 2 marks for correctly identifying chloroplasts."
+    },
+    {
+      "text": "What are the two main stages of photosynthesis?",
+      "answer": "The two main stages are the light reactions and the Calvin cycle.",
+      "question_type": "understand",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for each correctly identified stage."
+    },
+    {
+      "text": "What is the primary function of the light reactions in photosynthesis?",
+      "answer": "The light reactions capture solar energy and convert it into chemical energy in the form of ATP and NADPH.",
+      "question_type": "understand",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for mentioning the capture of solar energy. Award 1 mark for mentioning the production of ATP and NADPH."
+    },
+    {
+      "text": "Explain the role of ATP and NADPH in photosynthesis.",
+      "answer": "ATP and NADPH are chemical energy molecules produced during the light reactions. They are used in the Calvin cycle to fuel the production of sugars.",
+      "question_type": "understand",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for identifying their role as energy carriers. Award 1 mark for linking them to the Calvin cycle."
+    },
+    {
+      "text": "What is the main function of the Calvin cycle?",
+      "answer": "The Calvin cycle uses the products of the light reactions (ATP and NADPH) to fix carbon dioxide and produce sugars.",
+      "question_type": "understand",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for mentioning carbon dioxide fixation. Award 1 mark for mentioning sugar production."
+    },
+    {
+      "text": "How does the light reaction stage contribute to the Calvin cycle?",
+      "answer": "The light reactions provide the ATP and NADPH needed to power the Calvin cycle.",
+      "question_type": "use",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 2 marks for correctly explaining the relationship between the two stages."
+    },
+    {
+      "text": "If a plant is deprived of light, which stage of photosynthesis would be directly affected and why?",
+      "answer": "The light reactions would be directly affected because they require light to produce ATP and NADPH, which are essential for the Calvin cycle.",
+      "question_type": "use",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for identifying the light reactions. Award 1 mark for explaining why."
+    },
+    {
+      "text": "Explain the relationship between chloroplasts and photosynthesis.",
+      "answer": "Chloroplasts are the organelles where photosynthesis takes place.",
+      "question_type": "use",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 2 marks for correctly describing the location of photosynthesis."
+    },
+    {
+      "text": "Describe the overall energy transformation that occurs during photosynthesis.",
+      "answer": "Photosynthesis converts light energy into chemical energy (stored in ATP and NADPH, ultimately in sugars).",
+      "question_type": "use",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for identifying the initial light energy. Award 1 mark for identifying the final chemical energy storage."
+    },
+    {
+      "text": "What would be the consequences if the Calvin cycle was unable to fix carbon dioxide?",
+      "answer": "If the Calvin cycle could not fix carbon dioxide, sugars would not be produced, severely impacting plant growth and survival.",
+      "question_type": "explore",
+      "total_marks_available": 3,
+      "marking_criteria": "Award 1 mark for identifying the lack of sugar production. Award 1 mark for explaining its impact on growth. Award 1 mark for mentioning survival implications."
+    },
+    {
+      "text": "Compare and contrast the light reactions and the Calvin cycle in terms of their inputs and outputs.",
+      "answer": "Light reactions input: light energy; Output: ATP, NADPH. Calvin cycle input: ATP, NADPH, CO2; Output: sugars.",
+      "question_type": "explore",
+      "total_marks_available": 4,
+      "marking_criteria": "Award 1 mark for each correct input and output for both stages. "
+    },
+    {
+      "text": "How does the interdependence of the light reactions and the Calvin cycle ensure the efficient functioning of photosynthesis?",
+      "answer": "The light reactions produce ATP and NADPH, which are essential for the Calvin cycle to fix carbon dioxide and produce sugars. The Calvin cycle uses up the ATP and NADPH, creating a demand that keeps the light reactions running.",
+      "question_type": "explore",
+      "total_marks_available": 3,
+      "marking_criteria": "Award 1 mark for explaining the supply of ATP/NADPH. Award 1 mark for explaining the demand for ATP/NADPH. Award 1 mark for mentioning the cyclical nature."
+    },
+    {
+      "text": "Discuss the significance of photosynthesis for life on Earth.",
+      "answer": "Photosynthesis is the primary source of energy for most ecosystems on Earth, producing oxygen and the organic molecules that fuel life.",
+      "question_type": "explore",
+      "total_marks_available": 3,
+      "marking_criteria": "Award 1 mark for mentioning energy source. Award 1 mark for mentioning oxygen production. Award 1 mark for mentioning organic molecule production."
+    },
+    {
+      "text": "Explain how the products of the light reactions are essential for the process of carbon fixation in the Calvin cycle.",
+      "answer": "The ATP and NADPH produced during the light reactions provide the energy and reducing power needed to convert carbon dioxide into sugars in the Calvin cycle.  Without them, the energy-intensive process of carbon fixation could not occur.",
+      "question_type": "explore",
+      "total_marks_available": 3,
+      "marking_criteria": "Award 1 mark for mentioning the role of ATP in providing energy. Award 1 mark for mentioning NADPH as a reducing agent. Award 1 mark for correctly linking this to carbon fixation."
+    }
+  ],
+  "created_at": "2025-01-27T10:00:00.000Z",
+  "updated_at": "2025-01-27T10:00:00.000Z"
+}

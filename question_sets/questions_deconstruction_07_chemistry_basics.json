@@ -1,0 +1,31 @@
+{
+  "id": 1,
+  "name": "Questions for deconstruction_07_chemistry_basics",
+  "blueprint_id": "7866787b-42ce-4eff-90c2-fa0a5b582388",
+  "folder_id": null,
+  "questions": [
+    {
+      "text": "Explain the difference between atoms and molecules, using examples from the text.",
+      "answer": "Atoms are the fundamental building blocks of matter, consisting of protons, neutrons, and electrons.  Molecules are formed when atoms combine. For example, individual oxygen atoms (O) can combine to form oxygen molecules (O2).",
+      "question_type": "understand",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for correctly defining atoms. Award 1 mark for correctly defining molecules and providing a relevant example."
+    },
+    {
+      "text": "Apply the law of conservation of mass to a scenario:  If 10 grams of reactant A reacts completely with 5 grams of reactant B, what is the total mass of the resulting product(s)? Justify your answer.",
+      "answer": "The total mass of the resulting product(s) will be 15 grams.  The law of conservation of mass states that matter cannot be created or destroyed in a chemical reaction; therefore, the total mass of the reactants must equal the total mass of the products.",
+      "question_type": "use",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for stating the correct total mass (15 grams). Award 1 mark for correctly applying the law of conservation of mass to justify the answer."
+    },
+    {
+      "text": "Analyze the factors that determine the state (solid, liquid, or gas) of matter.  Explain how these factors could cause a substance to change state.",
+      "answer": "The state of matter is determined primarily by temperature and pressure.  Higher temperatures generally lead to substances existing as liquids or gases, while lower temperatures favor the solid state.  Increased pressure can also cause a substance to transition to a more compact state (e.g., from gas to liquid).  Changes in temperature or pressure can cause a substance to change from one state to another (e.g., ice melting from solid to liquid, water boiling from liquid to gas).",
+      "question_type": "explore",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for identifying temperature and pressure as key factors. Award 1 mark for explaining how changes in these factors lead to state changes, including providing examples."
+    }
+  ],
+  "created_at": "2025-01-27T10:00:00.000Z",
+  "updated_at": "2025-01-27T10:00:00.000Z"
+}

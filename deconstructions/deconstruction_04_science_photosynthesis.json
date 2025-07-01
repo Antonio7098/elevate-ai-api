@@ -1,0 +1,123 @@
+{
+  "blueprint_id": "3bfb8099-eb04-4060-9666-7376f33152a8",
+  "source_text": "# Science\nPhotosynthesis is the process by which plants convert light energy into chemical energy.",
+  "blueprint_json": {
+    "source_id": "3bfb8099-eb04-4060-9666-7376f33152a8",
+    "source_title": "Photosynthesis: Light to Chemical Energy",
+    "source_type": "article",
+    "source_summary": {
+      "core_thesis_or_main_argument": "Photosynthesis is the process by which plants convert light energy into chemical energy.",
+      "inferred_purpose": "To define photosynthesis and its basic function."
+    },
+    "sections": [
+      {
+        "section_id": "sec_1",
+        "section_name": "Science",
+        "description": "Overview of scientific concepts.",
+        "parent_section_id": null
+      },
+      {
+        "section_id": "sec_2",
+        "section_name": "Photosynthesis",
+        "description": "The process by which plants convert light energy into chemical energy.",
+        "parent_section_id": "sec_1"
+      }
+    ],
+    "knowledge_primitives": {
+      "key_propositions_and_facts": [
+        {
+          "id": "prop_1",
+          "statement": "Photosynthesis is the process by which plants convert light energy into chemical energy.",
+          "supporting_evidence": [],
+          "sections": [
+            "sec_1"
+          ]
+        },
+        {
+          "id": "prop_1",
+          "statement": "Photosynthesis is the process by which plants convert light energy into chemical energy.",
+          "supporting_evidence": [],
+          "sections": [
+            "sec_2"
+          ]
+        }
+      ],
+      "key_entities_and_definitions": [
+        {
+          "id": "e1",
+          "entity": "Photosynthesis",
+          "definition": "The process by which plants convert light energy into chemical energy.",
+          "category": "Concept",
+          "sections": [
+            "sec_1"
+          ]
+        },
+        {
+          "id": "e1",
+          "entity": "Photosynthesis",
+          "definition": "The process by which plants convert light energy into chemical energy.",
+          "category": "Concept",
+          "sections": [
+            "sec_2"
+          ]
+        }
+      ],
+      "described_processes_and_steps": [
+        {
+          "id": "process_1",
+          "process_name": "Photosynthesis",
+          "steps": [],
+          "sections": [
+            "sec_1"
+          ]
+        },
+        {
+          "id": "photosynthesis_process",
+          "process_name": "Photosynthesis",
+          "steps": [
+            "Plants absorb light energy"
+          ],
+          "sections": [
+            "sec_2"
+          ]
+        }
+      ],
+      "identified_relationships": [
+        {
+          "id": "rel_1",
+          "relationship_type": "component-of",
+          "source_primitive_id": "process_1",
+          "target_primitive_id": "e1",
+          "description": "The process 'Photosynthesis' (process_1) is a component representing the concept 'Photosynthesis' (e1).",
+          "sections": [
+            "sec_1"
+          ]
+        },
+        {
+          "id": "rel_2",
+          "relationship_type": "component-of",
+          "source_primitive_id": "photosynthesis_process",
+          "target_primitive_id": "e1",
+          "description": "The process 'Photosynthesis' (photosynthesis_process) is a component representing the concept 'Photosynthesis' (e1).",
+          "sections": [
+            "sec_2"
+          ]
+        },
+        {
+          "id": "rel_3",
+          "relationship_type": "defines",
+          "source_primitive_id": "e1",
+          "target_primitive_id": "prop_1",
+          "description": "The entity 'Photosynthesis' (e1) defines the proposition describing the process of Photosynthesis (prop_1).",
+          "sections": [
+            "sec_1",
+            "sec_2"
+          ]
+        }
+      ],
+      "implicit_and_open_questions": []
+    }
+  },
+  "created_at": "2025-06-30T09:33:57.131791",
+  "status": "completed"
+}

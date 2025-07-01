@@ -1,0 +1,31 @@
+{
+  "id": 1,
+  "name": "Questions for deconstruction_03_simple_text",
+  "blueprint_id": "7453b0a0-1bc4-44bf-8f7f-5ec794f624f2",
+  "folder_id": null,
+  "questions": [
+    {
+      "text": "Describe the structure of the provided text.  What elements, if any, are present to organize the information?",
+      "answer": "The text lacks any headings or structural elements.  It is presented as a single, unstructured block of text.",
+      "question_type": "understand",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for correctly identifying the absence of headings. Award 1 mark for stating that the text is unstructured."
+    },
+    {
+      "text": "If you were tasked with analyzing this text for key themes, what initial challenges might you encounter based on its current structure? Suggest one strategy to overcome this challenge.",
+      "answer": "The lack of structure makes identifying key themes challenging.  The text's simplicity hinders the ability to easily discern patterns or recurring ideas. One strategy to overcome this would be to manually segment the text into logical chunks based on topic or meaning, creating a more structured format for analysis.",
+      "question_type": "use",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for identifying a challenge related to the lack of structure (e.g., difficulty in identifying themes). Award 1 mark for suggesting a reasonable strategy to overcome this challenge (e.g., text segmentation)."
+    },
+    {
+      "text": "Explore potential ways to enhance the organization and clarity of this simple text, keeping in mind the principles of effective communication. Consider how different structural elements could impact the readability and understandability of the text.",
+      "answer": "Several structural elements could improve the text.  Adding headings would group related information, creating a clearer hierarchy. Using bullet points or numbered lists could improve readability, especially if the text were to contain multiple related points or a sequence of events.  Paragraph breaks could be used to visually separate distinct ideas.  The choice of structural elements would depend on the content and intended audience.",
+      "question_type": "explore",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for suggesting at least two appropriate structural improvements (headings, lists, paragraphs). Award 1 mark for explaining how these improvements would enhance readability and understandability."
+    }
+  ],
+  "created_at": "2025-01-27T10:00:00.000Z",
+  "updated_at": "2025-01-27T10:00:00.000Z"
+}

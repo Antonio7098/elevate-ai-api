@@ -1,0 +1,31 @@
+{
+  "id": 1,
+  "name": "Questions for deconstruction_06_photosynthesis_comprehensive",
+  "blueprint_id": "71d6fead-8613-4b2d-8799-45e4d303e1d3",
+  "folder_id": null,
+  "questions": [
+    {
+      "text": "Explain the significance of photosynthesis in maintaining life on Earth, referencing at least two key aspects highlighted in the provided text.",
+      "answer": "Photosynthesis is crucial for life on Earth because it converts light energy into chemical energy in the form of sugars, forming the base of nearly all food webs and sustaining most life.  Additionally, it maintains the atmospheric oxygen we breathe.",
+      "question_type": "understand",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for correctly identifying the conversion of light energy into chemical energy as a key function. Award 1 mark for mentioning either the role in food webs/sustaining life or the maintenance of atmospheric oxygen."
+    },
+    {
+      "text": "Using the information provided, describe the location within a plant cell where the light-dependent reactions of photosynthesis take place and explain why this location is crucial for the process.",
+      "answer": "The light-dependent reactions occur in the thylakoid membranes of chloroplasts. This location is crucial because it is where the necessary light energy is captured to produce ATP and NADPH, essential energy carriers for the process.",
+      "question_type": "use",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for correctly identifying the thylakoid membranes of chloroplasts as the location. Award 1 mark for explaining the importance of this location for capturing light energy and producing ATP and NADPH."
+    },
+    {
+      "text": "Analyze the introductory sentence, \u201cPhotosynthesis, meaning \u201clight putting together,\u201d is the cornerstone of life on Earth.\u201d  Discuss how this concise statement encapsulates the core concept and broader implications of photosynthesis.",
+      "answer": "The sentence highlights two key aspects of photosynthesis: its mechanism (light putting together implying the synthesis of compounds using light energy) and its importance ('cornerstone of life on Earth' indicating its vital role in sustaining life).  The simplicity of the statement effectively communicates the process's core function and its profound impact on the global ecosystem.",
+      "question_type": "explore",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for explaining the mechanistic aspect of the sentence (light energy creating compounds). Award 1 mark for explaining the implication of photosynthesis as essential for life on Earth."
+    }
+  ],
+  "created_at": "2025-01-27T10:00:00.000Z",
+  "updated_at": "2025-01-27T10:00:00.000Z"
+}

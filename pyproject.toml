@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "elevate-ai-api"
+version = "0.1.0"
+description = "AI-powered learning co-pilot API"
+authors = ["Antonio"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.115.14"
+uvicorn = "^0.35.0"
+pydantic = "^2.11.7"
+pydantic-settings = "^2.10.1"
+python-multipart = "^0.0.20"
+python-jose = {extras = ["cryptography"], version = "^3.5.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+httpx = "^0.28.1"
+openai = "^1.93.0"
+google-generativeai = "^0.8.5"
+rich = "^14.0.0"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.4.1"
+pytest-asyncio = "^1.0.0"
+black = "^25.1.0"
+isort = "^6.0.1"
+mypy = "^1.16.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

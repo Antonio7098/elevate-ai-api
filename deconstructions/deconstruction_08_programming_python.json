@@ -1,0 +1,54 @@
+{
+  "blueprint_id": "dc99bb97-7d84-4daf-a5e6-6282b25b804f",
+  "source_text": "# Python Programming\n\nPython is a high-level, interpreted programming language known for its simplicity and readability.\n\n## Variables and Data Types\nIn Python, variables are created by assigning values. Common data types include integers, floats, strings, and booleans.\n\n## Functions\nFunctions are reusable blocks of code that perform specific tasks. They are defined using the 'def' keyword and can accept parameters and return values.\n\n## Control Structures\nPython uses if-else statements for decision making and loops (for, while) for repetitive tasks.\n\n## Object-Oriented Programming\nPython supports OOP with classes and objects, allowing for encapsulation, inheritance, and polymorphism.",
+  "blueprint_json": {
+    "source_id": "dc99bb97-7d84-4daf-a5e6-6282b25b804f",
+    "source_title": "Generated from text",
+    "source_type": "tutorial",
+    "source_summary": {
+      "core_thesis_or_main_argument": "TODO: Extract thesis",
+      "inferred_purpose": "TODO: Extract purpose"
+    },
+    "sections": [
+      {
+        "section_id": "sec_e7c14ad9-78db-5bcc-bf07-58ba2ad78667",
+        "section_name": "Python Programming",
+        "description": "Python is a high-level, interpreted programming language known for its simplicity and readability.",
+        "parent_section_id": null
+      },
+      {
+        "section_id": "sec_7562fcec-8995-523a-bf69-a05b1bf58fd1",
+        "section_name": "Variables and Data Types",
+        "description": "In Python, variables are created by assigning values. Common data types include integers, floats, strings, and booleans.",
+        "parent_section_id": null
+      },
+      {
+        "section_id": "sec_5a3ca848-6e20-5fa2-bb6b-404467f4ef37",
+        "section_name": "Functions",
+        "description": "Functions are reusable blocks of code that perform specific tasks. They are defined using the 'def' keyword and can accept",
+        "parent_section_id": null
+      },
+      {
+        "section_id": "sec_e6edf8b9-9ec7-5342-ab93-708da7792adb",
+        "section_name": "Control Structures",
+        "description": "Python uses if-else statements for decision making and loops (for, while) for repetitive tasks.",
+        "parent_section_id": null
+      },
+      {
+        "section_id": "sec_91a01284-d502-5661-8b94-7d80ef2fdf87",
+        "section_name": "Object-Oriented Programming",
+        "description": "Python supports OOP with classes and objects, allowing for encapsulation, inheritance, and polymorphism.",
+        "parent_section_id": null
+      }
+    ],
+    "knowledge_primitives": {
+      "key_propositions_and_facts": [],
+      "key_entities_and_definitions": [],
+      "described_processes_and_steps": [],
+      "identified_relationships": [],
+      "implicit_and_open_questions": []
+    }
+  },
+  "created_at": "2025-06-30T08:57:34.261908",
+  "status": "completed"
+}

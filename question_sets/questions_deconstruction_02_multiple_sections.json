@@ -1,0 +1,108 @@
+{
+  "id": 1,
+  "name": "Questions for deconstruction_02_multiple_sections",
+  "blueprint_id": "9159f100-7ed4-48fa-9b24-050879b442c4",
+  "folder_id": null,
+  "questions": [
+    {
+      "text": "Identify the three main sections of the text.",
+      "answer": "The three main sections are Intro, Details, and Conclusion.",
+      "question_type": "understand",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for each correctly identified section.  Award 0 marks if fewer than 2 sections are correctly identified."
+    },
+    {
+      "text": "What is the purpose of the 'Intro' section?",
+      "answer": "Based on the provided text, the purpose of the 'Intro' section is to provide introductory text about the topic.",
+      "question_type": "understand",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 2 marks for a response that correctly identifies the introductory nature of the 'Intro' section. Award 1 mark for a partially correct response."
+    },
+    {
+      "text": "What type of information would you expect to find in the 'Details' section?",
+      "answer": "The 'Details' section contains details about the topic.",
+      "question_type": "understand",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 2 marks for an answer that correctly indicates the section provides specific information relating to the topic. Award 1 mark for a partially correct response."
+    },
+    {
+      "text": "What is the function of the 'Conclusion' section?",
+      "answer": "The 'Conclusion' section provides final thoughts on the topic.",
+      "question_type": "understand",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 2 marks for an answer that correctly identifies the conclusion as summarizing or offering final thoughts. Award 1 mark for a partially correct response."
+    },
+    {
+      "text": "Explain the relationship between the 'Intro' and 'Details' sections.",
+      "answer": "The 'Details' section expands upon or elaborates on the information introduced in the 'Intro' section.  The 'Details' section is a part of the overall structure, following the 'Intro'.",
+      "question_type": "use",
+      "total_marks_available": 3,
+      "marking_criteria": "Award 1 mark for identifying the sequential relationship. Award 1 mark for explaining that 'Details' expands on 'Intro'. Award 1 mark for correctly explaining the 'part-of' relationship."
+    },
+    {
+      "text": "Explain the relationship between the 'Details' and 'Conclusion' sections.",
+      "answer": "The 'Conclusion' summarizes or offers final thoughts on the information presented in the 'Details' section. The 'Conclusion' is a part of the overall structure, following the 'Details'.",
+      "question_type": "use",
+      "total_marks_available": 3,
+      "marking_criteria": "Award 1 mark for identifying the sequential relationship. Award 1 mark for explaining that 'Conclusion' summarizes 'Details'. Award 1 mark for correctly explaining the 'part-of' relationship."
+    },
+    {
+      "text": "How does the 'Intro' section prepare the reader for the 'Details' section?",
+      "answer": "The 'Intro' section provides a general overview or introduction to the topic, setting the stage for the more detailed information presented in the 'Details' section.",
+      "question_type": "use",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for identifying the introductory nature of the 'Intro'. Award 1 mark for explaining its function in preparing the reader for the 'Details'."
+    },
+    {
+      "text": "In what ways could the 'Details' section be improved to provide a more comprehensive understanding of the topic?",
+      "answer": "This is open to interpretation, but a good answer would suggest adding more specific examples, data, or evidence to support the claims made.  Alternatively, better organization or categorization of the details could improve comprehension.",
+      "question_type": "explore",
+      "total_marks_available": 3,
+      "marking_criteria": "Award 1 mark for suggesting specific improvements to the detail. Award 1 mark for suggesting improving the structure or organisation. Award 1 mark for a well-reasoned and relevant suggestion."
+    },
+    {
+      "text": "Suggest a different title for this chapter that more accurately reflects its content.",
+      "answer": "Answers will vary but should reflect the general topic covered in the 'Details' section. Examples could be: \"A Detailed Look at [Topic]\" or \"An Introduction to [Topic] and Key Details\"",
+      "question_type": "explore",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for a relevant and appropriate title. Award 1 mark for a title that is grammatically correct and clear."
+    },
+    {
+      "text": "If you were to add another section to this chapter, what would it be and why?",
+      "answer": "Answers will vary but should be justified. A possible answer is a section on 'Applications' to show practical uses of the details presented.",
+      "question_type": "explore",
+      "total_marks_available": 3,
+      "marking_criteria": "Award 1 mark for suggesting a logical additional section. Award 1 mark for a clear explanation of the purpose of the suggested section. Award 1 mark for a well-justified answer."
+    },
+    {
+      "text": "How could the 'Conclusion' section be strengthened to leave a more lasting impact on the reader?",
+      "answer": "Answers may vary but should suggest strengthening the summary, adding a call to action, or providing a forward-looking statement.",
+      "question_type": "explore",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for identifying a way to improve the conclusion. Award 1 mark for justification."
+    },
+    {
+      "text": "Considering the repetition of 'Intro' and 'Details' in the Key Entities, what might this suggest about the structure or emphasis of the original source?",
+      "answer": "The repetition might suggest a hierarchical structure within the 'Details' section or that the introduction and detailed explanation are especially crucial to understanding the content.",
+      "question_type": "explore",
+      "total_marks_available": 3,
+      "marking_criteria": "Award 1 mark for identifying the repetition. Award 1 mark for suggesting a possible hierarchical structure within the 'Details' section. Award 1 mark for a relevant interpretation of the emphasis on introduction and details."
+    },
+    {
+      "text": "Based solely on the provided text, what can you infer about the overall topic of the chapter?",
+      "answer": "The exact topic cannot be definitively determined, as the provided text only gives general section titles and placeholders.  However, the existence of an introduction, details, and conclusion implies a focused topic that was detailed and summarized.",
+      "question_type": "use",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 1 mark for acknowledging the lack of specific details about the overall topic. Award 1 mark for correctly inferring that a focused topic is discussed and outlined by the structure."
+    },
+    {
+      "text": "Critically evaluate the effectiveness of the chapter's structure based on the provided information.",
+      "answer": "The structure is simple and clear with a logical flow: Intro, Details, Conclusion.  However, without the actual content, a complete evaluation is impossible. The effectiveness depends on the content within each section.",
+      "question_type": "explore",
+      "total_marks_available": 3,
+      "marking_criteria": "Award 1 mark for identifying the simplicity and logical flow of the structure. Award 1 mark for acknowledging the limitations of the evaluation without the actual content. Award 1 mark for offering a well-reasoned critical assessment."
+    }
+  ],
+  "created_at": "2025-01-27T10:00:00.000Z",
+  "updated_at": "2025-01-27T10:00:00.000Z"
+}

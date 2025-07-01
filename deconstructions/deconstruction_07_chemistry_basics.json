@@ -1,0 +1,48 @@
+{
+  "blueprint_id": "7866787b-42ce-4eff-90c2-fa0a5b582388",
+  "source_text": "# Chemistry Fundamentals\n\nChemistry is the study of matter and its properties. Matter is anything that has mass and takes up space.\n\n## Atoms and Molecules\nAtoms are the basic building blocks of matter. They consist of protons, neutrons, and electrons. When atoms combine, they form molecules.\n\n## Chemical Reactions\nChemical reactions occur when substances interact to form new substances. The law of conservation of mass states that matter cannot be created or destroyed in a chemical reaction.\n\n## States of Matter\nMatter exists in three main states: solid, liquid, and gas. The state depends on temperature and pressure conditions.",
+  "blueprint_json": {
+    "source_id": "7866787b-42ce-4eff-90c2-fa0a5b582388",
+    "source_title": "Generated from text",
+    "source_type": "article",
+    "source_summary": {
+      "core_thesis_or_main_argument": "TODO: Extract thesis",
+      "inferred_purpose": "TODO: Extract purpose"
+    },
+    "sections": [
+      {
+        "section_id": "sec_29e58a94-e60d-50f1-aeca-a5999954b132",
+        "section_name": "Chemistry Fundamentals",
+        "description": "Chemistry is the study of matter and its properties. Matter is anything that has mass and takes up space.",
+        "parent_section_id": null
+      },
+      {
+        "section_id": "sec_00c0577d-1c03-5967-b33b-53f02c00a3bb",
+        "section_name": "Atoms and Molecules",
+        "description": "Atoms are the basic building blocks of matter. They consist of protons, neutrons, and electrons. When atoms combine, they form",
+        "parent_section_id": null
+      },
+      {
+        "section_id": "sec_6cd5b788-bc81-519d-89df-bd0aafcbb038",
+        "section_name": "Chemical Reactions",
+        "description": "Chemical reactions occur when substances interact to form new substances. The law of conservation of mass states that matter cannot",
+        "parent_section_id": null
+      },
+      {
+        "section_id": "sec_398e771a-035e-5848-bfdf-47bc426b3f63",
+        "section_name": "States of Matter",
+        "description": "Matter exists in three main states: solid, liquid, and gas. The state depends on temperature and pressure conditions.",
+        "parent_section_id": null
+      }
+    ],
+    "knowledge_primitives": {
+      "key_propositions_and_facts": [],
+      "key_entities_and_definitions": [],
+      "described_processes_and_steps": [],
+      "identified_relationships": [],
+      "implicit_and_open_questions": []
+    }
+  },
+  "created_at": "2025-06-30T08:55:11.827012",
+  "status": "completed"
+}

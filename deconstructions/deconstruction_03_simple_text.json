@@ -1,0 +1,30 @@
+{
+  "blueprint_id": "7453b0a0-1bc4-44bf-8f7f-5ec794f624f2",
+  "source_text": "This is a simple text without any headings or structure.",
+  "blueprint_json": {
+    "source_id": "7453b0a0-1bc4-44bf-8f7f-5ec794f624f2",
+    "source_title": "Simple Text Analysis",
+    "source_type": "note",
+    "source_summary": {
+      "core_thesis_or_main_argument": "There is no discernible thesis or argument presented in the provided text; it is simply a statement indicating the text's lack of structure or headings.",
+      "inferred_purpose": "The purpose is unclear as the text provides no information beyond its own description.  It may be a placeholder, a test case for an analysis program, or part of a larger, more meaningful document."
+    },
+    "sections": [
+      {
+        "section_id": "section_1",
+        "section_name": "Main",
+        "description": "The entire text content.",
+        "parent_section_id": null
+      }
+    ],
+    "knowledge_primitives": {
+      "key_propositions_and_facts": [],
+      "key_entities_and_definitions": [],
+      "described_processes_and_steps": [],
+      "identified_relationships": [],
+      "implicit_and_open_questions": []
+    }
+  },
+  "created_at": "2025-06-30T09:33:45.452517",
+  "status": "completed"
+}

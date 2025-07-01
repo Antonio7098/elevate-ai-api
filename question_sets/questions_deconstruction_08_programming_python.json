@@ -1,0 +1,24 @@
+{
+  "id": 1,
+  "name": "Questions for deconstruction_08_programming_python",
+  "blueprint_id": "dc99bb97-7d84-4daf-a5e6-6282b25b804f",
+  "folder_id": null,
+  "questions": [
+    {
+      "text": "What is the main topic of this content?",
+      "answer": "The content covers: Generated from text",
+      "question_type": "understand",
+      "total_marks_available": 2,
+      "marking_criteria": "Award 2 marks for identifying the main topic correctly."
+    },
+    {
+      "text": "Summarize the key points from this content.",
+      "answer": "Key points should include the main concepts and relationships discussed.",
+      "question_type": "explore",
+      "total_marks_available": 3,
+      "marking_criteria": "Award 1 mark per key point identified."
+    }
+  ],
+  "created_at": "2025-01-27T10:00:00.000Z",
+  "updated_at": "2025-01-27T10:00:00.000Z"
+}
