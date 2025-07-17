@@ -15,9 +15,17 @@ class Settings(BaseSettings):
     openai_api_key: Optional[str] = None
     google_api_key: Optional[str] = None
     
-    # Vector Database
+    # Vector Database Configuration
+    vector_store_type: str = "chromadb"  # "pinecone" or "chromadb"
     pinecone_api_key: Optional[str] = None
     pinecone_environment: Optional[str] = None
+    chroma_persist_directory: str = "./chroma_db"
+    
+    # Embedding Service Configuration
+    embedding_service_type: str = "openai"  # "openai", "google", or "local"
+    openai_embedding_model: str = "text-embedding-3-small"
+    google_embedding_model: str = "embedding-001"
+    local_embedding_model: str = "all-MiniLM-L6-v2"
     
     # Database
     database_url: Optional[str] = None
@@ -33,4 +41,6 @@ class Settings(BaseSettings):
 
 
 # Global settings instance
-settings = Settings() 
+settings = Settings()
+
+# (Debug print removed) 

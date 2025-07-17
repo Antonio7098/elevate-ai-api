@@ -299,6 +299,125 @@ class TestQuestionGenerationEndpoint:
             assert "Question generation failed" in response.json()["detail"]
 
 
+class TestAnswerEvaluationEndpoint:
+    """Test cases for the answer evaluation endpoint."""
+    
+    def test_evaluate_answer_unauthorized(self):
+        """Test answer evaluation endpoint without authentication."""
+        response = client.post("/api/v1/ai/evaluate-answer", 
+                             json={
+                                 "question_id": 1,
+                                 "user_answer": "Test answer"
+                             })
+        assert response.status_code == 401
+    
+    def test_evaluate_answer_authorized(self, mock_question_retrieval, mock_evaluation_service, mock_question_data, mock_evaluation_response):
+        """Test answer evaluation endpoint with authentication and mocked services."""
+        # Setup mocks
+        mock_question_retrieval.return_value = mock_question_data
+        mock_evaluation_service.return_value = {
+            "marks_achieved": 4,
+            "corrected_answer": "Mitochondria are the powerhouse of the cell, generating ATP through cellular respiration.",
+            "feedback": "Good answer! You correctly identified mitochondria as the powerhouse and mentioned ATP generation."
+        }
+        
+        headers = {"Authorization": "Bearer test_api_key_123"}
+        response = client.post("/api/v1/ai/evaluate-answer", 
+                             json={
+                                 "question_id": 1,
+                                 "user_answer": "Mitochondria are the powerhouse of the cell and generate ATP."
+                             },
+                             headers=headers)
+        assert response.status_code == 200
+        data = response.json()
+        assert "corrected_answer" in data
+        assert "marks_available" in data
+        assert "marks_achieved" in data
+        assert data["marks_available"] == 5
+        assert data["marks_achieved"] == 4
+        assert isinstance(data["marks_achieved"], int)
+        
+        # Verify evaluation service was called
+        mock_evaluation_service.assert_called_once()
+        call_args = mock_evaluation_service.call_args[0][0]
+        assert call_args["question_text"] == mock_question_data["text"]
+        assert call_args["expected_answer"] == mock_question_data["answer"]
+        assert call_args["user_answer"] == "Mitochondria are the powerhouse of the cell and generate ATP."
+    
+    def test_evaluate_answer_validation_invalid_question_id(self):
+        """Test validation error for invalid question ID."""
+        headers = {"Authorization": "Bearer test_api_key_123"}
+        response = client.post("/api/v1/ai/evaluate-answer", 
+                             json={
+                                 "question_id": 0,
+                                 "user_answer": "Test answer"
+                             },
+                             headers=headers)
+        assert response.status_code == 422
+        assert "Question ID must be a positive integer" in response.json()["detail"][0]["msg"]
+    
+    def test_evaluate_answer_validation_empty_answer(self):
+        """Test validation error for empty user answer."""
+        headers = {"Authorization": "Bearer test_api_key_123"}
+        response = client.post("/api/v1/ai/evaluate-answer", 
+                             json={
+                                 "question_id": 1,
+                                 "user_answer": ""
+                             },
+                             headers=headers)
+        assert response.status_code == 422
+        assert "User answer cannot be empty" in response.json()["detail"][0]["msg"]
+    
+    def test_evaluate_answer_question_not_found(self, mock_question_retrieval):
+        """Test answer evaluation when question is not found."""
+        # Setup mock to return empty question data (indicating not found)
+        mock_question_retrieval.return_value = {
+            "id": 999,
+            "text": "",  # This triggers 404
+            "answer": "",
+            "question_type": "understand",
+            "total_marks_available": 1,
+            "marking_criteria": "",
+            "question_set_name": "",
+            "folder_name": "",
+            "blueprint_title": ""
+        }
+        
+        headers = {"Authorization": "Bearer test_api_key_123"}
+        response = client.post("/api/v1/ai/evaluate-answer", 
+                             json={
+                                 "question_id": 999,
+                                 "user_answer": "Test answer"
+                             },
+                             headers=headers)
+        assert response.status_code == 404
+        assert "Question not found" in response.json()["detail"]
+    
+    def test_evaluate_answer_evaluation_service_error(self, mock_question_retrieval, mock_evaluation_service, mock_question_data):
+        """Test answer evaluation when evaluation service fails."""
+        # Setup mocks
+        mock_question_retrieval.return_value = mock_question_data
+        mock_evaluation_service.side_effect = Exception("Evaluation service unavailable")
+        
+        headers = {"Authorization": "Bearer test_api_key_123"}
+        response = client.post("/api/v1/ai/evaluate-answer", 
+                             json={
+                                 "question_id": 1,
+                                 "user_answer": "Test answer"
+                             },
+                             headers=headers)
+        
+        # The endpoint should still return 200 because it falls back to mock evaluation
+        assert response.status_code == 200
+        data = response.json()
+        assert "corrected_answer" in data
+        assert "marks_available" in data
+        assert "marks_achieved" in data
+        # Verify that fallback evaluation was used
+        assert data["marks_available"] == 5
+        assert isinstance(data["marks_achieved"], int)
+
+
 class TestAPIValidation:
     """Test cases for API request/response validation."""
     

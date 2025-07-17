@@ -10,11 +10,14 @@ from app.api.schemas import (
     QuestionSetResponseDto,
     EvaluateAnswerDto,
     EvaluateAnswerResponseDto,
+    IndexBlueprintRequest,
+    IndexBlueprintResponse,
+    IndexingStatsResponse,
     ErrorResponse
 )
 from app.core.deconstruction import deconstruct_text
 from app.core.chat import process_chat_message
-from app.core.indexing import generate_notes, generate_questions, generate_questions_from_blueprint, evaluate_answer
+from app.core.indexing import generate_notes, generate_questions, generate_questions_from_blueprint, evaluate_answer, _call_ai_service_for_evaluation
 from app.core.usage_tracker import usage_tracker
 from typing import Dict, Any, Optional
 import uuid
@@ -212,20 +215,38 @@ async def evaluate_answer_endpoint(request: EvaluateAnswerDto):
     """
     Evaluate a user's answer to a question using AI.
     
-    This endpoint evaluates a user's answer against the expected answer and
-    marking criteria, returning marks achieved and feedback.
+    This endpoint receives complete question context from the Core API and
+    evaluates the user's answer against the expected answer and marking criteria.
     """
     try:
-        # Call the actual answer evaluation logic
-        result = await evaluate_answer(
-            question_id=request.question_id,
-            user_answer=request.user_answer
-        )
+        # Extract data from the Core API's payload format
+        question_context = request.questionContext
+        user_answer = request.userAnswer
         
+        # Prepare the payload for the AI evaluation logic
+        ai_service_payload = {
+            "question_text": question_context.questionText,
+            "expected_answer": question_context.expectedAnswer,
+            "user_answer": user_answer,
+            "question_type": question_context.questionType.lower(),
+            "total_marks_available": question_context.marksAvailable,
+            "marking_criteria": question_context.markingCriteria or "",
+            "context": {
+                "question_set_name": request.context.questionSetName if request.context else "",
+                "folder_name": request.context.folderName if request.context else "",
+                "blueprint_title": request.context.questionSetName if request.context else ""
+            }
+        }
+        
+        # Call the AI evaluation logic directly (bypassing the mock data lookup)
+        evaluation_data = await _call_ai_service_for_evaluation(ai_service_payload)
+        
+        # Format the response
         return EvaluateAnswerResponseDto(
-            corrected_answer=result.get("corrected_answer", ""),
-            marks_available=result.get("marks_available", 0),
-            marks_achieved=result.get("marks_achieved", 0)
+            corrected_answer=evaluation_data.get("corrected_answer", ""),
+            marks_available=question_context.marksAvailable,
+            marks_achieved=evaluation_data.get("marks_achieved", 0),
+            feedback=evaluation_data.get("feedback", "")
         )
         
     except ValueError as e:
@@ -306,4 +327,134 @@ async def get_recent_usage(limit: int = 50):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get recent usage: {str(e)}"
+        )
+
+
+@router.post("/index-blueprint", response_model=IndexBlueprintResponse)
+async def index_blueprint_endpoint(request: IndexBlueprintRequest):
+    """
+    Index a LearningBlueprint into the vector database.
+    
+    Transforms a LearningBlueprint into searchable TextNodes with vector embeddings
+    for use in RAG (Retrieval-Augmented Generation) operations.
+    """
+    try:
+        from app.models.learning_blueprint import LearningBlueprint
+        from app.core.indexing_pipeline import IndexingPipeline, IndexingPipelineError
+        
+        # Parse the blueprint JSON into a LearningBlueprint object
+        try:
+            blueprint = LearningBlueprint(**request.blueprint_json)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid blueprint JSON: {str(e)}"
+            )
+        
+        # Initialize the indexing pipeline
+        pipeline = IndexingPipeline()
+        
+        # Check if blueprint is already indexed (unless force_reindex is True)
+        if not request.force_reindex:
+            is_indexed = await pipeline.check_blueprint_indexed(blueprint.source_id)
+            if is_indexed:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=f"Blueprint {blueprint.source_id} is already indexed. Use force_reindex=true to reindex."
+                )
+        
+        # Index the blueprint
+        result = await pipeline.index_blueprint(blueprint)
+        
+        # Convert result to response format
+        return IndexBlueprintResponse(
+            blueprint_id=result["blueprint_id"],
+            blueprint_title=result["blueprint_title"],
+            indexing_completed=result["indexing_completed"],
+            nodes_processed=result.get("processed_nodes", 0),
+            embeddings_generated=result.get("results", {}).get("embeddings_generated", 0),
+            vectors_stored=result.get("results", {}).get("vectors_stored", 0),
+            success_rate=result.get("success_rate", 0.0),
+            elapsed_seconds=result.get("elapsed_seconds", 0.0),
+            errors=result.get("errors", []),
+            created_at=datetime.utcnow().isoformat()
+        )
+        
+    except HTTPException:
+        # Re-raise HTTPExceptions as-is
+        raise
+    except IndexingPipelineError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Indexing pipeline error: {str(e)}"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Blueprint indexing failed: {str(e)}"
+        )
+
+
+@router.get("/indexing/stats", response_model=IndexingStatsResponse)
+async def get_indexing_stats(blueprint_id: Optional[str] = None):
+    """
+    Get statistics about indexed content in the vector database.
+    
+    Returns overall statistics or blueprint-specific statistics if blueprint_id is provided.
+    """
+    try:
+        from app.core.indexing_pipeline import IndexingPipeline, IndexingPipelineError
+        
+        pipeline = IndexingPipeline()
+        stats = await pipeline.get_indexing_stats(blueprint_id)
+        
+        return IndexingStatsResponse(
+            total_nodes=stats.get("total_nodes", 0),
+            total_blueprints=stats.get("total_blueprints", 0),
+            blueprint_specific=stats.get("blueprint_specific"),
+            created_at=datetime.utcnow().isoformat()
+        )
+        
+    except IndexingPipelineError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get indexing stats: {str(e)}"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get indexing stats: {str(e)}"
+        )
+
+
+@router.delete("/index-blueprint/{blueprint_id}")
+async def delete_blueprint_index(blueprint_id: str):
+    """
+    Delete all indexed nodes for a specific blueprint.
+    
+    Removes all TextNodes and vectors associated with the specified blueprint
+    from the vector database.
+    """
+    try:
+        from app.core.indexing_pipeline import IndexingPipeline, IndexingPipelineError
+        
+        pipeline = IndexingPipeline()
+        result = await pipeline.delete_blueprint_index(blueprint_id)
+        
+        return {
+            "blueprint_id": blueprint_id,
+            "nodes_deleted": result["nodes_deleted"],
+            "deletion_completed": result["deletion_completed"],
+            "message": f"Successfully deleted {result['nodes_deleted']} nodes for blueprint {blueprint_id}"
+        }
+        
+    except IndexingPipelineError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete blueprint index: {str(e)}"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete blueprint index: {str(e)}"
         ) 

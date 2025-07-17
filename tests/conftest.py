@@ -126,4 +126,44 @@ def mock_llm_service():
 def mock_blueprint_retrieval():
     """Mock blueprint data retrieval for testing."""
     with patch('app.core.indexing._get_blueprint_data') as mock_retrieval:
-        yield mock_retrieval 
+        yield mock_retrieval
+
+
+@pytest.fixture
+def mock_question_data() -> Dict[str, Any]:
+    """Mock question data for testing."""
+    return {
+        "id": 1,
+        "text": "What is the primary function of mitochondria?",
+        "answer": "Mitochondria are the powerhouse of the cell, generating ATP through cellular respiration.",
+        "question_type": "understand",
+        "total_marks_available": 5,
+        "marking_criteria": "Award 1 mark for mentioning 'powerhouse', 1 mark for 'ATP', 1 mark for 'cellular respiration', 1 mark for energy generation, and 1 mark for clarity.",
+        "question_set_name": "Sample Question Set",
+        "folder_name": "Biology",
+        "blueprint_title": "Cellular Biology"
+    }
+
+
+@pytest.fixture
+def mock_evaluation_response() -> str:
+    """Mock LLM response for answer evaluation."""
+    return '''{
+        "marks_achieved": 4,
+        "corrected_answer": "Mitochondria are the powerhouse of the cell, generating ATP through cellular respiration.",
+        "feedback": "Good answer! You correctly identified mitochondria as the powerhouse and mentioned ATP generation. You could have been more specific about cellular respiration."
+    }'''
+
+
+@pytest.fixture
+def mock_question_retrieval():
+    """Mock question data retrieval for testing."""
+    with patch('app.core.indexing._get_question_data') as mock_retrieval:
+        yield mock_retrieval
+
+
+@pytest.fixture
+def mock_evaluation_service():
+    """Mock answer evaluation service for testing."""
+    with patch('app.core.indexing._call_ai_service_for_evaluation') as mock_service:
+        yield mock_service 

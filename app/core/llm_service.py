@@ -459,22 +459,72 @@ TASK:
 1. Compare the user's answer with the expected answer
 2. Apply the marking criteria to determine the number of marks achieved (integer, 0 to {total_marks_available})
 3. Provide a corrected/improved version of the answer
-4. Give constructive feedback
+4. Give feedback that is specific, constructive, and encouraging
+5. If the answer is incorrect or incomplete, explain what is missing and give a tip or suggestion for improvement
+6. Always end your feedback with a positive or motivating remark
+
+EXAMPLES OF ENCOURAGING FEEDBACK:
+- "Your answer shows a good attempt! To improve, try to mention that energy cannot be created or destroyed, and that it can only change forms. Keep going—you're on the right track!"
+- "Nice effort! You included some key points, but remember to explain that the total energy in a closed system remains constant. You're making progress—keep it up!"
+
+FEEDBACK STYLE REQUIREMENTS:
+- ALWAYS start with a positive acknowledgment (e.g., "Good try!", "Nice effort!", "You're on the right track!")
+- Be specific about what they did well, even if the answer is mostly wrong
+- Provide clear, actionable suggestions for improvement
+- Use encouraging language throughout
+- ALWAYS end with a motivating phrase (e.g., "Keep going!", "You're making progress!", "Great work on trying!")
 
 Return a JSON object with the following structure:
 {{
   "marks_achieved": <integer between 0 and {total_marks_available}>,
   "corrected_answer": "The ideal/correct answer",
-  "feedback": "Constructive feedback explaining the marks and suggestions for improvement"
+  "feedback": "Encouraging, constructive feedback explaining the marks, suggestions for improvement, and ending with a positive remark."
 }}
 
 IMPORTANT:
 - Only return marks_achieved (integer, 0 to {total_marks_available}), corrected_answer (string), and feedback (string)
 - Do NOT return a score or percentage
 - Be fair and consistent in your evaluation
-- Provide specific, actionable feedback
+- Provide specific, actionable, and encouraging feedback
 - The corrected answer should be comprehensive and accurate
+- Feedback should always include a positive or motivating remark at the end
 
 Return only the JSON object, no additional text.
+"""
+    return prompt 
+
+
+def create_encouraging_feedback_prompt(evaluation_result: Dict[str, Any]) -> str:
+    """Create prompt for generating encouraging feedback based on evaluation results."""
+    marks_achieved = evaluation_result.get("marks_achieved", 0)
+    marks_available = evaluation_result.get("marks_available", 1)
+    question_text = evaluation_result.get("question_text", "")
+    user_answer = evaluation_result.get("user_answer", "")
+    corrected_answer = evaluation_result.get("corrected_answer", "")
+    
+    # Determine the score percentage
+    score_percentage = (marks_achieved / marks_available) * 100 if marks_available > 0 else 0
+    
+    prompt = f"""
+You are a supportive and encouraging educational mentor. Generate a brief, encouraging feedback message for a student based on their performance.
+
+QUESTION: {question_text}
+STUDENT'S ANSWER: {user_answer}
+CORRECT ANSWER: {corrected_answer}
+MARKS ACHIEVED: {marks_achieved}/{marks_available} ({score_percentage:.0f}%)
+
+TASK:
+Generate a short, encouraging feedback message (1-2 sentences) that:
+- Acknowledges their effort positively
+- Provides specific, actionable improvement suggestions
+- Ends with a motivating phrase
+- Is warm, supportive, and educational
+
+EXAMPLES OF ENCOURAGING FEEDBACK:
+- "Great effort on this question! To improve, try to mention that energy cannot be created or destroyed, and that it can only change forms. Keep going—you're on the right track!"
+- "Nice try! You included some key points, but remember to explain that the total energy in a closed system remains constant. You're making progress—keep it up!"
+- "Good attempt! Focus on explaining both energy conservation and transformation. Every practice helps you learn—don't give up!"
+
+Return only the encouraging feedback message as a string, no JSON formatting.
 """
     return prompt 
