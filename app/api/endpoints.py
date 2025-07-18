@@ -13,6 +13,10 @@ from app.api.schemas import (
     IndexBlueprintRequest,
     IndexBlueprintResponse,
     IndexingStatsResponse,
+    SearchRequest,
+    SearchResponse,
+    RelatedLocusSearchRequest,
+    RelatedLocusSearchResponse,
     ErrorResponse
 )
 from app.core.deconstruction import deconstruct_text
@@ -61,14 +65,136 @@ async def chat_endpoint(request: ChatMessageRequest):
     based on the user's knowledge base and conversation context.
     """
     try:
-        # TODO: Implement actual chat logic
-        response_content = "This is a placeholder response. Chat functionality will be implemented in future sprints."
+        from app.core.query_transformer import QueryTransformer
+        from app.core.rag_search import RAGSearchService
+        from app.core.context_assembly import ContextAssembler
+        from app.core.response_generation import ResponseGenerator, ResponseGenerationRequest
+        from app.core.vector_store import create_vector_store
+        from app.services.gemini_service import GeminiService
+        from app.services.google_embedding_service import GoogleEmbeddingService
+        import os
+        
+        # Initialize services
+        vector_store = create_vector_store(
+            store_type=os.getenv("VECTOR_STORE_TYPE", "pinecone"),
+            api_key=os.getenv("PINECONE_API_KEY", ""),
+            environment=os.getenv("PINECONE_ENVIRONMENT", "us-west1-gcp"),
+            index_name="elevate-ai-main"
+        )
+        
+        embedding_service = GoogleEmbeddingService(
+            api_key=os.getenv("GOOGLE_API_KEY", "")
+        )
+        
+        gemini_service = GeminiService()
+        
+        await vector_store.initialize()
+        await embedding_service.initialize()
+        
+        # Initialize RAG components
+        query_transformer = QueryTransformer(embedding_service)
+        rag_search_service = RAGSearchService(vector_store, embedding_service)
+        context_assembler = ContextAssembler(rag_search_service)
+        response_generator = ResponseGenerator(gemini_service)
+        
+        # Step 1: Transform the user query
+        query_transformation = await query_transformer.transform_query(
+            query=request.message,
+            user_context=request.context or {},
+            conversation_history=request.conversation_history or []
+        )
+        
+        # Step 2: Assemble context from all memory tiers
+        assembled_context = await context_assembler.assemble_context(
+            user_id=request.user_id,
+            session_id=request.session_id,
+            current_query=request.message,
+            query_transformation=query_transformation
+        )
+        
+        # Step 3: Add current message to conversation buffer
+        context_assembler.add_message_to_buffer(
+            session_id=request.session_id,
+            role="user",
+            content=request.message,
+            metadata=request.metadata or {}
+        )
+        
+        # Step 4: Generate response using LLM
+        response_request = ResponseGenerationRequest(
+            user_query=request.message,
+            query_transformation=query_transformation,
+            assembled_context=assembled_context,
+            max_tokens=request.max_tokens or 1000,
+            temperature=request.temperature or 0.7,
+            include_sources=True,
+            metadata=request.metadata or {}
+        )
+        
+        generated_response = await response_generator.generate_response(response_request)
+        
+        # Step 5: Add assistant response to conversation buffer
+        context_assembler.add_message_to_buffer(
+            session_id=request.session_id,
+            role="assistant",
+            content=generated_response.content,
+            metadata={
+                "response_type": generated_response.response_type.value,
+                "confidence_score": generated_response.confidence_score,
+                "factual_accuracy_score": generated_response.factual_accuracy_score,
+                "generation_time_ms": generated_response.generation_time_ms
+            }
+        )
+        
+        # Step 6: Update session state with extracted information
+        session_updates = context_assembler.extract_session_updates(
+            request.message,
+            generated_response.content
+        )
+        
+        if session_updates:
+            context_assembler.update_session_state(request.session_id, session_updates)
+        
+        # Step 7: Format retrieved context for response
+        retrieved_context = []
+        for result in assembled_context.retrieved_knowledge[:5]:  # Top 5 results
+            retrieved_context.append({
+                "source_id": result.source_id,
+                "content": result.content,
+                "locus_type": result.locus_type,
+                "relevance_score": result.final_score,
+                "metadata": result.metadata
+            })
+        
+        # Track usage
+        usage_tracker.track_request(
+            endpoint="chat_message",
+            user_id=request.user_id,
+            tokens_used=generated_response.token_count,
+            model_used="gemini",
+            cost_estimate=generated_response.token_count * 0.000001  # Rough estimate
+        )
         
         return ChatMessageResponse(
             role="assistant",
-            content=response_content,
-            retrieved_context=[]
+            content=generated_response.content,
+            retrieved_context=retrieved_context,
+            metadata={
+                "response_type": generated_response.response_type.value,
+                "tone_style": generated_response.tone_style.value,
+                "confidence_score": generated_response.confidence_score,
+                "factual_accuracy_score": generated_response.factual_accuracy_score,
+                "context_quality_score": assembled_context.context_quality_score,
+                "assembly_time_ms": assembled_context.assembly_time_ms,
+                "generation_time_ms": generated_response.generation_time_ms,
+                "total_context_tokens": assembled_context.total_tokens,
+                "response_tokens": generated_response.token_count,
+                "sources_count": len(generated_response.sources),
+                "query_intent": query_transformation.intent.value,
+                "query_expanded": query_transformation.expanded_query
+            }
         )
+        
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -457,4 +583,293 @@ async def delete_blueprint_index(blueprint_id: str):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to delete blueprint index: {str(e)}"
+        )
+
+
+@router.post("/search", response_model=SearchResponse)
+async def search_nodes_endpoint(request: SearchRequest):
+    """
+    Search for TextNodes with metadata filtering.
+    
+    Performs vector similarity search with advanced metadata filtering including
+    locus type, UUE stage, relationships, and content-based filtering.
+    """
+    try:
+        from app.core.search_service import SearchService, SearchServiceError
+        from app.core.vector_store import create_vector_store
+        from app.core.embeddings import create_embedding_service
+        import os
+        
+        # Initialize services
+        vector_store = create_vector_store(
+            store_type=os.getenv("VECTOR_STORE_TYPE", "chromadb"),
+            api_key=os.getenv("PINECONE_API_KEY", ""),
+            environment=os.getenv("PINECONE_ENVIRONMENT", "us-west1-gcp")
+        )
+        
+        embedding_service = create_embedding_service(
+            service_type=os.getenv("EMBEDDING_SERVICE_TYPE", "openai"),
+            api_key=os.getenv("OPENAI_API_KEY", "")
+        )
+        
+        await vector_store.initialize()
+        await embedding_service.initialize()
+        
+        search_service = SearchService(vector_store, embedding_service)
+        result = await search_service.search_nodes(request)
+        
+        return result
+        
+    except SearchServiceError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Search service error: {str(e)}"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Search failed: {str(e)}"
+        )
+
+
+@router.get("/search/locus-type/{locus_type}")
+async def search_by_locus_type_endpoint(
+    locus_type: str,
+    blueprint_id: Optional[str] = None,
+    limit: int = 50
+):
+    """
+    Search for nodes by specific locus type.
+    
+    Args:
+        locus_type: Type of locus (foundational_concept, use_case, exploration, key_term, common_misconception)
+        blueprint_id: Optional blueprint ID to filter by
+        limit: Maximum number of results (default: 50)
+    """
+    try:
+        from app.core.search_service import SearchService, SearchServiceError
+        from app.core.vector_store import create_vector_store
+        from app.core.embeddings import create_embedding_service
+        from app.models.text_node import LocusType
+        import os
+        
+        # Validate locus type
+        try:
+            locus_type_enum = LocusType(locus_type)
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid locus type: {locus_type}. Must be one of: {[e.value for e in LocusType]}"
+            )
+        
+        # Initialize services
+        vector_store = create_vector_store(
+            store_type=os.getenv("VECTOR_STORE_TYPE", "chromadb"),
+            api_key=os.getenv("PINECONE_API_KEY", ""),
+            environment=os.getenv("PINECONE_ENVIRONMENT", "us-west1-gcp")
+        )
+        
+        embedding_service = create_embedding_service(
+            service_type=os.getenv("EMBEDDING_SERVICE_TYPE", "openai"),
+            api_key=os.getenv("OPENAI_API_KEY", "")
+        )
+        
+        await vector_store.initialize()
+        await embedding_service.initialize()
+        
+        search_service = SearchService(vector_store, embedding_service)
+        results = await search_service.search_by_locus_type(locus_type_enum, blueprint_id, limit)
+        
+        return {
+            "locus_type": locus_type,
+            "blueprint_id": blueprint_id,
+            "results": results,
+            "total_results": len(results),
+            "created_at": datetime.utcnow().isoformat()
+        }
+        
+    except SearchServiceError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Search service error: {str(e)}"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Locus type search failed: {str(e)}"
+        )
+
+
+@router.get("/search/uue-stage/{uue_stage}")
+async def search_by_uue_stage_endpoint(
+    uue_stage: str,
+    blueprint_id: Optional[str] = None,
+    limit: int = 50
+):
+    """
+    Search for nodes by UUE stage.
+    
+    Args:
+        uue_stage: UUE stage (understand, use, evaluate)
+        blueprint_id: Optional blueprint ID to filter by
+        limit: Maximum number of results (default: 50)
+    """
+    try:
+        from app.core.search_service import SearchService, SearchServiceError
+        from app.core.vector_store import create_vector_store
+        from app.core.embeddings import create_embedding_service
+        from app.models.text_node import UUEStage
+        import os
+        
+        # Validate UUE stage
+        try:
+            uue_stage_enum = UUEStage(uue_stage)
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid UUE stage: {uue_stage}. Must be one of: {[e.value for e in UUEStage]}"
+            )
+        
+        # Initialize services
+        vector_store = create_vector_store(
+            store_type=os.getenv("VECTOR_STORE_TYPE", "chromadb"),
+            api_key=os.getenv("PINECONE_API_KEY", ""),
+            environment=os.getenv("PINECONE_ENVIRONMENT", "us-west1-gcp")
+        )
+        
+        embedding_service = create_embedding_service(
+            service_type=os.getenv("EMBEDDING_SERVICE_TYPE", "openai"),
+            api_key=os.getenv("OPENAI_API_KEY", "")
+        )
+        
+        await vector_store.initialize()
+        await embedding_service.initialize()
+        
+        search_service = SearchService(vector_store, embedding_service)
+        results = await search_service.search_by_uue_stage(uue_stage_enum, blueprint_id, limit)
+        
+        return {
+            "uue_stage": uue_stage,
+            "blueprint_id": blueprint_id,
+            "results": results,
+            "total_results": len(results),
+            "created_at": datetime.utcnow().isoformat()
+        }
+        
+    except SearchServiceError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Search service error: {str(e)}"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"UUE stage search failed: {str(e)}"
+        )
+
+
+@router.post("/search/related-loci", response_model=RelatedLocusSearchResponse)
+async def search_related_loci_endpoint(request: RelatedLocusSearchRequest):
+    """
+    Find loci related to a specific locus through relationships.
+    
+    Performs graph traversal to find related loci based on relationships,
+    with configurable depth and relationship type filtering.
+    """
+    try:
+        from app.core.search_service import SearchService, SearchServiceError
+        from app.core.vector_store import create_vector_store
+        from app.core.embeddings import create_embedding_service
+        import os
+        
+        # Initialize services
+        vector_store = create_vector_store(
+            store_type=os.getenv("VECTOR_STORE_TYPE", "chromadb"),
+            api_key=os.getenv("PINECONE_API_KEY", ""),
+            environment=os.getenv("PINECONE_ENVIRONMENT", "us-west1-gcp")
+        )
+        
+        embedding_service = create_embedding_service(
+            service_type=os.getenv("EMBEDDING_SERVICE_TYPE", "openai"),
+            api_key=os.getenv("OPENAI_API_KEY", "")
+        )
+        
+        await vector_store.initialize()
+        await embedding_service.initialize()
+        
+        search_service = SearchService(vector_store, embedding_service)
+        result = await search_service.find_related_loci(request)
+        
+        return result
+        
+    except SearchServiceError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Search service error: {str(e)}"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Related loci search failed: {str(e)}"
+        )
+
+
+@router.get("/search/suggestions")
+async def get_search_suggestions_endpoint(
+    q: str,
+    limit: int = 5
+):
+    """
+    Get search suggestions based on partial query.
+    
+    Args:
+        q: Partial search query
+        limit: Maximum number of suggestions (default: 5)
+    """
+    try:
+        from app.core.search_service import SearchService, SearchServiceError
+        from app.core.vector_store import create_vector_store
+        from app.core.embeddings import create_embedding_service
+        import os
+        
+        if len(q) < 3:
+            return {
+                "query": q,
+                "suggestions": [],
+                "message": "Query must be at least 3 characters long"
+            }
+        
+        # Initialize services
+        vector_store = create_vector_store(
+            store_type=os.getenv("VECTOR_STORE_TYPE", "chromadb"),
+            api_key=os.getenv("PINECONE_API_KEY", ""),
+            environment=os.getenv("PINECONE_ENVIRONMENT", "us-west1-gcp")
+        )
+        
+        embedding_service = create_embedding_service(
+            service_type=os.getenv("EMBEDDING_SERVICE_TYPE", "openai"),
+            api_key=os.getenv("OPENAI_API_KEY", "")
+        )
+        
+        await vector_store.initialize()
+        await embedding_service.initialize()
+        
+        search_service = SearchService(vector_store, embedding_service)
+        suggestions = await search_service.get_search_suggestions(q, limit)
+        
+        return {
+            "query": q,
+            "suggestions": suggestions,
+            "created_at": datetime.utcnow().isoformat()
+        }
+        
+    except SearchServiceError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Search service error: {str(e)}"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Search suggestions failed: {str(e)}"
         ) 

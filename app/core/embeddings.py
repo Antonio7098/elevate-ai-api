@@ -13,8 +13,14 @@ from concurrent.futures import ThreadPoolExecutor
 
 import openai
 import google.generativeai as genai
-from sentence_transformers import SentenceTransformer
 import numpy as np
+
+try:
+    from sentence_transformers import SentenceTransformer
+    HAS_SENTENCE_TRANSFORMERS = True
+except ImportError:
+    SentenceTransformer = None
+    HAS_SENTENCE_TRANSFORMERS = False
 
 logger = logging.getLogger(__name__)
 
@@ -136,9 +142,12 @@ class GoogleEmbeddingService(EmbeddingService):
         """Embed a single text string using Google AI."""
         try:
             def _embed():
-                model = genai.GenerativeModel(self.model)
-                embedding = model.embed_content(text)
-                return embedding.embedding
+                # Use the embed_content function directly
+                embedding = genai.embed_content(
+                    model=f"models/{self.model}",
+                    content=text
+                )
+                return embedding['embedding']
             
             embedding = await asyncio.get_event_loop().run_in_executor(
                 self._executor, _embed
@@ -152,11 +161,13 @@ class GoogleEmbeddingService(EmbeddingService):
         """Embed a batch of text strings using Google AI."""
         try:
             def _embed_batch():
-                model = genai.GenerativeModel(self.model)
                 embeddings = []
                 for text in texts:
-                    embedding = model.embed_content(text)
-                    embeddings.append(embedding.embedding)
+                    embedding = genai.embed_content(
+                        model=f"models/{self.model}",
+                        content=text
+                    )
+                    embeddings.append(embedding['embedding'])
                 return embeddings
             
             embeddings = await asyncio.get_event_loop().run_in_executor(
@@ -170,6 +181,10 @@ class GoogleEmbeddingService(EmbeddingService):
     def get_dimension(self) -> int:
         """Get the dimension of Google AI embeddings."""
         return self._dimension
+    
+    async def generate_embedding(self, text: str) -> List[float]:
+        """Generate embedding for a single text (alias for embed_text)."""
+        return await self.embed_text(text)
 
 
 class LocalEmbeddingService(EmbeddingService):
@@ -183,6 +198,9 @@ class LocalEmbeddingService(EmbeddingService):
     
     async def initialize(self) -> None:
         """Initialize sentence-transformers model."""
+        if not HAS_SENTENCE_TRANSFORMERS:
+            raise EmbeddingError("sentence-transformers package not installed")
+        
         try:
             def _load_model():
                 return SentenceTransformer(self.model_name)

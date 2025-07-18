@@ -33,6 +33,26 @@ class BlueprintParserError(Exception):
     pass
 
 
+class Locus:
+    """Represents a knowledge locus extracted from a LearningBlueprint."""
+    
+    def __init__(self, 
+                 id: str,
+                 content: str,
+                 locus_type: LocusType,
+                 title: str,
+                 uue_stage: Optional[UUEStage] = None,
+                 section_ids: Optional[List[str]] = None,
+                 metadata: Optional[Dict[str, Any]] = None):
+        self.id = id
+        self.content = content
+        self.locus_type = locus_type
+        self.title = title
+        self.uue_stage = uue_stage
+        self.section_ids = section_ids or []
+        self.metadata = metadata or {}
+
+
 class BlueprintParser:
     """Parser for transforming LearningBlueprints into TextNodes."""
     
@@ -64,6 +84,9 @@ class BlueprintParser:
             
             # Parse relationships
             nodes.extend(self._parse_relationships(blueprint, source_text_hash))
+            
+            # Parse misconceptions
+            nodes.extend(self._parse_misconceptions(blueprint, source_text_hash))
             
             logger.info(f"Parsed blueprint {blueprint.source_id} into {len(nodes)} TextNodes")
             return nodes
@@ -281,6 +304,53 @@ class BlueprintParser:
                     }
                 )
                 nodes.append(node)
+        
+        return nodes
+    
+    def _parse_misconceptions(self, blueprint: LearningBlueprint, source_text_hash: str) -> List[TextNode]:
+        """Parse common misconceptions from questions and other knowledge primitives."""
+        nodes = []
+        
+        # Look for misconception indicators in questions
+        misconception_keywords = [
+            "misconception", "misunderstanding", "common mistake", "often confused",
+            "frequently misunderstood", "wrongly believe", "incorrect assumption",
+            "fallacy", "myth", "commonly held but false"
+        ]
+        
+        for question in blueprint.knowledge_primitives.implicit_and_open_questions:
+            # Check if question indicates a misconception
+            question_lower = question.question.lower()
+            if any(keyword in question_lower for keyword in misconception_keywords):
+                content = f"Common Misconception: {question.question}"
+                
+                # Split into chunks if needed
+                chunks = self._chunk_content(content, f"misconception_{question.id}")
+                
+                for i, chunk in enumerate(chunks):
+                    node = TextNode(
+                        id=create_text_node_id(blueprint.source_id, f"misconception_{question.id}", i),
+                        content=chunk,
+                        blueprint_id=blueprint.source_id,
+                        source_text_hash=source_text_hash,
+                        locus_id=f"misconception_{question.id}",
+                        locus_type=LocusType.COMMON_MISCONCEPTION,
+                        locus_title=f"Misconception: {question.question[:50]}...",
+                        uue_stage=UUEStage.UNDERSTAND,
+                        chunk_index=i,
+                        total_chunks=len(chunks),
+                        word_count=calculate_word_count(chunk),
+                        related_locus_ids=[question.id] + question.sections,
+                        metadata={
+                            "primitive_type": "misconception",
+                            "derived_from": "question",
+                            "original_question_id": question.id,
+                            "sections": question.sections,
+                            "source_title": blueprint.source_title,
+                            "source_type": blueprint.source_type
+                        }
+                    )
+                    nodes.append(node)
         
         return nodes
     

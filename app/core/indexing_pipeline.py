@@ -242,20 +242,32 @@ class IndexingPipeline:
         # Store vectors in database
         vectors = []
         for node, embedding in zip(nodes, embeddings):
+            # Build metadata and filter out None values (Pinecone doesn't allow null metadata)
+            metadata = {
+                "content": node.content,
+                "blueprint_id": node.blueprint_id,
+                "locus_id": node.locus_id,
+            }
+            
+            # Only add optional fields if they have values
+            if node.locus_type:
+                metadata["locus_type"] = node.locus_type.value
+            if node.uue_stage:
+                metadata["uue_stage"] = node.uue_stage.value
+                
+            # Add node metadata, filtering out None values
+            if node.metadata:
+                for key, value in node.metadata.items():
+                    if value is not None:
+                        metadata[key] = value
+            
             vectors.append({
                 "id": node.id,
                 "values": embedding,
-                "metadata": {
-                    "content": node.content,
-                    "blueprint_id": node.blueprint_id,
-                    "locus_id": node.locus_id,
-                    "locus_type": node.locus_type.value if node.locus_type else None,
-                    "uue_stage": node.uue_stage.value if node.uue_stage else None,
-                    **node.metadata
-                }
+                "metadata": metadata
             })
         
-        await self.vector_store.upsert_vectors("text_nodes", vectors)
+        await self.vector_store.upsert_vectors("blueprint-nodes", vectors)
         results["vectors_stored"] = len(vectors)
         results["nodes_processed"] = len(nodes)
         
@@ -280,7 +292,7 @@ class IndexingPipeline:
         """Get statistics about indexed content."""
         try:
             await self._initialize_services()
-            stats = await self.vector_store.get_stats("text_nodes")
+            stats = await self.vector_store.get_stats("blueprint-nodes")
             
             if blueprint_id:
                 # Get blueprint-specific stats

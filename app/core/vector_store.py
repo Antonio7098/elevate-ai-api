@@ -12,7 +12,8 @@ from dataclasses import dataclass
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
-import pinecone
+from pinecone import Pinecone, ServerlessSpec
+from pinecone.exceptions import PineconeApiException
 from chromadb import Client, Collection
 from chromadb.config import Settings
 
@@ -97,15 +98,14 @@ class PineconeVectorStore(VectorStore):
     def __init__(self, api_key: str, environment: str):
         self.api_key = api_key
         self.environment = environment
-        self.client: Optional[pinecone.Pinecone] = None
+        self.client: Optional[Pinecone] = None
         self._executor = ThreadPoolExecutor(max_workers=4)
     
     async def initialize(self) -> None:
         """Initialize Pinecone client."""
         try:
             def _init():
-                pinecone.init(api_key=self.api_key, environment=self.environment)
-                return pinecone.Pinecone(api_key=self.api_key)
+                return Pinecone(api_key=self.api_key)
             
             self.client = await asyncio.get_event_loop().run_in_executor(
                 self._executor, _init
@@ -122,11 +122,16 @@ class PineconeVectorStore(VectorStore):
         
         try:
             def _create():
-                if index_name not in pinecone.list_indexes():
-                    pinecone.create_index(
+                existing_indexes = [idx.name for idx in self.client.list_indexes()]
+                if index_name not in existing_indexes:
+                    self.client.create_index(
                         name=index_name,
                         dimension=dimension,
-                        metric="cosine"
+                        metric="cosine",
+                        spec=ServerlessSpec(
+                            cloud="aws",
+                            region="us-east-1"
+                        )
                     )
             
             await asyncio.get_event_loop().run_in_executor(self._executor, _create)
@@ -142,8 +147,9 @@ class PineconeVectorStore(VectorStore):
         
         try:
             def _delete():
-                if index_name in pinecone.list_indexes():
-                    pinecone.delete_index(index_name)
+                existing_indexes = [idx.name for idx in self.client.list_indexes()]
+                if index_name in existing_indexes:
+                    self.client.delete_index(index_name)
             
             await asyncio.get_event_loop().run_in_executor(self._executor, _delete)
             logger.info(f"Deleted Pinecone index: {index_name}")
@@ -158,7 +164,8 @@ class PineconeVectorStore(VectorStore):
         
         try:
             def _check():
-                return index_name in pinecone.list_indexes()
+                existing_indexes = [idx.name for idx in self.client.list_indexes()]
+                return index_name in existing_indexes
             
             return await asyncio.get_event_loop().run_in_executor(self._executor, _check)
         except Exception as e:
@@ -175,16 +182,67 @@ class PineconeVectorStore(VectorStore):
             raise VectorStoreError("Pinecone client not initialized")
         
         try:
+            # Check if index exists, create it if not
+            print(f"[DEBUG] Checking if index {index_name} exists...")
+            index_exists = await self.index_exists(index_name)
+            print(f"[DEBUG] Index {index_name} exists: {index_exists}")
+            
+            if not index_exists:
+                print(f"[DEBUG] Index {index_name} does not exist, creating it...")
+                # Determine dimension from first vector
+                dimension = len(vectors[0]["values"]) if vectors else 1536
+                print(f"[DEBUG] Creating index with dimension: {dimension}")
+                await self.create_index(index_name, dimension)
+                
+                # Wait a moment for index to be ready
+                import time
+                def _wait():
+                    time.sleep(5)  # Increased wait time
+                print(f"[DEBUG] Waiting for index {index_name} to be ready...")
+                await asyncio.get_event_loop().run_in_executor(self._executor, _wait)
+                
+                # Verify index was created
+                final_check = await self.index_exists(index_name)
+                print(f"[DEBUG] Index {index_name} created successfully: {final_check}")
+            else:
+                print(f"[DEBUG] Index {index_name} already exists, proceeding with upsert...")
+            
             index = self.client.Index(index_name)
             
-            def _upsert():
-                index.upsert(vectors=vectors)
+            print(f"[DEBUG] About to upsert {len(vectors)} vectors to index {index_name}")
             
-            await asyncio.get_event_loop().run_in_executor(self._executor, _upsert)
+            def _upsert():
+                print(f"[DEBUG] Executing upsert for {len(vectors)} vectors...")
+                result = index.upsert(vectors=vectors)
+                print(f"[DEBUG] Upsert result: {result}")
+                return result
+            
+            result = await asyncio.get_event_loop().run_in_executor(self._executor, _upsert)
+            print(f"[DEBUG] Upsert completed with result: {result}")
             logger.info(f"Upserted {len(vectors)} vectors to Pinecone index: {index_name}")
         except Exception as e:
             logger.error(f"Failed to upsert vectors to Pinecone: {e}")
             raise VectorStoreError(f"Failed to upsert vectors: {e}")
+    
+    def _convert_filters_for_pinecone(self, filters: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        """Convert filter format to Pinecone-compatible syntax.
+        
+        Pinecone requires array filters to use $in operator:
+        {'field': ['val1', 'val2']} -> {'field': {'$in': ['val1', 'val2']}}
+        """
+        if not filters:
+            return filters
+            
+        converted = {}
+        for key, value in filters.items():
+            if isinstance(value, list):
+                # Convert array filters to use $in operator
+                converted[key] = {"$in": value}
+            else:
+                # Keep scalar values as-is
+                converted[key] = value
+        
+        return converted
     
     async def search(
         self,
@@ -200,12 +258,15 @@ class PineconeVectorStore(VectorStore):
         try:
             index = self.client.Index(index_name)
             
+            # Convert filters to Pinecone-compatible format
+            pinecone_filters = self._convert_filters_for_pinecone(filter_metadata)
+            
             def _search():
                 return index.query(
                     vector=query_vector,
                     top_k=top_k,
                     include_metadata=True,
-                    filter=filter_metadata
+                    filter=pinecone_filters
                 )
             
             result = await asyncio.get_event_loop().run_in_executor(self._executor, _search)

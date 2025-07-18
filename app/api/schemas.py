@@ -165,4 +165,110 @@ class IndexingStatsResponse(BaseModel):
     total_nodes: int = Field(..., description="Total number of nodes in the vector database")
     total_blueprints: int = Field(..., description="Total number of blueprints indexed")
     blueprint_specific: Optional[Dict[str, Any]] = Field(None, description="Blueprint-specific statistics")
-    created_at: str = Field(..., description="Timestamp when stats were generated") 
+    created_at: str = Field(..., description="Timestamp when stats were generated")
+
+
+class SearchRequest(BaseModel):
+    """Request schema for vector search with metadata filtering."""
+    query: str = Field(..., description="Search query text")
+    top_k: int = Field(10, ge=1, le=100, description="Number of results to return")
+    
+    # Metadata filtering options
+    blueprint_id: Optional[str] = Field(None, description="Filter by specific blueprint ID")
+    locus_type: Optional[str] = Field(None, description="Filter by locus type (foundational_concept, use_case, etc.)")
+    uue_stage: Optional[str] = Field(None, description="Filter by UUE stage (understand, use, evaluate)")
+    
+    # Relationship filtering
+    related_to_locus: Optional[str] = Field(None, description="Filter by loci related to this locus ID")
+    relationship_type: Optional[str] = Field(None, description="Filter by relationship type (prerequisite, supports, etc.)")
+    
+    # Content filtering
+    min_chunk_size: Optional[int] = Field(None, ge=1, description="Minimum chunk size in words")
+    max_chunk_size: Optional[int] = Field(None, ge=1, description="Maximum chunk size in words")
+    
+    @field_validator('locus_type')
+    @classmethod
+    def validate_locus_type(cls, v):
+        if v and v not in ['foundational_concept', 'use_case', 'exploration', 'key_term', 'common_misconception']:
+            raise ValueError('Invalid locus type. Must be one of: foundational_concept, use_case, exploration, key_term, common_misconception')
+        return v
+    
+    @field_validator('uue_stage')
+    @classmethod
+    def validate_uue_stage(cls, v):
+        if v and v not in ['understand', 'use', 'evaluate']:
+            raise ValueError('Invalid UUE stage. Must be one of: understand, use, evaluate')
+        return v
+
+
+class SearchResultItem(BaseModel):
+    """Individual search result item."""
+    id: str = Field(..., description="TextNode ID")
+    content: str = Field(..., description="Node content")
+    score: float = Field(..., description="Similarity score")
+    
+    # Metadata
+    blueprint_id: str = Field(..., description="Source blueprint ID")
+    locus_id: str = Field(..., description="Source locus ID")
+    locus_type: str = Field(..., description="Type of locus")
+    uue_stage: str = Field(..., description="UUE stage")
+    
+    # Chunk information
+    chunk_index: Optional[int] = Field(None, description="Chunk index if content was chunked")
+    chunk_total: Optional[int] = Field(None, description="Total chunks for this locus")
+    word_count: int = Field(..., description="Word count of the content")
+    
+    # Relationships
+    relationships: List[Dict[str, Any]] = Field(default_factory=list, description="Related loci")
+    
+    # Timestamps
+    created_at: str = Field(..., description="When the node was created")
+    indexed_at: str = Field(..., description="When the node was indexed")
+
+
+class SearchResponse(BaseModel):
+    """Response schema for vector search results."""
+    results: List[SearchResultItem] = Field(..., description="Search results")
+    total_results: int = Field(..., description="Total number of results found")
+    query: str = Field(..., description="Original search query")
+    
+    # Applied filters
+    filters_applied: Dict[str, Any] = Field(..., description="Filters that were applied")
+    
+    # Performance metrics
+    search_time_ms: float = Field(..., description="Search time in milliseconds")
+    embedding_time_ms: float = Field(..., description="Time to generate query embedding")
+    
+    # Metadata
+    created_at: str = Field(..., description="When the search was performed")
+
+
+class RelatedLocusSearchRequest(BaseModel):
+    """Request schema for finding related loci."""
+    locus_id: str = Field(..., description="Source locus ID to find relationships for")
+    relationship_types: Optional[List[str]] = Field(None, description="Filter by relationship types")
+    max_depth: int = Field(1, ge=1, le=3, description="Maximum relationship depth to traverse")
+    include_reverse: bool = Field(True, description="Include reverse relationships")
+    
+
+class RelatedLocusItem(BaseModel):
+    """Related locus information."""
+    locus_id: str = Field(..., description="Related locus ID")
+    relationship_type: str = Field(..., description="Type of relationship")
+    relationship_strength: float = Field(..., description="Strength of the relationship")
+    depth: int = Field(..., description="Relationship depth from source")
+    path: List[str] = Field(..., description="Path from source to this locus")
+    
+    # Locus metadata
+    locus_type: str = Field(..., description="Type of the related locus")
+    blueprint_id: str = Field(..., description="Blueprint containing the locus")
+    content_preview: str = Field(..., description="Preview of the locus content")
+
+
+class RelatedLocusSearchResponse(BaseModel):
+    """Response schema for related locus search."""
+    source_locus_id: str = Field(..., description="Source locus ID")
+    related_loci: List[RelatedLocusItem] = Field(..., description="Related loci")
+    total_related: int = Field(..., description="Total number of related loci found")
+    max_depth_reached: int = Field(..., description="Maximum depth reached in traversal")
+    created_at: str = Field(..., description="When the search was performed") 

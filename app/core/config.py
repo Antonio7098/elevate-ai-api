@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     google_api_key: Optional[str] = None
     
     # Vector Database Configuration
-    vector_store_type: str = "chromadb"  # "pinecone" or "chromadb"
+    vector_store_type: str = "pinecone"  # "pinecone" or "chromadb"
     pinecone_api_key: Optional[str] = None
     pinecone_environment: Optional[str] = None
     chroma_persist_directory: str = "./chroma_db"
