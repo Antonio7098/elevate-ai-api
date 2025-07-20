@@ -159,7 +159,7 @@ async def chat_endpoint(request: ChatMessageRequest):
         retrieved_context = []
         for result in assembled_context.retrieved_knowledge[:5]:  # Top 5 results
             retrieved_context.append({
-                "source_id": result.source_id,
+                "source_id": result.blueprint_id,
                 "content": result.content,
                 "locus_type": result.locus_type,
                 "relevance_score": result.final_score,

@@ -4,6 +4,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import Dict, Any
 from app.core.config import settings
 from app.api import endpoints
+from app.api.blueprint_lifecycle_endpoints import lifecycle_router
 from app.core.indexing import evaluate_answer
 from app.core.services import initialize_services, shutdown_services
 
@@ -57,6 +58,14 @@ app.include_router(
     endpoints.router,
     prefix="/api/v1",
     dependencies=[Depends(verify_api_key)]
+)
+
+# Include Blueprint Lifecycle routes
+app.include_router(
+    lifecycle_router,
+    prefix="/api/v1",
+    dependencies=[Depends(verify_api_key)],
+    tags=["Blueprint Lifecycle"]
 )
 
 # Startup and shutdown events

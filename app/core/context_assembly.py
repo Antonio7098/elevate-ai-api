@@ -290,6 +290,11 @@ class ContextAssembler:
         cognitive_profile: CognitiveProfile
     ) -> List[RAGSearchResult]:
         """Retrieve relevant knowledge from the knowledge base."""
+        print(f"[DEBUG] === Starting _retrieve_relevant_knowledge ===")
+        print(f"[DEBUG] Query: {query}")
+        print(f"[DEBUG] Transformation intent: {transformation.intent}")
+        print(f"[DEBUG] Search service available: {self.search_service is not None}")
+        
         # Prepare user context for search
         user_context = {
             'learning_stage': session_state.metadata.get('learning_stage', 'understand'),
@@ -298,6 +303,7 @@ class ContextAssembler:
             'discussed_concepts': session_state.discussed_concepts,
             'learning_style': cognitive_profile.learning_style
         }
+        print(f"[DEBUG] User context prepared: {user_context}")
         
         # Prepare conversation history
         conversation_history = []
@@ -307,22 +313,40 @@ class ContextAssembler:
                 'content': msg.content,
                 'timestamp': msg.timestamp.isoformat()
             })
+        print(f"[DEBUG] Conversation history prepared: {len(conversation_history)} messages")
         
         # Create search request
+        max_results = self.tier_config[ContextTier.KNOWLEDGE_BASE]['max_results']
+        print(f"[DEBUG] Max results from config: {max_results}")
+        
         search_request = RAGSearchRequest(
             query=query,
             user_context=user_context,
             conversation_history=conversation_history,
-            top_k=self.tier_config[ContextTier.KNOWLEDGE_BASE]['max_results'],
+            top_k=max_results,
             similarity_threshold=0.7,
             diversity_factor=0.3,
             include_relationships=True
         )
+        print(f"[DEBUG] Search request created: top_k={search_request.top_k}, threshold={search_request.similarity_threshold}")
         
         # Perform search
-        search_response = await self.search_service.search(search_request)
-        
-        return search_response.results
+        print(f"[DEBUG] About to call search_service.search...")
+        try:
+            search_response = await self.search_service.search(search_request)
+            print(f"[DEBUG] Search completed successfully!")
+            print(f"[DEBUG] Search response type: {type(search_response)}")
+            print(f"[DEBUG] Results count: {len(search_response.results)}")
+            print(f"[DEBUG] Search strategy used: {search_response.search_strategy}")
+            
+            for i, result in enumerate(search_response.results[:3]):
+                print(f"[DEBUG] Result {i+1}: Score {result.score:.4f}, Content: {result.content[:60]}...")
+            
+            return search_response.results
+        except Exception as e:
+            print(f"[DEBUG] Search failed with error: {e}")
+            print(f"[DEBUG] Error type: {type(e).__name__}")
+            raise
     
     def _create_context_summary(
         self,

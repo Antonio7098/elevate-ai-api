@@ -11,6 +11,10 @@ import os
 import sys
 from typing import Dict, List, Any
 from datetime import datetime
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv(override=True)
 
 # Add the app directory to the path so we can import our modules
 sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
@@ -168,7 +172,8 @@ class RAGChatDemo:
                         query_transformation=query_transformation
                     )
                     
-                    print(f"   ✅ Context assembled with {len(assembled_context.conversational_context)} messages")
+                    print(f"   ✅ Context assembled with {len(assembled_context.conversational_context)} conversation messages")
+                    print(f"   ✅ Retrieved knowledge: {len(assembled_context.retrieved_knowledge)} relevant vectors from Pinecone")
                     print(f"   ✅ Session state: {assembled_context.session_context.current_topic}")
                     
                 except Exception as e:

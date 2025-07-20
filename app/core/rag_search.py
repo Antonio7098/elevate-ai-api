@@ -119,21 +119,36 @@ class RAGSearchService:
         Returns:
             RAGSearchResponse with optimized results
         """
+        print(f"[DEBUG] === RAGSearchService.search STARTED ===")
+        print(f"[DEBUG] Request query: {request.query}")
+        print(f"[DEBUG] Request top_k: {request.top_k}")
+        print(f"[DEBUG] Request similarity_threshold: {request.similarity_threshold}")
+        print(f"[DEBUG] Query transformer available: {self.query_transformer is not None}")
+        print(f"[DEBUG] Vector store available: {self.vector_store is not None}")
+        
         start_time = time.time()
         
         try:
             # Step 1: Transform query using query transformer
+            print(f"[DEBUG] Step 1: Starting query transformation...")
             transform_start = time.time()
             query_transformation = await self.query_transformer.transform_query(
                 request.query, 
                 request.user_context
             )
             transform_time = (time.time() - transform_start) * 1000
+            print(f"[DEBUG] Query transformation completed in {transform_time:.2f}ms")
+            print(f"[DEBUG] Intent: {query_transformation.intent}")
+            print(f"[DEBUG] Confidence: {query_transformation.confidence}")
+            print(f"[DEBUG] Search strategy: {query_transformation.search_strategy}")
             
             # Step 2: Get search parameters from transformation
+            print(f"[DEBUG] Step 2: Getting search parameters...")
             search_params = self.query_transformer.get_search_parameters(query_transformation)
+            print(f"[DEBUG] Search params: {search_params}")
             
             # Step 3: Perform multi-strategy search
+            print(f"[DEBUG] Step 3: Starting multi-strategy search...")
             search_start = time.time()
             raw_results = await self._perform_multi_strategy_search(
                 query_transformation, 
@@ -141,8 +156,11 @@ class RAGSearchService:
                 request
             )
             search_time = (time.time() - search_start) * 1000
+            print(f"[DEBUG] Multi-strategy search completed in {search_time:.2f}ms")
+            print(f"[DEBUG] Raw results count: {len(raw_results)}")
             
             # Step 4: Re-rank results
+            print(f"[DEBUG] Step 4: Starting re-ranking...")
             rerank_start = time.time()
             reranked_results = await self._rerank_results(
                 raw_results, 
@@ -150,17 +168,23 @@ class RAGSearchService:
                 request
             )
             rerank_time = (time.time() - rerank_start) * 1000
+            print(f"[DEBUG] Re-ranking completed in {rerank_time:.2f}ms")
+            print(f"[DEBUG] Re-ranked results count: {len(reranked_results)}")
             
             # Step 5: Apply diversity filtering
+            print(f"[DEBUG] Step 5: Applying diversity filtering...")
             final_results = self._apply_diversity_filtering(
                 reranked_results, 
                 request.diversity_factor,
                 request.top_k
             )
+            print(f"[DEBUG] Diversity filtering completed")
+            print(f"[DEBUG] Final results count: {len(final_results)}")
             
             total_time = (time.time() - start_time) * 1000
+            print(f"[DEBUG] RAG search completed in {total_time:.2f}ms total")
             
-            return RAGSearchResponse(
+            response = RAGSearchResponse(
                 results=final_results,
                 query_transformation=query_transformation,
                 total_results=len(final_results),
@@ -171,8 +195,14 @@ class RAGSearchService:
                 filters_applied=search_params.get('metadata_filters', {}),
                 created_at=datetime.utcnow().isoformat()
             )
+            print(f"[DEBUG] === RAGSearchService.search COMPLETED ===")
+            return response
             
         except Exception as e:
+            print(f"[DEBUG] RAG search failed with error: {e}")
+            print(f"[DEBUG] Error type: {type(e).__name__}")
+            import traceback
+            print(f"[DEBUG] Full traceback: {traceback.format_exc()}")
             logger.error(f"RAG search failed: {e}")
             raise RAGSearchServiceError(f"Search operation failed: {e}")
     
@@ -185,21 +215,40 @@ class RAGSearchService:
         """
         Perform search using multiple strategies based on query intent.
         """
-        strategy = SearchStrategy(search_params.get('search_strategy', 'semantic_broad'))
+        strategy_str = search_params.get('search_strategy', 'semantic_broad')
+        print(f"[DEBUG] Multi-strategy search - Raw strategy: {strategy_str}")
+        print(f"[DEBUG] Search params: {search_params}")
+        print(f"[DEBUG] Query intent: {transformation.intent}")
+        
+        try:
+            strategy = SearchStrategy(strategy_str)
+            print(f"[DEBUG] Converted to enum: {strategy}")
+        except ValueError as e:
+            print(f"[DEBUG] Invalid search strategy '{strategy_str}': {e}")
+            strategy = SearchStrategy.SEMANTIC_BROAD
+        
+        print(f"[DEBUG] Using search strategy: {strategy}")
         
         if strategy == SearchStrategy.EXACT_MATCH:
+            print(f"[DEBUG] Calling _exact_match_search")
             return await self._exact_match_search(transformation, search_params, request)
         elif strategy == SearchStrategy.SEMANTIC_BROAD:
+            print(f"[DEBUG] Calling _semantic_broad_search")
             return await self._semantic_broad_search(transformation, search_params, request)
         elif strategy == SearchStrategy.SEQUENTIAL_SEARCH:
+            print(f"[DEBUG] Calling _sequential_search")
             return await self._sequential_search(transformation, search_params, request)
         elif strategy == SearchStrategy.MULTI_CONCEPT_SEARCH:
+            print(f"[DEBUG] Calling _multi_concept_search")
             return await self._multi_concept_search(transformation, search_params, request)
         elif strategy == SearchStrategy.CONTEXTUAL_SEARCH:
+            print(f"[DEBUG] Calling _contextual_search")
             return await self._contextual_search(transformation, search_params, request)
         elif strategy == SearchStrategy.ASSOCIATIVE_SEARCH:
+            print(f"[DEBUG] Calling _associative_search")
             return await self._associative_search(transformation, search_params, request)
         else:
+            print(f"[DEBUG] Fallback to _semantic_broad_search")
             return await self._semantic_broad_search(transformation, search_params, request)
     
     async def _exact_match_search(
@@ -208,24 +257,108 @@ class RAGSearchService:
         search_params: Dict[str, Any],
         request: RAGSearchRequest
     ) -> List[SearchResult]:
-        """Perform exact match search for factual queries."""
-        # Generate embedding for exact query
-        query_embedding = await self.embedding_service.generate_embedding(transformation.original_query)
+        """
+        Perform exact match search with high precision.
+        """
+        print(f"[DEBUG] === Starting _exact_match_search ===")
+        print(f"[DEBUG] Expanded query: {transformation.expanded_query}")
+        print(f"[DEBUG] Original query: {transformation.original_query}")
+        print(f"[DEBUG] Search params: {search_params}")
         
-        # Build strict metadata filters
+        # Get search parameters
+        top_k = search_params.get('top_k', 5)
+        similarity_threshold = search_params.get('similarity_threshold', 0.8)
         metadata_filters = search_params.get('metadata_filters', {})
+        exact_match_boost = search_params.get('exact_match_boost', 1.0)
         
-        # Focus on high-confidence matches
-        results = await self.vector_store.search(
-            index_name=self.index_name,
-            query_vector=query_embedding,
-            top_k=search_params.get('top_k', 10),
-            filter_metadata=metadata_filters
-        )
+        print(f"[DEBUG] Search parameters:")
+        print(f"[DEBUG]   top_k: {top_k}")
+        print(f"[DEBUG]   similarity_threshold: {similarity_threshold}")
+        print(f"[DEBUG]   metadata_filters: {metadata_filters}")
+        print(f"[DEBUG]   exact_match_boost: {exact_match_boost}")
+        print(f"[DEBUG] Vector store type: {type(self.vector_store)}")
+        print(f"[DEBUG] Vector store available: {self.vector_store is not None}")
         
-        # Filter by high similarity threshold
-        threshold = search_params.get('similarity_threshold', 0.8)
-        return [r for r in results if r.score >= threshold]
+        # Generate embedding for the query
+        print(f"[DEBUG] About to generate embedding for query...")
+        try:
+            query_embedding = await self.embedding_service.generate_embedding(transformation.expanded_query)
+            print(f"[DEBUG] Query embedding generated successfully, dimension: {len(query_embedding)}")
+        except Exception as e:
+            print(f"[DEBUG] Failed to generate embedding: {e}")
+            return []
+        
+        # First test search WITHOUT filters to debug
+        print(f"[DEBUG] Testing search WITHOUT filters first...")
+        try:
+            test_results = await self.vector_store.search(
+                index_name=self.index_name,
+                query_vector=query_embedding,
+                top_k=top_k
+            )
+            print(f"[DEBUG] Test search (no filters) returned {len(test_results)} results")
+            for i, r in enumerate(test_results[:3]):
+                print(f"[DEBUG]   Test result {i+1}: Score={r.score:.4f}, Content={r.content[:50]}...")
+                print(f"[DEBUG]   Test metadata: {r.metadata}")
+        except Exception as e:
+            print(f"[DEBUG] Test search failed: {e}")
+        
+        # Fix metadata filters to match actual stored values
+        print(f"[DEBUG] Original filters: {metadata_filters}")
+        
+        # Update locus_type to match actual stored values
+        if 'locus_type' in metadata_filters:
+            # Replace with actual stored locus_type values
+            metadata_filters['locus_type'] = ['foundational_concept', 'key_propositions_and_facts', 'key_entities_and_definitions']
+        
+        # Remove difficulty_level filter as it doesn't exist in stored metadata
+        if 'difficulty_level' in metadata_filters:
+            print(f"[DEBUG] Removing difficulty_level filter (not in stored metadata)")
+            del metadata_filters['difficulty_level']
+        
+        print(f"[DEBUG] Corrected filters: {metadata_filters}")
+        
+        # Now perform vector search with exact match emphasis
+        print(f"[DEBUG] Now testing WITH corrected filters...")
+        try:
+            results = await self.vector_store.search(
+                index_name=self.index_name,
+                query_vector=query_embedding,
+                top_k=top_k,
+                filter_metadata=metadata_filters
+            )
+            print(f"[DEBUG] Vector search completed successfully!")
+            print(f"[DEBUG] Raw results count: {len(results)}")
+            print(f"[DEBUG] Raw results type: {type(results)}")
+            
+            # Log details of first few results
+            for i, result in enumerate(results[:3]):
+                print(f"[DEBUG] Raw result {i+1}: ID={result.id}, Score={result.score:.4f}, Content={result.content[:50]}...")
+        
+        except Exception as e:
+            print(f"[DEBUG] Vector search failed with error: {e}")
+            print(f"[DEBUG] Error type: {type(e).__name__}")
+            import traceback
+            print(f"[DEBUG] Full traceback: {traceback.format_exc()}")
+            return []
+        
+        # Convert to SearchResult objects
+        print(f"[DEBUG] Converting {len(results)} results to SearchResult objects...")
+        search_results = []
+        for i, result in enumerate(results):
+            boosted_score = result.score * exact_match_boost
+            search_result = SearchResult(
+                id=result.id,
+                content=result.content,
+                metadata=result.metadata,
+                score=boosted_score
+            )
+            search_results.append(search_result)
+            print(f"[DEBUG] Converted result {i+1}: Score={result.score:.4f} → Boosted={boosted_score:.4f}")
+        
+        print(f"[DEBUG] Final search results count: {len(search_results)}")
+        print(f"[DEBUG] === _exact_match_search COMPLETED ===")
+        return search_results
     
     async def _semantic_broad_search(
         self, 

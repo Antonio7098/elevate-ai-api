@@ -373,7 +373,7 @@ class QueryTransformer:
         if transformation.intent == QueryIntent.FACTUAL:
             base_params.update({
                 'top_k': 5,
-                'similarity_threshold': 0.8,
+                'similarity_threshold': 0.65,
                 'exact_match_boost': 2.0
             })
         

@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 class GeminiConfig:
     """Configuration for Gemini API service."""
     api_key: str
-    model_name: str = "gemini-1.5-flash"
+    model_name: str = "gemini-2.5-flash"
     temperature: float = 0.7
     max_tokens: int = 1000
     top_p: float = 0.9

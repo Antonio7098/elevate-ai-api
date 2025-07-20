@@ -330,7 +330,7 @@ class ResponseGenerator:
         
         # Add knowledge base sources
         for result in context.retrieved_knowledge[:5]:  # Top 5 sources
-            source = f"[{result.locus_type}] {result.source_id}"
+            source = f"[{result.locus_type}] {result.blueprint_id}"
             if source not in sources:
                 sources.append(source)
         
