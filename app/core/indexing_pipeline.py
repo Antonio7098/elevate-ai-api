@@ -266,7 +266,13 @@ class IndexingPipeline:
                 "values": embedding,
                 "metadata": metadata
             })
+            
+            # Debug logging for the first vector in each batch
+            if len(vectors) == 1:
+                logger.info(f" [STORAGE DEBUG] Storing vector with blueprint_id: {node.blueprint_id}")
+                logger.info(f" [STORAGE DEBUG] Vector metadata: {metadata}")
         
+        logger.info(f" [STORAGE DEBUG] Upserting {len(vectors)} vectors to index: blueprint-nodes")
         await self.vector_store.upsert_vectors("blueprint-nodes", vectors)
         results["vectors_stored"] = len(vectors)
         results["nodes_processed"] = len(nodes)
@@ -292,30 +298,33 @@ class IndexingPipeline:
         """Get statistics about indexed content."""
         try:
             await self._initialize_services()
-            stats = await self.vector_store.get_stats("blueprint-nodes")
-            
+
             if blueprint_id:
-                # Get blueprint-specific stats
-                # For now, return basic stats as we need to implement proper search
-                stats["blueprint_specific"] = {
-                    "blueprint_id": blueprint_id,
-                    "node_count": 0,
-                    "locus_types": {},
-                    "uue_stages": {}
+                # Get blueprint-specific stats by querying vector store with a filter
+                filter_metadata = {"blueprint_id": blueprint_id}
+                blueprint_stats = await self.vector_store.get_stats(
+                    "blueprint-nodes",
+                    filter_metadata=filter_metadata
+                )
+                node_count = blueprint_stats.get("total_vector_count", 0)
+                logger.info(f"Found {node_count} indexed nodes for blueprint {blueprint_id}")
+
+                # The get_stats call for a filtered query does not return locus_types.
+                # We will return the node count and an empty dict for locus_types for now.
+                # A more advanced implementation could run multiple get_stats calls for each locus type.
+                return {
+                    "blueprint_specific": {
+                        "blueprint_id": blueprint_id,
+                        "node_count": node_count,
+                        "locus_types": {},  # Placeholder
+                        "uue_stages": {}  # Placeholder
+                    }
                 }
-                
-                stats["blueprint_specific"] = {
-                    "blueprint_id": blueprint_id,
-                    "node_count": len(blueprint_nodes),
-                    "locus_types": {},
-                    "uue_stages": {}
-                }
-                
-                # For now, return empty stats as we need to implement proper search
-                pass
-            
-            return stats
-            
+            else:
+                # Get overall stats if no blueprint_id is provided
+                stats = await self.vector_store.get_stats("blueprint-nodes")
+                return stats
+
         except Exception as e:
             logger.error(f"Failed to get indexing stats: {e}")
             raise IndexingPipelineError(f"Failed to get indexing stats: {e}")
@@ -323,20 +332,68 @@ class IndexingPipeline:
     async def delete_blueprint_index(self, blueprint_id: str) -> Dict[str, Any]:
         """Delete all indexed nodes for a specific blueprint."""
         try:
-            logger.info(f"Deleting index for blueprint: {blueprint_id}")
+            logger.info(f"🗑️ [DELETE DEBUG] Starting deletion for blueprint: {blueprint_id}")
             await self._initialize_services()
             
-            # For now, return basic result as we need to implement proper search
-            result = {
-                "blueprint_id": blueprint_id,
-                "nodes_found": 0,
-                "nodes_deleted": 0,
-                "deletion_completed": True
-            }
+            if not self.vector_store:
+                raise IndexingPipelineError("Vector store not initialized")
+
+            # Define the metadata filter to target the specific blueprint
+            filter_metadata = {"blueprint_id": blueprint_id}
+            logger.info(f"🗑️ [DELETE DEBUG] Using filter metadata: {filter_metadata}")
+
+            # Query the vector store to find vectors for this blueprint
+            logger.info(f"🗑️ [DELETE DEBUG] Querying vector store for vectors with blueprint_id: {blueprint_id}")
+            stats_before = await self.vector_store.get_stats(
+                index_name="blueprint-nodes",
+                filter_metadata=filter_metadata
+            )
+            nodes_to_delete = stats_before.get("total_vector_count", 0)
+            logger.info(f"🗑️ [DELETE DEBUG] Found {nodes_to_delete} vectors to delete for blueprint {blueprint_id}")
+            logger.info(f"🗑️ [DELETE DEBUG] Stats before deletion: {stats_before}")
+
+            if nodes_to_delete > 0:
+                # Delete the vectors using the new delete_by_metadata method
+                logger.info(f"🗑️ [DELETE DEBUG] Calling delete_by_metadata with index: blueprint-nodes, filter: {filter_metadata}")
+                await self.vector_store.delete_by_metadata(
+                    index_name="blueprint-nodes",
+                    filter_metadata=filter_metadata
+                )
+                logger.info(f"🗑️ [DELETE DEBUG] Successfully submitted deletion for {nodes_to_delete} nodes for blueprint {blueprint_id}")
+                
+                # Verify deletion by checking stats again
+                import asyncio
+                await asyncio.sleep(2)  # Give Pinecone time to process the deletion
+                stats_after = await self.vector_store.get_stats(
+                    index_name="blueprint-nodes",
+                    filter_metadata=filter_metadata
+                )
+                remaining_nodes = stats_after.get("total_vector_count", 0)
+                actual_nodes_deleted = nodes_to_delete - remaining_nodes
+                logger.info(f"🗑️ [DELETE DEBUG] After deletion, {remaining_nodes} vectors remain for blueprint {blueprint_id}")
+                logger.info(f"🗑️ [DELETE DEBUG] Actually deleted {actual_nodes_deleted} vectors for blueprint {blueprint_id}")
+                
+                # Use the actual deletion results
+                result = {
+                    "blueprint_id": blueprint_id,
+                    "nodes_found": nodes_to_delete,
+                    "nodes_deleted": actual_nodes_deleted,
+                    "nodes_remaining": remaining_nodes,
+                    "deletion_completed": remaining_nodes == 0
+                }
+            else:
+                logger.info(f"🗑️ [DELETE DEBUG] No nodes found for blueprint {blueprint_id}, nothing to delete.")
+                result = {
+                    "blueprint_id": blueprint_id,
+                    "nodes_found": 0,
+                    "nodes_deleted": 0,
+                    "nodes_remaining": 0,
+                    "deletion_completed": True
+                }
             
-            logger.info(f"Deleted 0 nodes for blueprint {blueprint_id}")
+            logger.info(f"🗑️ [DELETE DEBUG] Deletion result: {result}")
             return result
             
         except Exception as e:
             logger.error(f"Failed to delete blueprint index {blueprint_id}: {e}")
-            raise IndexingPipelineError(f"Failed to delete blueprint index: {e}") 
+            raise IndexingPipelineError(f"Failed to delete blueprint index: {e}")

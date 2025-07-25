@@ -15,20 +15,216 @@ from app.core.config import settings
 
 async def index_blueprint(blueprint: LearningBlueprint, user_id: str) -> bool:
     """
-    Index a LearningBlueprint into the vector database.
+    Index a LearningBlueprint into the vector database with user-specific metadata.
     
     This function implements the blueprint-to-node pipeline:
     1. Parse the blueprint structure
-    2. Create TextNode objects with rich metadata
-    3. Index them in the vector store
-    """
-    # TODO: Implement blueprint indexing
-    # - Iterate through blueprint loci
-    # - Create TextNode objects with rich metadata
-    # - Index in vector database
-    # - Handle relationships and pathways
+    2. Extract content from sections and knowledge primitives
+    3. Create embeddings with rich metadata including userId
+    4. Index them in the vector store with user isolation
     
-    return True
+    Args:
+        blueprint: LearningBlueprint object containing the blueprint data
+        user_id: User ID for metadata filtering and isolation
+        
+    Returns:
+        bool: True if indexing succeeded, False otherwise
+    """
+    try:
+        from app.core.vector_store import create_vector_store
+        from app.core.embeddings import get_embedding_service
+        from app.core.config import settings
+        import uuid
+        
+        # Initialize services
+        vector_store = create_vector_store(
+            store_type="pinecone",
+            api_key=settings.PINECONE_API_KEY,
+            environment=settings.PINECONE_ENVIRONMENT
+        )
+        await vector_store.initialize()
+        
+        embedding_service = await get_embedding_service()
+        
+        # Collection of text chunks to index
+        text_chunks = []
+        
+        # 1. Extract content from sections
+        for section in blueprint.sections:
+            if section.description:
+                chunk_id = f"blueprint_{blueprint.source_id}_section_{section.section_id}"
+                content = f"Section: {section.section_name}\n{section.description}"
+                
+                metadata = {
+                    "userId": user_id,  # Critical: User isolation metadata
+                    "blueprintId": blueprint.source_id,
+                    "blueprintTitle": blueprint.source_title,
+                    "contentType": "section",
+                    "sectionId": section.section_id,
+                    "sectionName": section.section_name,
+                    "parentSectionId": section.parent_section_id
+                }
+                
+                text_chunks.append({
+                    "id": chunk_id,
+                    "content": content,
+                    "metadata": metadata
+                })
+        
+        # 2. Extract content from knowledge primitives
+        kp = blueprint.knowledge_primitives
+        
+        # Key propositions and facts
+        for prop in kp.key_propositions_and_facts:
+            chunk_id = f"blueprint_{blueprint.source_id}_proposition_{prop.id}"
+            content = f"Proposition: {prop.statement}"
+            if prop.supporting_evidence:
+                content += f"\nEvidence: {', '.join(prop.supporting_evidence)}"
+            
+            metadata = {
+                "userId": user_id,  # Critical: User isolation metadata
+                "blueprintId": blueprint.source_id,
+                "blueprintTitle": blueprint.source_title,
+                "contentType": "proposition",
+                "propositionId": prop.id,
+                "sections": prop.sections if prop.sections else []
+            }
+            
+            text_chunks.append({
+                "id": chunk_id,
+                "content": content,
+                "metadata": metadata
+            })
+        
+        # Key entities and definitions
+        for entity in kp.key_entities_and_definitions:
+            chunk_id = f"blueprint_{blueprint.source_id}_entity_{entity.id}"
+            content = f"Entity: {entity.entity}\nDefinition: {entity.definition}\nCategory: {entity.category}"
+            
+            metadata = {
+                "userId": user_id,  # Critical: User isolation metadata
+                "blueprintId": blueprint.source_id,
+                "blueprintTitle": blueprint.source_title,
+                "contentType": "entity",
+                "entityId": entity.id,
+                "entityName": entity.entity,
+                "entityCategory": entity.category,
+                "sections": entity.sections if entity.sections else []
+            }
+            
+            text_chunks.append({
+                "id": chunk_id,
+                "content": content,
+                "metadata": metadata
+            })
+        
+        # Processes and steps
+        for process in kp.described_processes_and_steps:
+            chunk_id = f"blueprint_{blueprint.source_id}_process_{process.id}"
+            content = f"Process: {process.process_name}\nDescription: {process.description}"
+            if process.steps:
+                steps_text = "\n".join([f"{i+1}. {step}" for i, step in enumerate(process.steps)])
+                content += f"\nSteps:\n{steps_text}"
+            
+            metadata = {
+                "userId": user_id,  # Critical: User isolation metadata
+                "blueprintId": blueprint.source_id,
+                "blueprintTitle": blueprint.source_title,
+                "contentType": "process",
+                "processId": process.id,
+                "processName": process.process_name,
+                "sections": process.sections if process.sections else []
+            }
+            
+            text_chunks.append({
+                "id": chunk_id,
+                "content": content,
+                "metadata": metadata
+            })
+        
+        # Relationships
+        for relationship in kp.identified_relationships:
+            chunk_id = f"blueprint_{blueprint.source_id}_relationship_{relationship.id}"
+            content = f"Relationship: {relationship.entity_1} {relationship.relationship_type} {relationship.entity_2}"
+            if relationship.description:
+                content += f"\nDescription: {relationship.description}"
+            
+            metadata = {
+                "userId": user_id,  # Critical: User isolation metadata
+                "blueprintId": blueprint.source_id,
+                "blueprintTitle": blueprint.source_title,
+                "contentType": "relationship",
+                "relationshipId": relationship.id,
+                "relationshipType": relationship.relationship_type,
+                "entity1": relationship.entity_1,
+                "entity2": relationship.entity_2,
+                "sections": relationship.sections if relationship.sections else []
+            }
+            
+            text_chunks.append({
+                "id": chunk_id,
+                "content": content,
+                "metadata": metadata
+            })
+        
+        # Questions
+        for question in kp.implicit_and_open_questions:
+            chunk_id = f"blueprint_{blueprint.source_id}_question_{question.id}"
+            content = f"Question: {question.question}"
+            if question.context:
+                content += f"\nContext: {question.context}"
+            if question.potential_implications:
+                content += f"\nImplications: {', '.join(question.potential_implications)}"
+            
+            metadata = {
+                "userId": user_id,  # Critical: User isolation metadata
+                "blueprintId": blueprint.source_id,
+                "blueprintTitle": blueprint.source_title,
+                "contentType": "question",
+                "questionId": question.id,
+                "questionType": question.question_type,
+                "sections": question.sections if question.sections else []
+            }
+            
+            text_chunks.append({
+                "id": chunk_id,
+                "content": content,
+                "metadata": metadata
+            })
+        
+        # 3. Generate embeddings for all chunks
+        if not text_chunks:
+            logger.warning(f"No content extracted from blueprint {blueprint.source_id}")
+            return False
+        
+        logger.info(f"Indexing {len(text_chunks)} chunks for blueprint {blueprint.source_id} (user: {user_id})")
+        
+        # Batch embed all content
+        contents = [chunk["content"] for chunk in text_chunks]
+        embeddings = await embedding_service.embed_batch(contents)
+        
+        # 4. Prepare vectors for upsert
+        vectors = []
+        for i, chunk in enumerate(text_chunks):
+            vectors.append({
+                "id": chunk["id"],
+                "values": embeddings[i],
+                "metadata": {
+                    **chunk["metadata"],
+                    "content": chunk["content"][:1000]  # Truncate content for metadata
+                }
+            })
+        
+        # 5. Upsert to vector store
+        index_name = "blueprints"  # Default index name
+        await vector_store.upsert_vectors(index_name, vectors)
+        
+        logger.info(f"Successfully indexed blueprint {blueprint.source_id} with {len(vectors)} vectors (user: {user_id})")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Failed to index blueprint {blueprint.source_id} for user {user_id}: {e}")
+        return False
 
 
 async def generate_notes(blueprint_id: str, name: str, user_preferences: Dict[str, Any]) -> Dict[str, Any]:

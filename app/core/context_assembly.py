@@ -153,6 +153,7 @@ class ContextAssembler:
         
         # Retrieve relevant knowledge
         retrieved_knowledge = await self._retrieve_relevant_knowledge(
+            user_id,  # CRITICAL: Pass user_id for blueprint isolation
             current_query, 
             query_transformation, 
             session_state, 
@@ -284,6 +285,7 @@ class ContextAssembler:
     
     async def _retrieve_relevant_knowledge(
         self,
+        user_id: str,  # CRITICAL: User ID for filtering blueprints by ownership
         query: str,
         transformation: QueryTransformation,
         session_state: SessionState,
@@ -321,6 +323,7 @@ class ContextAssembler:
         
         search_request = RAGSearchRequest(
             query=query,
+            user_id=user_id,  # CRITICAL: Ensure user can only access their own blueprints
             user_context=user_context,
             conversation_history=conversation_history,
             top_k=max_results,

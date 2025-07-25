@@ -65,14 +65,20 @@ class BlueprintLifecycleService:
         
     async def _initialize(self):
         """Initialize vector store connection."""
-        if not self.vector_store:
-            from app.core.config import settings
-            self.vector_store = create_vector_store(
-                store_type=settings.vector_store_type,
-                api_key=settings.pinecone_api_key,
-                environment=settings.pinecone_environment
-            )
-            await self.vector_store.initialize()
+        try:
+            if not self.vector_store:
+                from app.core.config import settings
+                self.vector_store = create_vector_store(
+                    store_type=settings.vector_store_type,
+                    api_key=settings.pinecone_api_key,
+                    environment=settings.pinecone_environment
+                )
+                await self.vector_store.initialize()
+        except Exception as e:
+            import traceback
+            tb_str = traceback.format_exc()
+            logger.error(f"Failed to initialize BlueprintLifecycleService: {e}\nTraceback:\n{tb_str}")
+            raise
     
     async def detect_blueprint_changes(
         self, 
@@ -282,16 +288,24 @@ class BlueprintLifecycleService:
         
         try:
             stats = await self.indexing_pipeline.get_indexing_stats(blueprint_id)
+            
+            # The stats are now nested under 'blueprint_specific'
+            blueprint_info = stats.get("blueprint_specific", {})
+            node_count = blueprint_info.get("node_count", 0)
+            is_indexed = node_count > 0
+
             return {
                 "blueprint_id": blueprint_id,
-                "is_indexed": stats.get("blueprint_specific", {}).get("node_count", 0) > 0,
-                "node_count": stats.get("blueprint_specific", {}).get("node_count", 0),
+                "is_indexed": is_indexed,
+                "node_count": node_count,
                 "last_updated": None,  # Would need to track this
-                "locus_types": stats.get("blueprint_specific", {}).get("locus_types", {}),
-                "status": "indexed" if stats.get("blueprint_specific", {}).get("node_count", 0) > 0 else "not_indexed"
+                "locus_types": blueprint_info.get("locus_types", {}),
+                "status": "indexed" if is_indexed else "not_indexed"
             }
         except Exception as e:
-            logger.error(f"Failed to get blueprint status: {e}")
+            import traceback
+            tb_str = traceback.format_exc()
+            logger.error(f"Failed to get blueprint status for {blueprint_id}: {e}\nTraceback:\n{tb_str}")
             return {
                 "blueprint_id": blueprint_id,
                 "status": "error",

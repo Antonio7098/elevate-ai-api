@@ -328,11 +328,12 @@ class ResponseGenerator:
         """Extract source references from the assembled context."""
         sources = []
         
-        # Add knowledge base sources
-        for result in context.retrieved_knowledge[:5]:  # Top 5 sources
-            source = f"[{result.locus_type}] {result.blueprint_id}"
-            if source not in sources:
-                sources.append(source)
+        # Add knowledge base sources if available
+        if context.retrieved_knowledge:
+            for result in context.retrieved_knowledge[:5]:  # Top 5 sources
+                source = f"[{result.locus_type}] {result.blueprint_id}"
+                if source not in sources:
+                    sources.append(source)
         
         return sources
     

@@ -87,8 +87,17 @@ class VectorStore(ABC):
         pass
     
     @abstractmethod
-    async def get_stats(self, index_name: str) -> Dict[str, Any]:
-        """Get index statistics."""
+    async def get_stats(self, index_name: str, filter_metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Get index statistics, optionally filtered by metadata."""
+        pass
+
+    @abstractmethod
+    async def delete_by_metadata(
+        self,
+        index_name: str,
+        filter_metadata: Dict[str, Any]
+    ) -> None:
+        """Delete vectors by metadata filter."""
         pass
 
 
@@ -306,26 +315,85 @@ class PineconeVectorStore(VectorStore):
             logger.error(f"Failed to delete vectors from Pinecone: {e}")
             raise VectorStoreError(f"Failed to delete vectors: {e}")
     
-    async def get_stats(self, index_name: str) -> Dict[str, Any]:
-        """Get Pinecone index statistics."""
+    async def delete_by_metadata(
+        self,
+        index_name: str,
+        filter_metadata: Dict[str, Any]
+    ) -> None:
+        """Delete vectors by metadata filter from Pinecone."""
         if not self.client:
             raise VectorStoreError("Pinecone client not initialized")
         
         try:
             index = self.client.Index(index_name)
+            pinecone_filter = self._convert_filters_for_pinecone(filter_metadata)
             
-            def _stats():
+            def _delete():
+                # Pinecone's delete operation with metadata filter
+                index.delete(filter=pinecone_filter)
+            
+            await asyncio.get_event_loop().run_in_executor(self._executor, _delete)
+            logger.info(f"Submitted delete request for vectors in {index_name} with filter: {pinecone_filter}")
+
+        except Exception as e:
+            logger.error(f"Failed to delete vectors by metadata from Pinecone: {e}")
+            raise VectorStoreError(f"Failed to delete by metadata: {e}")
+    
+    async def get_stats(self, index_name: str, filter_metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Get Pinecone index statistics, optionally filtered by metadata.
+
+        Serverless/Starter indexes do NOT support describe_index_stats with a filter.
+        We fallback to a query-based approach: perform a blanket similarity search with
+        a dummy vector and count the matches that satisfy the metadata filter. This is
+        less efficient but works within plan limits.
+        """
+        if not self.client:
+            raise VectorStoreError("Pinecone client not initialized")
+
+        try:
+            index = self.client.Index(index_name)
+
+            # Fetch index dimension once (describe without filter is allowed)
+            def _get_dim():
                 return index.describe_index_stats()
-            
-            stats = await asyncio.get_event_loop().run_in_executor(self._executor, _stats)
+            stats_overall = await asyncio.get_event_loop().run_in_executor(self._executor, _get_dim)
+            dimension = stats_overall.dimension or 1536
+
+            # Build a dummy zero vector for querying
+            dummy_vector = [0.0] * dimension
+
+            # Convert filters to Pinecone syntax
+            pinecone_filter = self._convert_filters_for_pinecone(filter_metadata)
+
+            def _query():
+                return index.query(
+                    vector=dummy_vector,
+                    top_k=10000,  # large number to retrieve all matches (subject to service caps)
+                    include_metadata=True,
+                    filter=pinecone_filter,
+                )
+
+            query_result = await asyncio.get_event_loop().run_in_executor(self._executor, _query)
+            matches = query_result.get("matches", [])
+            node_count = len(matches)
+
+            # Aggregate locus types if available
+            locus_types: Dict[str, int] = {}
+            for m in matches:
+                lt = m.get("metadata", {}).get("locus_type")
+                if lt:
+                    locus_types[lt] = locus_types.get(lt, 0) + 1
+
             return {
-                "total_vector_count": stats.total_vector_count,
-                "dimension": stats.dimension,
-                "index_fullness": stats.index_fullness,
-                "namespaces": stats.namespaces
+                "total_vector_count": stats_overall.total_vector_count,
+                "node_count": node_count,
+                "dimension": dimension,
+                "locus_types": locus_types,
             }
         except Exception as e:
-            logger.error(f"Failed to get Pinecone index stats: {e}")
+            logger.error(
+                "Failed to get Pinecone index stats via query fallback: %s", e
+            )
             raise VectorStoreError(f"Failed to get stats: {e}")
 
 
@@ -492,9 +560,32 @@ class ChromaDBVectorStore(VectorStore):
         except Exception as e:
             logger.error(f"Failed to delete vectors from ChromaDB: {e}")
             raise VectorStoreError(f"Failed to delete vectors: {e}")
+
+    async def delete_by_metadata(
+        self,
+        index_name: str,
+        filter_metadata: Dict[str, Any]
+    ) -> None:
+        """Delete vectors by metadata filter from ChromaDB."""
+        if not self.client:
+            raise VectorStoreError("ChromaDB client not initialized")
+        
+        try:
+            collection = self.client.get_collection(index_name)
+            
+            def _delete():
+                # ChromaDB uses 'where' for filtering in delete()
+                collection.delete(where=filter_metadata)
+            
+            await asyncio.get_event_loop().run_in_executor(self._executor, _delete)
+            logger.info(f"Submitted delete request for vectors in ChromaDB {index_name} with filter: {filter_metadata}")
+
+        except Exception as e:
+            logger.error(f"Failed to delete vectors by metadata from ChromaDB: {e}")
+            raise VectorStoreError(f"Failed to delete by metadata: {e}")
     
-    async def get_stats(self, index_name: str) -> Dict[str, Any]:
-        """Get ChromaDB collection statistics."""
+    async def get_stats(self, index_name: str, filter_metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Get ChromaDB collection statistics, optionally filtered by metadata."""
         if not self.client:
             raise VectorStoreError("ChromaDB client not initialized")
         
@@ -502,7 +593,8 @@ class ChromaDBVectorStore(VectorStore):
             collection = self.client.get_collection(index_name)
             
             def _stats():
-                return collection.count()
+                # ChromaDB uses 'where' for filtering in count()
+                return collection.count(where=filter_metadata)
             
             count = await asyncio.get_event_loop().run_in_executor(self._executor, _stats)
             return {

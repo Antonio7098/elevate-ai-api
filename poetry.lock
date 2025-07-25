@@ -2389,6 +2389,20 @@ typing = ["typing-extensions"]
 xmp = ["defusedxml"]
 
 [[package]]
+name = "pinecone"
+version = "3.2.2"
+description = "Pinecone client and SDK"
+optional = false
+python-versions = "<4.0,>=3.8"
+files = [
+    {file = "pinecone-3.2.2-py3-none-any.whl", hash = "sha256:273a1f985776f1157d9c5a56d9df594943bac389662940a39d7a70431422e9bc"},
+    {file = "pinecone-3.2.2.tar.gz", hash = "sha256:a6745f3955320497ea79baf6294a1380af31c8bc5598b95363ea0f2ee147d8b9"},
+]
+
+[package.dependencies]
+pinecone-client = "3.2.2"
+
+[[package]]
 name = "pinecone-client"
 version = "3.2.2"
 description = "Pinecone client and SDK"
@@ -4095,4 +4109,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "f3dc060ef79aeafd6eab1717eb60254f0f36d25adf8ce8f058d99b7d5909fb6f"
+content-hash = "7d40e2e97628411544307d0a8f750bb2b3648b92a9e9a8a5d22264ad33da3d7c"

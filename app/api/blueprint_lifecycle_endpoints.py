@@ -142,7 +142,14 @@ async def update_blueprint_endpoint(
     - 'full_reindex': Deletes and re-indexes entire blueprint (slower, guaranteed consistency)
     """
     try:
+        logger.info(f"=== BLUEPRINT UPDATE DEBUG START ===")
         logger.info(f"Updating blueprint {blueprint_id} with strategy {request.strategy}")
+        logger.info(f"Raw request object type: {type(request)}")
+        logger.info(f"Raw request object: {request}")
+        logger.info(f"Request.blueprint type: {type(request.blueprint)}")
+        logger.info(f"Request.blueprint content: {request.blueprint}")
+        logger.info(f"Request.strategy: {request.strategy}")
+        logger.info(f"=== BLUEPRINT UPDATE DEBUG END ===")
         
         # Convert dict back to LearningBlueprint object
         blueprint_dict = request.blueprint

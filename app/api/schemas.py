@@ -19,8 +19,14 @@ class DeconstructResponse(BaseModel):
 
 class ChatMessageRequest(BaseModel):
     """Request schema for the /chat endpoint."""
+    user_id: str = Field(..., description="User ID")
     message_content: str = Field(..., description="User's message content")
+    conversation_history: Optional[List[Dict[str, Any]]] = Field(default=[], description="Previous conversation messages")
     context: Optional[Dict[str, Any]] = Field(None, description="Context for the conversation")
+    session_id: str = Field(..., description="Session ID for conversation tracking")
+    metadata: Optional[Dict[str, Any]] = Field(default={}, description="Additional metadata")
+    max_tokens: Optional[int] = Field(default=1000, description="Maximum tokens for response")
+    temperature: Optional[float] = Field(default=0.7, description="Temperature for response generation")
 
 
 class ChatMessageResponse(BaseModel):

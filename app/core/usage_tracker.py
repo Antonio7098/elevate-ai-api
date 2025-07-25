@@ -51,6 +51,32 @@ class UsageTracker:
         if not self.log_file.exists():
             self._write_log([])
     
+    def track_request(self, endpoint: str, user_id: str, tokens_used: int, model_used: str, cost_estimate: float) -> None:
+        """Track a request for usage monitoring.
+        
+        Args:
+            endpoint: The API endpoint that was called
+            user_id: ID of the user making the request
+            tokens_used: Number of tokens consumed
+            model_used: The model that was used
+            cost_estimate: Estimated cost of the request
+        """
+        try:
+            record = UsageRecord(
+                timestamp=datetime.now().isoformat(),
+                provider="gemini",
+                model=model_used,
+                operation=endpoint,
+                input_tokens=tokens_used // 2,  # Rough estimate
+                output_tokens=tokens_used // 2,  # Rough estimate
+                total_tokens=tokens_used,
+                estimated_cost_usd=cost_estimate,
+                success=True
+            )
+            self.log_usage(record)
+        except Exception as e:
+            print(f"Warning: Failed to track request: {e}")
+    
     def log_usage(self, record: UsageRecord) -> None:
         """Log a usage record to the JSON file.
         
