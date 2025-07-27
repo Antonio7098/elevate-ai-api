@@ -384,12 +384,19 @@ class PineconeVectorStore(VectorStore):
                 if lt:
                     locus_types[lt] = locus_types.get(lt, 0) + 1
 
-            return {
-                "total_vector_count": stats_overall.total_vector_count,
-                "node_count": node_count,
-                "dimension": dimension,
-                "locus_types": locus_types,
-            }
+            # For blueprint-specific stats, return the filtered count
+            # For overall stats, return the total count
+            if filter_metadata:
+                return {
+                    "total_vector_count": node_count,  # Filtered count
+                    "dimension": dimension,
+                    "locus_types": locus_types,
+                }
+            else:
+                return {
+                    "total_vector_count": stats_overall.total_vector_count,
+                    "dimension": dimension,
+                }
         except Exception as e:
             logger.error(
                 "Failed to get Pinecone index stats via query fallback: %s", e

@@ -24,6 +24,7 @@ from app.core.chat import process_chat_message
 from app.core.indexing import generate_notes, generate_questions, generate_questions_from_blueprint, evaluate_answer, _call_ai_service_for_evaluation
 from app.core.usage_tracker import usage_tracker
 from typing import Dict, Any, Optional
+from app.core.indexing_pipeline import IndexingPipelineError
 import uuid
 from datetime import datetime, date
 

@@ -141,6 +141,7 @@ class EvaluateAnswerResponseDto(BaseModel):
 # New schemas for the blueprint indexing endpoint
 class IndexBlueprintRequest(BaseModel):
     """Request schema for the /index-blueprint endpoint."""
+    blueprint_id: str = Field(..., description="ID of the blueprint to index")
     blueprint_json: Dict[str, Any] = Field(..., description="LearningBlueprint JSON to index")
     force_reindex: bool = Field(False, description="Force reindexing even if blueprint already exists")
     

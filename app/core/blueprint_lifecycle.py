@@ -271,10 +271,32 @@ class BlueprintLifecycleService:
     
     async def _update_locus(self, blueprint_id: str, old_node: TextNode, new_node: TextNode):
         """Update an existing locus in the vector database."""
-        # Delete old node and add new one
-        await self._delete_locus(blueprint_id, old_node.locus_id)
+        logger.info(f"🔄 Starting locus update for blueprint {blueprint_id}: {old_node.locus_id} -> {new_node.locus_id}")
+        
+        # Check vector count before update
+        stats_before = await self.indexing_pipeline.get_indexing_stats(blueprint_id)
+        count_before = stats_before.get("total_vector_count", 0)
+        logger.info(f"📊 Vector count BEFORE update: {count_before}")
+        
+        # Add new node first, then delete old one to maintain indexing status
+        # This prevents the vector count from temporarily dropping to 0
+        logger.info(f"➕ Adding new locus: {new_node.locus_id}")
         await self._add_locus(blueprint_id, new_node)
-        logger.debug(f"Updated locus {new_node.locus_id} for blueprint {blueprint_id}")
+        
+        # Check count after add
+        stats_after_add = await self.indexing_pipeline.get_indexing_stats(blueprint_id)
+        count_after_add = stats_after_add.get("total_vector_count", 0)
+        logger.info(f"📊 Vector count AFTER adding new node: {count_after_add}")
+        
+        logger.info(f"➖ Deleting old locus: {old_node.locus_id}")
+        await self._delete_locus(blueprint_id, old_node.locus_id)
+        
+        # Check final count
+        stats_after = await self.indexing_pipeline.get_indexing_stats(blueprint_id)
+        count_after = stats_after.get("total_vector_count", 0)
+        logger.info(f"📊 Vector count AFTER complete update: {count_after}")
+        
+        logger.info(f"✅ Updated locus {new_node.locus_id} for blueprint {blueprint_id} (before: {count_before}, after: {count_after})")
     
     async def _delete_locus(self, blueprint_id: str, locus_id: str):
         """Delete a locus from the vector database."""
@@ -289,9 +311,8 @@ class BlueprintLifecycleService:
         try:
             stats = await self.indexing_pipeline.get_indexing_stats(blueprint_id)
             
-            # The stats are now nested under 'blueprint_specific'
-            blueprint_info = stats.get("blueprint_specific", {})
-            node_count = blueprint_info.get("node_count", 0)
+            # Use total_vector_count for the filtered count
+            node_count = stats.get("total_vector_count", 0)
             is_indexed = node_count > 0
 
             return {
@@ -299,7 +320,7 @@ class BlueprintLifecycleService:
                 "is_indexed": is_indexed,
                 "node_count": node_count,
                 "last_updated": None,  # Would need to track this
-                "locus_types": blueprint_info.get("locus_types", {}),
+                "locus_types": stats.get("locus_types", {}),
                 "status": "indexed" if is_indexed else "not_indexed"
             }
         except Exception as e:

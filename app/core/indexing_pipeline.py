@@ -361,14 +361,24 @@ class IndexingPipeline:
                 )
                 logger.info(f"🗑️ [DELETE DEBUG] Successfully submitted deletion for {nodes_to_delete} nodes for blueprint {blueprint_id}")
                 
-                # Verify deletion by checking stats again
-                import asyncio
-                await asyncio.sleep(2)  # Give Pinecone time to process the deletion
-                stats_after = await self.vector_store.get_stats(
-                    index_name="blueprint-nodes",
-                    filter_metadata=filter_metadata
-                )
-                remaining_nodes = stats_after.get("total_vector_count", 0)
+                # Verify deletion by checking stats again with retries
+                retries = 5
+                backoff = 2  # seconds
+                remaining_nodes = nodes_to_delete
+                for attempt in range(1, retries + 1):
+                    await asyncio.sleep(backoff)
+                    stats_after = await self.vector_store.get_stats(
+                        index_name="blueprint-nodes",
+                        filter_metadata=filter_metadata
+                    )
+                    remaining_nodes = stats_after.get("total_vector_count", 0)
+                    logger.info(
+                        f"🗑️ [DELETE DEBUG] Attempt {attempt}: {remaining_nodes} vectors remain for blueprint {blueprint_id}"
+                    )
+                    if remaining_nodes == 0:
+                        break
+                    backoff *= 2  # exponential
+
                 actual_nodes_deleted = nodes_to_delete - remaining_nodes
                 logger.info(f"🗑️ [DELETE DEBUG] After deletion, {remaining_nodes} vectors remain for blueprint {blueprint_id}")
                 logger.info(f"🗑️ [DELETE DEBUG] Actually deleted {actual_nodes_deleted} vectors for blueprint {blueprint_id}")

@@ -1,0 +1,17 @@
+[
+  {
+    "id": "TC001",
+    "query": "What is the powerhouse of the cell?",
+    "expected_answer": "The mitochondria is the powerhouse of the cell. It generates most of the cell's supply of adenosine triphosphate (ATP), used as a source of chemical energy."
+  },
+  {
+    "id": "TC002",
+    "query": "What are the main components of a transformer model?",
+    "expected_answer": "The main components of a transformer model are the encoder and the decoder. The encoder maps an input sequence of symbol representations to a sequence of continuous representations. The decoder then generates an output sequence one symbol at a time, using the encoder's output and its own previously generated symbols."
+  },
+  {
+    "id": "TC003",
+    "query": "Explain the process of photosynthesis in simple terms.",
+    "expected_answer": "Photosynthesis is the process used by plants, algae, and some bacteria to convert light energy into chemical energy. They use sunlight, water, and carbon dioxide to create glucose (sugar for energy) and oxygen (which they release into the air)."
+  }
+]
