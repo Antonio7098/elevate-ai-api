@@ -49,7 +49,7 @@ class SearchService:
         try:
             # Generate embedding for the query
             embedding_start = time.time()
-            query_embedding = await self.embedding_service.generate_embedding(request.query)
+            query_embedding = await self.embedding_service.embed_text(request.query)
             embedding_time = (time.time() - embedding_start) * 1000
             
             # Build metadata filters
@@ -357,7 +357,7 @@ class SearchService:
             
             # Search for nodes containing the partial query
             if len(partial_query) >= 3:  # Only search for queries with 3+ characters
-                embedding = await self.embedding_service.generate_embedding(partial_query)
+                embedding = await self.embedding_service.embed_text(partial_query)
                 
                 results = await self.vector_store.search(
                     index_name=self.index_name,

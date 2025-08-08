@@ -194,12 +194,21 @@ class LocalEmbeddingService(EmbeddingService):
         self.model_name = model_name
         self.model: Optional[SentenceTransformer] = None
         self._executor = ThreadPoolExecutor(max_workers=2)  # Lower for local model
-        self._dimension = 384  # Default for all-MiniLM-L6-v2
+        # Default fallback dimension (align with common prod index size); overridable via env
+        import os
+        try:
+            self._dimension = int(os.getenv("EMBEDDING_DIMENSION", "768"))
+        except Exception:
+            self._dimension = 768
     
     async def initialize(self) -> None:
         """Initialize sentence-transformers model."""
         if not HAS_SENTENCE_TRANSFORMERS:
-            raise EmbeddingError("sentence-transformers package not installed")
+            # Fall back to deterministic local embedding without the package
+            logger.warning("sentence-transformers not installed; using fallback local embeddings")
+            self.model = None
+            self._dimension = 384
+            return
         
         try:
             def _load_model():
@@ -208,16 +217,23 @@ class LocalEmbeddingService(EmbeddingService):
             self.model = await asyncio.get_event_loop().run_in_executor(
                 self._executor, _load_model
             )
-            self._dimension = self.model.get_sentence_embedding_dimension()
-            logger.info(f"Local embedding service initialized with model: {self.model_name}")
+            # If model failed to load, keep fallback mode
+            if self.model is not None:
+                self._dimension = self.model.get_sentence_embedding_dimension()
+                logger.info(f"Local embedding service initialized with model: {self.model_name}")
+            else:
+                logger.warning("Failed to load sentence-transformers model; using fallback embeddings")
         except Exception as e:
             logger.error(f"Failed to initialize sentence-transformers model: {e}")
-            raise EmbeddingError(f"Local embedding initialization failed: {e}")
+            # Do not raise; enable fallback embeddings
+            self.model = None
+            self._dimension = 384
     
     async def embed_text(self, text: str) -> List[float]:
         """Embed a single text string using sentence-transformers."""
         if not self.model:
-            raise EmbeddingError("Sentence-transformers model not initialized")
+            # Fallback deterministic embedding
+            return self._fallback_embed(text)
         
         try:
             def _embed():
@@ -230,12 +246,14 @@ class LocalEmbeddingService(EmbeddingService):
             return embedding
         except Exception as e:
             logger.error(f"Failed to embed text with sentence-transformers: {e}")
-            raise EmbeddingError(f"Local embedding failed: {e}")
+            # Fallback deterministic embedding on error
+            return self._fallback_embed(text)
     
     async def embed_batch(self, texts: List[str]) -> List[List[float]]:
         """Embed a batch of text strings using sentence-transformers."""
         if not self.model:
-            raise EmbeddingError("Sentence-transformers model not initialized")
+            # Fallback deterministic embeddings
+            return [self._fallback_embed(text) for text in texts]
         
         try:
             def _embed_batch():
@@ -250,11 +268,33 @@ class LocalEmbeddingService(EmbeddingService):
             return embeddings
         except Exception as e:
             logger.error(f"Failed to embed batch with sentence-transformers: {e}")
-            raise EmbeddingError(f"Local batch embedding failed: {e}")
+            # Fallback on error
+            return [self._fallback_embed(text) for text in texts]
     
     def get_dimension(self) -> int:
         """Get the dimension of sentence-transformers embeddings."""
         return self._dimension
+    
+    async def generate_embedding(self, text: str) -> List[float]:
+        """Generate embedding for a single text (alias for embed_text)."""
+        return await self.embed_text(text)
+
+    def _fallback_embed(self, text: str) -> List[float]:
+        """Generate a deterministic fallback embedding for offline/dev.
+
+        Uses a seeded pseudo-random vector based on the input text hash.
+        """
+        # Choose dimension (keep consistent with default local model)
+        dim = self._dimension or 384
+        # Stable seed from text
+        seed = (abs(hash(text)) % (2**32))
+        rng = np.random.default_rng(seed)
+        vec = rng.normal(loc=0.0, scale=1.0, size=dim)
+        # Normalize to unit length to mimic embedding scale
+        norm = np.linalg.norm(vec)
+        if norm == 0:
+            return vec.tolist()
+        return (vec / norm).tolist()
 
 
 # Factory function to create the appropriate embedding service

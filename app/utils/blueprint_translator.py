@@ -99,6 +99,16 @@ class BlueprintTranslator:
             # Create a copy to avoid modifying the original
             transformed = blueprint_json.copy()
             
+            # Ensure required top-level fields exist with sensible defaults
+            if not transformed.get('source_type'):
+                transformed['source_type'] = 'article'
+            
+            if not isinstance(transformed.get('source_summary'), dict):
+                transformed['source_summary'] = {
+                    'core_thesis_or_main_argument': transformed.get('description') or transformed.get('source_title', 'Learning material'),
+                    'inferred_purpose': f"Educational content: {transformed.get('source_title', 'Unknown')}"
+                }
+            
             # Transform source_summary from string to dict format
             if isinstance(transformed.get('source_summary'), str):
                 transformed['source_summary'] = {
@@ -119,6 +129,14 @@ class BlueprintTranslator:
                         }
                         section_objects.append(section_obj)
                 transformed['sections'] = section_objects
+            elif 'sections' not in transformed or not isinstance(transformed['sections'], list):
+                # Provide a minimal default section
+                transformed['sections'] = [{
+                    'section_id': 'main_content',
+                    'section_name': 'Main Content',
+                    'description': 'Primary content section',
+                    'parent_section_id': None
+                }]
             
             # Transform knowledge_primitives from array to KnowledgePrimitives object
             if 'knowledge_primitives' in transformed:
@@ -140,6 +158,15 @@ class BlueprintTranslator:
                         'identified_relationships': [],
                         'implicit_and_open_questions': []
                     }
+            else:
+                # Provide a default empty structure
+                transformed['knowledge_primitives'] = {
+                    'key_propositions_and_facts': [],
+                    'key_entities_and_definitions': [],
+                    'described_processes_and_steps': [],
+                    'identified_relationships': [],
+                    'implicit_and_open_questions': []
+                }
             
             # Map user ID if provided
             if user_id:
@@ -354,11 +381,16 @@ class BlueprintTranslator:
         
         for i, entity_data in enumerate(entity_list):
             if isinstance(entity_data, dict):
+                # Ensure category is a valid literal value
+                category = entity_data.get("category", "Concept")
+                if category not in ["Person", "Organization", "Concept", "Place", "Object"]:
+                    category = "Concept"  # Default to Concept if invalid
+                
                 entities.append(Entity(
                     id=entity_data.get("id", f"entity_{i}"),
                     entity=entity_data.get("entity", ""),
                     definition=entity_data.get("definition", ""),
-                    category=entity_data.get("category", "Concept"),
+                    category=category,
                     sections=entity_data.get("sections", [])
                 ))
         

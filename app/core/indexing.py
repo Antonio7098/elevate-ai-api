@@ -296,7 +296,7 @@ async def generate_questions_from_blueprint(
         HTTPException: If the AI service fails or blueprint is not found
     """
     try:
-        # Retrieve blueprint from database
+        # Retrieve blueprint from database or vector store
         blueprint_data = await _get_blueprint_data(blueprint_id)
         
         # Check if we found actual blueprint data (not just placeholder)
@@ -348,8 +348,41 @@ async def _get_blueprint_data(blueprint_id: str) -> Dict[str, Any]:
     using the blueprint_id. For now, we'll try to load from local files
     and fall back to a placeholder if not found.
     """
-    # TODO: Implement actual database retrieval
-    # For now, try to load from local deconstruction files
+    # Try to retrieve from vector store by blueprint_id if available
+    try:
+        from app.core.indexing_pipeline import IndexingPipeline
+        pipeline = IndexingPipeline()
+        stats = await pipeline.get_indexing_stats(blueprint_id)
+        # If stats indicate nodes exist for this blueprint, return a minimal blueprint_json
+        blueprint_specific = stats.get("blueprint_specific") if isinstance(stats, dict) else None
+        node_count = 0
+        if isinstance(blueprint_specific, dict):
+            node_count = blueprint_specific.get("node_count", 0)
+        if node_count and node_count > 0:
+            return {
+                "source_id": blueprint_id,
+                "source_text": "Indexed blueprint content available in vector store.",
+                "source_title": "Indexed Blueprint",
+                "source_type": "text",
+                "source_summary": {
+                    "core_thesis_or_main_argument": "Indexed learning content",
+                    "inferred_purpose": "Educational content"
+                },
+                "sections": [
+                    {"section_id": "indexed", "section_name": "Indexed", "description": "Indexed content"}
+                ],
+                "knowledge_primitives": {
+                    "key_propositions_and_facts": [],
+                    "key_entities_and_definitions": [],
+                    "described_processes_and_steps": [],
+                    "identified_relationships": [],
+                    "implicit_and_open_questions": []
+                }
+            }
+    except Exception:
+        pass
+
+    # Fallback: try to load from local deconstruction files
     import os
     from pathlib import Path
     

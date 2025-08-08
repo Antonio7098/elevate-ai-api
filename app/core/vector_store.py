@@ -524,10 +524,30 @@ class ChromaDBVectorStore(VectorStore):
             collection = self.client.get_collection(index_name)
             
             def _search():
+                # ChromaDB requires specific where clause format
+                if filter_metadata:
+                    # Convert metadata filters to ChromaDB where format
+                    where_conditions = []
+                    for key, value in filter_metadata.items():
+                        if isinstance(value, list):
+                            # For list values, use $in operator
+                            where_conditions.append({key: {"$in": value}})
+                        else:
+                            # For single values, use $eq operator
+                            where_conditions.append({key: {"$eq": value}})
+                    
+                    if len(where_conditions) == 1:
+                        where_clause = where_conditions[0]
+                    else:
+                        # Multiple conditions need $and
+                        where_clause = {"$and": where_conditions}
+                else:
+                    where_clause = None
+                
                 return collection.query(
                     query_embeddings=[query_vector],
                     n_results=top_k,
-                    where=filter_metadata
+                    where=where_clause
                 )
             
             result = await asyncio.get_event_loop().run_in_executor(self._executor, _search)
@@ -600,8 +620,13 @@ class ChromaDBVectorStore(VectorStore):
             collection = self.client.get_collection(index_name)
             
             def _stats():
-                # ChromaDB uses 'where' for filtering in count()
-                return collection.count(where=filter_metadata)
+                # Prefer fast count(); if filtering needed, use get(where=...)
+                if not filter_metadata:
+                    return collection.count()
+                # Use get with where filter and count returned ids
+                res = collection.get(where=filter_metadata, include=[])
+                ids = res.get("ids") or []
+                return len(ids)
             
             count = await asyncio.get_event_loop().run_in_executor(self._executor, _stats)
             return {

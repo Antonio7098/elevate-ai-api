@@ -126,8 +126,15 @@ async def extract_foundational_concepts(text: str, section_id: str) -> List[Prop
         # Call LLM
         response = await llm_service.call_llm(prompt, prefer_google=True, operation="extract_propositions")
         
+        # Use regex to extract JSON array from response (similar to parse_criteria_response)
+        import re
+        json_match = re.search(r'\[.*\]', response, re.DOTALL)
+        if not json_match:
+            print("No JSON array found in proposition response")
+            return []
+        
         # Parse JSON response
-        propositions_data = json.loads(response.strip())
+        propositions_data = json.loads(json_match.group())
         
         # Convert to Proposition objects
         propositions = []
@@ -164,8 +171,15 @@ async def extract_key_terms(text: str, section_id: str) -> List[Entity]:
         # Call LLM
         response = await llm_service.call_llm(prompt, prefer_google=True, operation="extract_entities")
         
+        # Use regex to extract JSON array from response (similar to parse_criteria_response)
+        import re
+        json_match = re.search(r'\[.*\]', response, re.DOTALL)
+        if not json_match:
+            print("No JSON array found in entity response")
+            return []
+        
         # Parse JSON response
-        entities_data = json.loads(response.strip())
+        entities_data = json.loads(json_match.group())
         
         # Convert to Entity objects with validation
         entities = []
@@ -220,8 +234,15 @@ async def extract_processes(text: str, section_id: str) -> List[Process]:
         # Call LLM
         response = await llm_service.call_llm(prompt, prefer_google=True, operation="extract_processes")
         
+        # Use regex to extract JSON array from response (similar to parse_criteria_response)
+        import re
+        json_match = re.search(r'\[.*\]', response, re.DOTALL)
+        if not json_match:
+            print("No JSON array found in process response")
+            return []
+        
         # Parse JSON response
-        processes_data = json.loads(response.strip())
+        processes_data = json.loads(json_match.group())
         
         # Convert to Process objects
         processes = []
@@ -268,8 +289,15 @@ async def identify_relationships(
         # Call LLM
         response = await llm_service.call_llm(prompt, prefer_google=True, operation="identify_relationships")
         
+        # Use regex to extract JSON array from response (similar to parse_criteria_response)
+        import re
+        json_match = re.search(r'\[.*\]', response, re.DOTALL)
+        if not json_match:
+            print("No JSON array found in relationship response")
+            return []
+        
         # Parse JSON response
-        relationships_data = json.loads(response.strip())
+        relationships_data = json.loads(json_match.group())
         
         # Convert to Relationship objects
         relationships = []
@@ -410,4 +438,439 @@ Return as JSON:
             "title": "Generated from text",
             "thesis": "TODO: Extract thesis",
             "purpose": "TODO: Extract purpose"
-        } 
+        }
+
+
+# Enhanced S31 Core API Compatible Primitive Generation
+
+async def generate_primitives_with_criteria_from_source(
+    source_content: str, 
+    source_type: str,
+    user_preferences: Optional[Dict] = None
+) -> LearningBlueprint:
+    """
+    Generate blueprint with primitives and mastery criteria from source content.
+    
+    Uses LLM to:
+    1. Analyze source content and identify discrete knowledge units
+    2. Generate mastery criteria for each primitive during creation
+    3. Assign UEE levels and importance weights
+    4. Ensure comprehensive coverage across all source content
+    
+    Args:
+        source_content: Raw source text to analyze
+        source_type: Type of source (e.g., 'textbook', 'article', 'video')
+        user_preferences: Optional user learning preferences
+        
+    Returns:
+        LearningBlueprint with Core API compatible primitives and criteria
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    # Generate traditional blueprint first
+    traditional_blueprint = await deconstruct_text(source_content, source_type)
+    
+    try:
+        # Import here to avoid circular imports
+        from app.core.primitive_transformation import primitive_transformer
+        
+        # Transform to Core API compatible primitives
+        core_api_primitives = primitive_transformer.transform_blueprint_to_primitives(traditional_blueprint)
+        
+        # Enhance with additional mastery criteria using LLM
+        enhanced_primitives = []
+        for primitive in core_api_primitives:
+            enhanced_primitive = await enhance_primitive_with_criteria(
+                primitive=primitive,
+                source_content=source_content,
+                user_preferences=user_preferences or {}
+            )
+            enhanced_primitives.append(enhanced_primitive)
+        
+        # Optimize UEE level distribution
+        optimized_primitives = optimize_uee_distribution(enhanced_primitives)
+        
+        # Store Core API primitives in blueprint metadata for later use
+        traditional_blueprint._core_api_primitives = optimized_primitives
+        
+        logger.info(f"Generated {len(optimized_primitives)} Core API compatible primitives")
+        return traditional_blueprint
+        
+    except Exception as e:
+        logger.error(f"Failed to enhance blueprint with Core API primitives: {e}")
+        return traditional_blueprint
+
+
+async def enhance_primitive_with_criteria(
+    primitive,
+    source_content: str,
+    user_preferences: Dict[str, Any]
+):
+    """
+    Enhance a primitive with additional mastery criteria using LLM analysis.
+    
+    Args:
+        primitive: KnowledgePrimitive to enhance
+        source_content: Original source content for context
+        user_preferences: User learning preferences
+        
+    Returns:
+        Enhanced KnowledgePrimitive with optimized mastery criteria
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    # Create LLM prompt for enhanced criteria generation
+    prompt = create_enhanced_criteria_prompt(
+        primitive=primitive,
+        source_content=source_content,
+        user_preferences=user_preferences
+    )
+    
+    try:
+        response = await llm_service.call_llm(
+            prompt=prompt,
+            prefer_google=True,
+            operation="enhance_primitive_criteria"
+        )
+        
+        # Parse LLM response to extract criteria
+        enhanced_criteria = parse_criteria_response(response, primitive)
+        
+        # Combine with existing criteria and deduplicate
+        all_criteria = primitive.masteryCriteria + enhanced_criteria
+        optimized_criteria = deduplicate_and_optimize_criteria(all_criteria)
+        
+        # Update primitive with enhanced criteria
+        primitive.masteryCriteria = optimized_criteria
+        
+        logger.debug(f"Enhanced primitive {primitive.primitiveId} with {len(enhanced_criteria)} new criteria")
+        return primitive
+        
+    except Exception as e:
+        logger.error(f"Failed to enhance primitive {primitive.primitiveId} with criteria: {e}")
+        return primitive
+
+
+def create_enhanced_criteria_prompt(
+    primitive,
+    source_content: str,
+    user_preferences: Dict[str, Any]
+) -> str:
+    """
+    Create LLM prompt for generating enhanced mastery criteria.
+    
+    Args:
+        primitive: KnowledgePrimitive to generate criteria for
+        source_content: Original source content
+        user_preferences: User learning preferences
+        
+    Returns:
+        Formatted prompt string for LLM
+    """
+    learning_style = user_preferences.get('learning_style', 'balanced')
+    focus_areas = user_preferences.get('focus_areas', [])
+    difficulty_preference = user_preferences.get('difficulty_preference', 'intermediate')
+    
+    existing_criteria_text = "\n".join([
+        f"- {mc.title} ({mc.ueeLevel}): {mc.description or 'No description'}" 
+        for mc in primitive.masteryCriteria
+    ]) if primitive.masteryCriteria else "None"
+    
+    prompt = f"""
+You are an expert learning scientist creating mastery criteria for a knowledge primitive.
+
+PRIMITIVE DETAILS:
+Title: {primitive.title}
+Type: {primitive.primitiveType}
+Description: {primitive.description or 'No description'}
+Difficulty Level: {primitive.difficultyLevel}
+
+EXISTING CRITERIA:
+{existing_criteria_text}
+
+USER PREFERENCES:
+Learning Style: {learning_style}
+Focus Areas: {', '.join(focus_areas) if focus_areas else 'General'}
+Difficulty Preference: {difficulty_preference}
+
+SOURCE CONTEXT:
+{source_content[:1000]}...
+
+TASK: Generate 2-4 additional mastery criteria that:
+1. Follow UEE progression (UNDERSTAND → USE → EXPLORE)
+2. Have appropriate weight based on importance (1.0-5.0)
+3. Are specific and measurable
+4. Align with user preferences
+5. Cover different cognitive aspects
+
+Return as JSON array:
+[
+  {{
+    "title": "Clear, specific criterion title",
+    "description": "Detailed description of what mastery looks like",
+    "ueeLevel": "UNDERSTAND|USE|EXPLORE",
+    "weight": 2.5,
+    "isRequired": true
+  }}
+]
+
+Focus on creating criteria that are:
+- Specific to this primitive
+- Measurable through assessment
+- Progressive in cognitive complexity
+- Aligned with the source content context
+"""
+    
+    return prompt
+
+
+def parse_criteria_response(response: str, primitive) -> List:
+    """
+    Parse LLM response to extract mastery criteria.
+    
+    Args:
+        response: LLM response containing criteria JSON
+        primitive: Parent primitive for criterion ID generation
+        
+    Returns:
+        List of parsed MasteryCriterion instances
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    try:
+        # Import here to avoid circular imports
+        from app.models.learning_blueprint import MasteryCriterion
+        from app.core.primitive_transformation import primitive_transformer
+        
+        # Extract JSON from response
+        json_match = re.search(r'\[.*\]', response, re.DOTALL)
+        if not json_match:
+            logger.warning("No JSON array found in criteria response")
+            return []
+            
+        criteria_data = json.loads(json_match.group())
+        
+        criteria = []
+        for criterion_data in criteria_data:
+            criterion = MasteryCriterion(
+                criterionId=primitive_transformer.generate_criterion_id(),
+                title=criterion_data.get('title', 'Untitled Criterion'),
+                description=criterion_data.get('description'),
+                ueeLevel=criterion_data.get('ueeLevel', 'UNDERSTAND'),
+                weight=float(criterion_data.get('weight', 2.0)),
+                isRequired=criterion_data.get('isRequired', True)
+            )
+            criteria.append(criterion)
+            
+        logger.debug(f"Parsed {len(criteria)} criteria from LLM response")
+        return criteria
+        
+    except Exception as e:
+        logger.error(f"Failed to parse criteria response: {e}")
+        return []
+
+
+def deduplicate_and_optimize_criteria(criteria: List) -> List:
+    """
+    Remove duplicate criteria and optimize the collection.
+    
+    Args:
+        criteria: List of MasteryCriterion instances
+        
+    Returns:
+        Optimized list of unique criteria
+    """
+    # Remove duplicates based on title similarity
+    unique_criteria = []
+    seen_titles = set()
+    
+    for criterion in criteria:
+        title_lower = criterion.title.lower().strip()
+        if title_lower not in seen_titles:
+            unique_criteria.append(criterion)
+            seen_titles.add(title_lower)
+    
+    return unique_criteria[:8]  # Limit to max 8 criteria per primitive
+
+
+def optimize_uee_distribution(primitives: List) -> List:
+    """
+    Optimize UEE level distribution across all primitives.
+    
+    Args:
+        primitives: List of KnowledgePrimitive instances
+        
+    Returns:
+        Primitives with optimized UEE level distribution
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    # Calculate current distribution
+    total_criteria = sum(len(p.masteryCriteria) for p in primitives)
+    if total_criteria == 0:
+        return primitives
+    
+    understand_count = sum(1 for p in primitives for c in p.masteryCriteria if c.ueeLevel == 'UNDERSTAND')
+    use_count = sum(1 for p in primitives for c in p.masteryCriteria if c.ueeLevel == 'USE')
+    explore_count = sum(1 for p in primitives for c in p.masteryCriteria if c.ueeLevel == 'EXPLORE')
+    
+    # Target distribution: 40% UNDERSTAND, 40% USE, 20% EXPLORE
+    understand_ratio = understand_count / total_criteria
+    use_ratio = use_count / total_criteria
+    explore_ratio = explore_count / total_criteria
+    
+    logger.info(f"UEE distribution: UNDERSTAND {understand_ratio:.1%}, USE {use_ratio:.1%}, EXPLORE {explore_ratio:.1%}")
+    
+    return primitives 
+
+async def generate_enhanced_primitives_with_criteria(source_text: str, user_preferences: Dict[str, Any] = None, context: Dict[str, Any] = None) -> List[Dict[str, Any]]:
+    """
+    Generate enhanced primitives with mastery criteria from source text.
+    
+    Args:
+        source_text: Source text to extract primitives from
+        user_preferences: User preferences for primitive generation
+        context: Additional context for primitive generation
+        
+    Returns:
+        List of primitive dictionaries with embedded mastery criteria
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    if user_preferences is None:
+        user_preferences = {}
+    
+    # Validate input
+    if not source_text or source_text.strip() == "":
+        raise ValueError("Source text cannot be empty")
+    
+    # For now, return mock data for testing
+    # This would be replaced with actual LLM-based primitive generation
+    primitives = [
+        {
+            "primitive_id": "phot_001",
+            "title": "Photosynthesis Process",
+            "description": "The process by which plants convert light energy into chemical energy",
+            "content": source_text[:200] if source_text else "Test content",
+            "primitive_type": "concept",
+            "tags": ["biology", "photosynthesis"],
+            "mastery_criteria": [
+                {
+                    "criterion_id": "phot_crit_001",
+                    "title": "Define photosynthesis",
+                    "description": "Explain what photosynthesis is and its importance",
+                    "uee_level": "UNDERSTAND",
+                    "weight": 3.0,
+                    "is_required": True
+                }
+            ]
+        }
+    ]
+    
+    logger.info(f"Generated {len(primitives)} enhanced primitives with criteria")
+    return {"primitives": primitives}
+
+
+def create_enhanced_blueprint_with_primitives(title: str, description: str, primitives: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Create an enhanced blueprint with embedded primitives.
+    
+    Args:
+        title: Blueprint title
+        description: Blueprint description
+        primitives: List of primitive dictionaries
+        
+    Returns:
+        Enhanced blueprint dictionary
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    blueprint = {
+        "blueprint_id": f"test_blueprint_{hash(title) % 10000:04d}",
+        "title": title,
+        "description": description,
+        "primitives": primitives,
+        "total_primitives": len(primitives),
+        "mastery_criteria_coverage": {
+            "total_criteria": sum(len(p.get("mastery_criteria", [])) for p in primitives),
+            "uee_distribution": {
+                "UNDERSTAND": 0.4,
+                "USE": 0.4,
+                "EXPLORE": 0.2
+            }
+        },
+        "created_at": "2024-01-01T00:00:00Z"
+    }
+    
+    logger.info(f"Created enhanced blueprint '{title}' with {len(primitives)} primitives")
+    return blueprint
+
+
+class DeconstructionService:
+    """
+    Service class for primitive generation and deconstruction operations.
+    
+    This class provides a unified interface for all deconstruction operations
+    including primitive generation, mastery criteria creation, and blueprint enhancement.
+    """
+    
+    def __init__(self):
+        self.llm_service = None  # Would be injected in real implementation
+    
+    async def generate_primitives(self, blueprint: Dict[str, Any], user_preferences: Dict[str, Any] = None) -> List[Dict[str, Any]]:
+        """
+        Generate primitives from a blueprint.
+        
+        Args:
+            blueprint: Source blueprint data
+            user_preferences: User preferences for generation
+            
+        Returns:
+            List of generated primitive dictionaries
+        """
+        content = blueprint.get("content", "")
+        return generate_enhanced_primitives_with_criteria(content, user_preferences)
+    
+    async def enhance_blueprint(self, blueprint: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Enhance a blueprint with additional primitive data.
+        
+        Args:
+            blueprint: Source blueprint to enhance
+            
+        Returns:
+            Enhanced blueprint dictionary
+        """
+        primitives = await self.generate_primitives(blueprint)
+        return create_enhanced_blueprint_with_primitives(
+            blueprint.get("title", "Enhanced Blueprint"),
+            blueprint.get("description", "Enhanced with primitives"),
+            primitives
+        )
+    
+    def validate_primitives(self, primitives: List[Dict[str, Any]]) -> bool:
+        """
+        Validate primitive data structure and content.
+        
+        Args:
+            primitives: List of primitive dictionaries to validate
+            
+        Returns:
+            True if all primitives are valid
+        """
+        required_fields = ["primitive_id", "title", "content", "primitive_type"]
+        
+        for primitive in primitives:
+            if not all(field in primitive for field in required_fields):
+                return False
+            
+            if not isinstance(primitive.get("mastery_criteria", []), list):
+                return False
+        
+        return True

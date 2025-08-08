@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     # LLM API Keys
     openai_api_key: Optional[str] = None
     google_api_key: Optional[str] = None
+    openrouter_api_key: Optional[str] = None
     
     # Vector Database Configuration
     vector_store_type: str = "pinecone"  # "pinecone" or "chromadb"

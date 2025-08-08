@@ -125,13 +125,13 @@ def mock_llm_service():
 @pytest.fixture
 def mock_blueprint_retrieval():
     """Mock blueprint data retrieval for testing."""
-    with patch('app.core.indexing._get_blueprint_data') as mock_retrieval:
+    with patch('app.core.indexing._get_blueprint_data', new_callable=AsyncMock) as mock_retrieval:
         yield mock_retrieval
 
 
 @pytest.fixture
 def mock_question_data() -> Dict[str, Any]:
-    """Mock question data for testing."""
+    """Mock question data for testing - legacy format."""
     return {
         "id": 1,
         "text": "What is the primary function of mitochondria?",
@@ -142,6 +142,19 @@ def mock_question_data() -> Dict[str, Any]:
         "question_set_name": "Sample Question Set",
         "folder_name": "Biology",
         "blueprint_title": "Cellular Biology"
+    }
+
+
+@pytest.fixture
+def mock_question_context_data() -> Dict[str, Any]:
+    """Mock question context data matching QuestionContextDto schema."""
+    return {
+        "questionId": 1,
+        "questionText": "What is the primary function of mitochondria?",
+        "expectedAnswer": "Mitochondria are the powerhouse of the cell, generating ATP through cellular respiration.",
+        "questionType": "SHORT_ANSWER",
+        "marksAvailable": 5,
+        "markingCriteria": "Award 1 mark for mentioning 'powerhouse', 1 mark for 'ATP', 1 mark for 'cellular respiration', 1 mark for energy generation, and 1 mark for clarity."
     }
 
 
@@ -165,5 +178,5 @@ def mock_question_retrieval():
 @pytest.fixture
 def mock_evaluation_service():
     """Mock answer evaluation service for testing."""
-    with patch('app.core.indexing._call_ai_service_for_evaluation') as mock_service:
+    with patch('app.api.endpoints._call_ai_service_for_evaluation') as mock_service:
         yield mock_service 

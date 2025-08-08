@@ -414,3 +414,29 @@ class QueryTransformer:
             })
         
         return base_params
+
+
+@dataclass
+class QueryFilterParams:
+    """Parameters for filtering query results."""
+    locus_types: Optional[List[str]] = None
+    difficulty_levels: Optional[List[str]] = None
+    subject_areas: Optional[List[str]] = None
+    uue_stages: Optional[List[str]] = None
+    min_confidence: Optional[float] = None
+    max_results: Optional[int] = None
+    exclude_keywords: Optional[List[str]] = None
+    include_keywords: Optional[List[str]] = None
+
+
+@dataclass
+class QueryOptimization:
+    """Query optimization configuration."""
+    enable_expansion: bool = True
+    enable_reformulation: bool = True
+    enable_intent_detection: bool = True
+    enable_filtering: bool = True
+    max_reformulations: int = 5
+    min_confidence_threshold: float = 0.3
+    similarity_threshold: float = 0.7
+    diversity_factor: float = 0.2

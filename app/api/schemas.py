@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, field_validator
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Literal
 
 
 class DeconstructRequest(BaseModel):
@@ -48,7 +48,13 @@ class GenerateQuestionsRequest(BaseModel):
     blueprint_id: str = Field(..., description="ID of the LearningBlueprint to use")
     name: str = Field(..., description="Name for the generated question set")
     folder_id: Optional[int] = Field(None, description="ID of the folder to store the question set")
-    question_options: Optional[Dict[str, Any]] = Field(None, description="Options for question generation")
+    sourceContent: str = Field(..., description="Source text content to generate questions from")
+    questionCount: Optional[int] = Field(5, description="Number of questions to generate")
+    questionTypes: Optional[List[str]] = Field(default_factory=lambda: ["short_answer", "multiple_choice"], description="Types of questions to generate")
+    difficultyLevel: Optional[str] = Field("intermediate", description="Difficulty level for questions")
+    topicFocus: Optional[str] = Field(None, description="Specific topic focus for questions")
+    includeAnswerKeys: Optional[bool] = Field(True, description="Whether to include answer keys")
+    question_options: Optional[Dict[str, Any]] = Field(None, description="Additional options for question generation")
 
 
 # New schemas for the question generation endpoint
@@ -80,6 +86,10 @@ class QuestionDto(BaseModel):
     question_type: str = Field(..., description="Type of question (understand/use/explore)")
     total_marks_available: int = Field(..., description="Total marks available for this question")
     marking_criteria: str = Field(..., description="Detailed marking criteria for scoring")
+    criterion_id: Optional[str] = Field(None, description="ID of mastery criterion this question tests")
+    uee_level: Optional[str] = Field(None, description="UEE level this question targets")
+    question_complexity: Optional[int] = Field(None, ge=1, le=5, description="Question complexity level (1=basic, 5=advanced)")
+    estimated_time_minutes: Optional[int] = Field(None, ge=1, le=60, description="Estimated time to answer in minutes")
 
 
 class QuestionSetResponseDto(BaseModel):
@@ -278,4 +288,527 @@ class RelatedLocusSearchResponse(BaseModel):
     related_loci: List[RelatedLocusItem] = Field(..., description="Related loci")
     total_related: int = Field(..., description="Total number of related loci found")
     max_depth_reached: int = Field(..., description="Maximum depth reached in traversal")
-    created_at: str = Field(..., description="When the search was performed") 
+    created_at: str = Field(..., description="When the search was performed")
+
+
+# Primitive-Centric API Schemas
+class MasteryCriterionDto(BaseModel):
+    """Schema for mastery criteria in API requests/responses (Core API Prisma compatible)."""
+    criterionId: str = Field(..., description="Unique criterion ID")
+    primitiveId: Optional[str] = Field(None, description="Primitive ID this criterion belongs to")
+    title: str = Field(..., description="Criterion title")
+    description: Optional[str] = Field(None, description="Criterion description")
+    ueeLevel: Literal["UNDERSTAND", "USE", "EXPLORE"] = Field(..., description="UEE level")
+    weight: float = Field(..., description="Criterion importance weight")
+    isRequired: bool = Field(default=True, description="Whether criterion is required")
+    
+    @field_validator('title')
+    @classmethod
+    def validate_title_not_empty(cls, v):
+        if not v or not v.strip():
+            raise ValueError('Criterion title cannot be empty')
+        return v.strip()
+    
+    @field_validator('ueeLevel')
+    @classmethod
+    def validate_uee_level(cls, v):
+        valid_levels = ["UNDERSTAND", "USE", "EXPLORE"]
+        if v not in valid_levels:
+            raise ValueError(f'UEE level must be one of: {", ".join(valid_levels)}')
+        return v
+    
+    @field_validator('weight')
+    @classmethod
+    def validate_weight_range(cls, v):
+        if v < 1.0 or v > 5.0:
+            raise ValueError('Weight must be between 1.0 and 5.0')
+        return v
+
+
+class KnowledgePrimitiveDto(BaseModel):
+    """Schema for knowledge primitives in API requests/responses (Core API Prisma compatible)."""
+    primitiveId: str = Field(..., description="Unique primitive ID (matches Prisma primitiveId)")
+    title: str = Field(..., description="Primitive title")
+    description: Optional[str] = Field(None, description="Primitive description")
+    primitiveType: str = Field(..., description="Primitive type: fact, concept, process (matches Prisma)")
+    difficultyLevel: str = Field(..., description="Difficulty level: beginner, intermediate, advanced")
+    estimatedTimeMinutes: Optional[int] = Field(None, description="Estimated time in minutes")
+    trackingIntensity: Literal["DENSE", "NORMAL", "SPARSE"] = Field(default="NORMAL", description="Tracking intensity")
+    masteryCriteria: List[MasteryCriterionDto] = Field(default_factory=list, description="Associated mastery criteria")
+    
+    @field_validator('title')
+    @classmethod
+    def validate_title_not_empty(cls, v):
+        if not v or not v.strip():
+            raise ValueError('Primitive title cannot be empty')
+        return v.strip()
+    
+    @field_validator('primitiveType')
+    @classmethod
+    def validate_primitive_type(cls, v):
+        valid_types = ["fact", "concept", "process"]
+        if v not in valid_types:
+            raise ValueError(f'Primitive type must be one of: {", ".join(valid_types)}')
+        return v
+    
+    @field_validator('difficultyLevel')
+    @classmethod
+    def validate_difficulty_level(cls, v):
+        valid_levels = ["beginner", "intermediate", "advanced"]
+        if v not in valid_levels:
+            raise ValueError(f'Difficulty level must be one of: {", ".join(valid_levels)}')
+        return v
+    
+    @field_validator('trackingIntensity')
+    @classmethod
+    def validate_tracking_intensity(cls, v):
+        valid_intensities = ["DENSE", "NORMAL", "SPARSE"]
+        if v not in valid_intensities:
+            raise ValueError(f'Tracking intensity must be one of: {", ".join(valid_intensities)}')
+        return v
+
+
+class BlueprintPrimitivesRequest(BaseModel):
+    """Request schema for getting primitives from a blueprint."""
+    include_criteria: bool = Field(default=True, description="Include mastery criteria in response")
+    primitive_types: Optional[List[str]] = Field(None, description="Filter by primitive types")
+    blueprintId: str = Field(..., description="Blueprint ID to sync")
+    primitives: List[KnowledgePrimitiveDto] = Field(..., description="Primitives to sync")
+
+
+# Sprint 31 API Schemas for Primitive Services
+
+class PrimitiveGenerationRequest(BaseModel):
+    """Request schema for generating primitives with mastery criteria from source content."""
+    sourceContent: str = Field(..., description="Raw source content to analyze")
+    sourceType: str = Field(..., description="Type of source (textbook, article, video, etc.)")
+    userPreferences: Optional[Dict[str, Any]] = Field(default_factory=dict, description="User learning preferences")
+    targetPrimitiveCount: Optional[int] = Field(default=None, description="Target number of primitives to generate")
+    generateCriteria: bool = Field(default=True, description="Whether to generate mastery criteria")
+    criteriaPerPrimitive: int = Field(default=4, description="Target criteria per primitive")
+
+    @field_validator('sourceType')
+    @classmethod
+    def validate_source_type(cls, v):
+        valid_types = ["textbook", "article", "video", "lecture", "documentation", "tutorial", "other"]
+        if v not in valid_types:
+            raise ValueError(f'Source type must be one of: {", ".join(valid_types)}')
+        return v
+
+
+class PrimitiveGenerationResponse(BaseModel):
+    """Response schema for primitive generation."""
+    success: bool = Field(..., description="Whether generation was successful")
+    primitives: List[KnowledgePrimitiveDto] = Field(..., description="Generated primitives with criteria")
+    generatedCount: int = Field(..., description="Number of primitives generated")
+    totalCriteria: int = Field(..., description="Total number of criteria across all primitives")
+    processingTime: float = Field(default=0.0, description="Processing time in seconds")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    warnings: List[str] = Field(default_factory=list, description="Any generation warnings")
+
+
+class CriterionQuestionRequest(BaseModel):
+    """Request schema for generating questions mapped to mastery criteria."""
+    criterionIds: List[str] = Field(..., description="Criterion IDs to generate questions for")
+    criteria: List[MasteryCriterionDto] = Field(..., description="Mastery criteria data")
+    primitive: KnowledgePrimitiveDto = Field(..., description="Parent primitive context")
+    sourceContent: str = Field(..., description="Source content for context")
+    questionsPerCriterion: int = Field(default=3, description="Number of questions per criterion")
+    userPreferences: Optional[Dict[str, Any]] = Field(default_factory=dict, description="User preferences")
+    useSemanticMapping: bool = Field(default=True, description="Use semantic mapping for question-criterion alignment")
+    difficultyPreference: str = Field(default="intermediate", description="Preferred question difficulty")
+
+    @field_validator('difficultyPreference')
+    @classmethod
+    def validate_difficulty_preference(cls, v):
+        valid_difficulties = ["beginner", "intermediate", "advanced", "expert"]
+        if v not in valid_difficulties:
+            raise ValueError(f'Difficulty preference must be one of: {", ".join(valid_difficulties)}')
+        return v
+
+    @field_validator('questionsPerCriterion')
+    @classmethod
+    def validate_questions_per_criterion(cls, v):
+        if v < 1 or v > 10:
+            raise ValueError('Questions per criterion must be between 1 and 10')
+        return v
+
+
+class CriterionQuestionDto(BaseModel):
+    """Data Transfer Object for criterion-based questions."""
+    questionId: str = Field(..., description="Unique question identifier")
+    questionText: str = Field(..., description="Question text")
+    questionType: str = Field(..., description="Type of question")
+    correctAnswer: str = Field(..., description="Correct answer")
+    options: List[str] = Field(default_factory=list, description="Multiple choice options")
+    explanation: Optional[str] = Field(None, description="Answer explanation")
+    difficulty: str = Field(default="intermediate", description="Question difficulty")
+    estimatedTime: int = Field(default=120, description="Estimated time in seconds")
+    tags: List[str] = Field(default_factory=list, description="Question tags")
+    criterionId: Optional[str] = Field(None, description="Associated criterion ID")
+    primitiveId: Optional[str] = Field(None, description="Associated primitive ID")
+    ueeLevel: Optional[str] = Field(None, description="UEE level")
+    weight: float = Field(default=1.0, description="Question weight")
+
+    @field_validator('questionType')
+    @classmethod
+    def validate_question_type(cls, v):
+        valid_types = [
+            "multiple_choice", "true_false", "fill_blank", "definition", "matching",
+            "problem_solving", "application", "calculation", "scenario", "case_study",
+            "analysis", "synthesis", "evaluation", "design", "critique"
+        ]
+        if v not in valid_types:
+            raise ValueError(f'Question type must be one of: {", ".join(valid_types)}')
+        return v
+
+    @field_validator('difficulty')
+    @classmethod
+    def validate_difficulty(cls, v):
+        valid_difficulties = ["beginner", "intermediate", "advanced", "expert"]
+        if v not in valid_difficulties:
+            raise ValueError(f'Difficulty must be one of: {", ".join(valid_difficulties)}')
+        return v
+
+    @field_validator('estimatedTime')
+    @classmethod
+    def validate_estimated_time(cls, v):
+        if v < 10 or v > 1800:  # 10 seconds to 30 minutes
+            raise ValueError('Estimated time must be between 10 and 1800 seconds')
+        return v
+
+
+class CriterionQuestionResponse(BaseModel):
+    """Response schema for criterion question generation."""
+    success: bool = Field(..., description="Whether generation was successful")
+    questionsByCriterion: Dict[str, List[CriterionQuestionDto]] = Field(..., description="Questions mapped by criterion ID")
+    totalQuestions: int = Field(..., description="Total number of questions generated")
+    mappingConfidence: float = Field(default=0.0, description="Average mapping confidence score")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    warnings: List[str] = Field(default_factory=list, description="Any generation warnings")
+
+
+class SyncStatusResponse(BaseModel):
+    """Response schema for synchronization status."""
+    success: bool = Field(..., description="Whether operation was successful")
+    status: str = Field(..., description="Current sync status")
+    message: str = Field(..., description="Status message")
+    primitivesProcessed: int = Field(default=0, description="Number of primitives processed")
+    criteriaProcessed: int = Field(default=0, description="Number of criteria processed")
+    questionsProcessed: int = Field(default=0, description="Number of questions processed")
+    estimatedCompletion: Optional[int] = Field(None, description="Estimated completion time in seconds")
+    lastSync: Optional[str] = Field(None, description="Last sync timestamp")
+    errors: List[str] = Field(default_factory=list, description="Any sync errors")
+    warnings: List[str] = Field(default_factory=list, description="Any sync warnings")
+
+    @field_validator('status')
+    @classmethod
+    def validate_status(cls, v):
+        valid_statuses = ["pending", "in_progress", "completed", "failed", "cancelled"]
+        if v not in valid_statuses:
+            raise ValueError(f'Status must be one of: {", ".join(valid_statuses)}')
+        return v
+
+
+class MappingValidationResponse(BaseModel):
+    """Response schema for question-criterion mapping validation."""
+    success: bool = Field(..., description="Whether validation was successful")
+    validationIssues: Dict[str, List[str]] = Field(..., description="Issues by criterion ID")
+    mappingStatistics: Dict[str, Any] = Field(..., description="Mapping quality statistics")
+    recommendations: List[str] = Field(default_factory=list, description="Improvement recommendations")
+    overallQuality: str = Field(..., description="Overall mapping quality")
+
+    @field_validator('overallQuality')
+    @classmethod
+    def validate_overall_quality(cls, v):
+        valid_qualities = ["excellent", "good", "fair", "poor"]
+        if v not in valid_qualities:
+            raise ValueError(f'Overall quality must be one of: {", ".join(valid_qualities)}')
+        return v
+
+
+# Sprint 32 API Schemas for Blueprint Primitive Data Access
+
+class BlueprintPrimitivesResponse(BaseModel):
+    """Response schema for blueprint primitive data access."""
+    success: bool = Field(..., description="Whether retrieval was successful")
+    blueprintId: str = Field(..., description="Blueprint ID")
+    primitives: List[KnowledgePrimitiveDto] = Field(..., description="Core API compatible primitives")
+    primitiveCount: int = Field(..., description="Number of primitives")
+    totalCriteria: int = Field(..., description="Total number of criteria")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    warnings: List[str] = Field(default_factory=list, description="Any retrieval warnings")
+
+
+class BatchBlueprintPrimitivesRequest(BaseModel):
+    """Request schema for batch blueprint primitive retrieval."""
+    blueprintIds: List[str] = Field(..., description="List of blueprint IDs to process")
+    includeMetadata: bool = Field(default=True, description="Include metadata in response")
+    validateCompatibility: bool = Field(default=True, description="Validate Core API compatibility")
+    
+    @field_validator('blueprintIds')
+    @classmethod
+    def validate_blueprint_ids(cls, v):
+        if len(v) == 0:
+            raise ValueError('At least one blueprint ID is required')
+        if len(v) > 50:  # Reasonable batch limit
+            raise ValueError('Maximum 50 blueprint IDs per batch request')
+        return v
+
+
+class BatchBlueprintPrimitivesResponse(BaseModel):
+    """Response schema for batch blueprint primitive retrieval."""
+    success: bool = Field(..., description="Whether batch operation was successful")
+    results: Dict[str, List[KnowledgePrimitiveDto]] = Field(..., description="Results by blueprint ID")
+    totalPrimitives: int = Field(..., description="Total primitives across all blueprints")
+    totalCriteria: int = Field(..., description="Total criteria across all primitives")
+    processedCount: int = Field(..., description="Number of successfully processed blueprints")
+    failedCount: int = Field(..., description="Number of failed blueprints")
+    errors: List[str] = Field(default_factory=list, description="Any processing errors")
+
+
+class PrimitiveValidationRequest(BaseModel):
+    """Request schema for primitive validation."""
+    validateSchema: bool = Field(default=True, description="Validate Prisma schema compliance")
+    validateIntegrity: bool = Field(default=True, description="Validate data integrity")
+    validateUeeDistribution: bool = Field(default=True, description="Validate UEE level distribution")
+    strictMode: bool = Field(default=False, description="Enable strict validation mode")
+
+
+class PrimitiveValidationResponse(BaseModel):
+    """Response schema for primitive validation."""
+    success: bool = Field(..., description="Whether validation was successful")
+    isValid: bool = Field(..., description="Whether primitives are valid")
+    validationQuality: str = Field(..., description="Overall validation quality")
+    primitiveCount: int = Field(..., description="Number of primitives validated")
+    criteriaCount: int = Field(..., description="Number of criteria validated")
+    issues: List[str] = Field(default_factory=list, description="Validation issues")
+    warnings: List[str] = Field(default_factory=list, description="Validation warnings")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Validation metadata")
+    
+    @field_validator('validationQuality')
+    @classmethod
+    def validate_validation_quality(cls, v):
+        valid_qualities = ["excellent", "good", "fair", "poor"]
+        if v not in valid_qualities:
+            raise ValueError(f'Validation quality must be one of: {", ".join(valid_qualities)}')
+        return v
+
+
+# Sprint 32 API Schemas for Core API Compatible Question Generation
+
+class CoreApiQuestionRequest(BaseModel):
+    """Request schema for generating Core API compatible questions."""
+    criterionId: str = Field(..., description="Core API criterion ID")
+    criterionTitle: str = Field(..., description="Criterion title")
+    criterionDescription: Optional[str] = Field(None, description="Criterion description")
+    primitiveId: str = Field(..., description="Core API primitive ID")
+    primitiveTitle: str = Field(..., description="Primitive title")
+    primitiveDescription: Optional[str] = Field(None, description="Primitive description")
+    ueeLevel: str = Field(..., description="UEE level (UNDERSTAND|USE|EXPLORE)")
+    weight: float = Field(..., description="Criterion weight (1.0-5.0)")
+    isRequired: bool = Field(default=True, description="Whether criterion is required")
+    sourceContent: str = Field(..., description="Source content for context")
+    questionCount: int = Field(default=3, description="Number of questions to generate")
+    difficultyLevel: Optional[str] = Field(default="intermediate", description="Difficulty level")
+    userPreferences: Optional[Dict[str, Any]] = Field(default_factory=dict, description="User preferences")
+    
+    @field_validator('ueeLevel')
+    @classmethod
+    def validate_uee_level(cls, v):
+        valid_levels = ['UNDERSTAND', 'USE', 'EXPLORE']
+        if v not in valid_levels:
+            raise ValueError(f'UEE level must be one of: {", ".join(valid_levels)}')
+        return v
+    
+    @field_validator('weight')
+    @classmethod
+    def validate_weight(cls, v):
+        if not (1.0 <= v <= 5.0):
+            raise ValueError('Weight must be between 1.0 and 5.0')
+        return v
+    
+    @field_validator('questionCount')
+    @classmethod
+    def validate_question_count(cls, v):
+        if not (1 <= v <= 10):
+            raise ValueError('Question count must be between 1 and 10')
+        return v
+
+
+class CoreApiQuestionDto(BaseModel):
+    """Core API compatible question DTO."""
+    questionId: str = Field(..., description="Unique question identifier")
+    questionText: str = Field(..., description="Question text")
+    questionType: str = Field(..., description="Type of question")
+    correctAnswer: str = Field(..., description="Correct answer")
+    options: List[str] = Field(default_factory=list, description="Multiple choice options")
+    explanation: Optional[str] = Field(None, description="Answer explanation")
+    difficulty: str = Field(default="intermediate", description="Question difficulty")
+    estimatedTime: int = Field(default=120, description="Estimated time in seconds")
+    tags: List[str] = Field(default_factory=list, description="Question tags")
+    criterionId: str = Field(..., description="Core API criterion ID")
+    primitiveId: str = Field(..., description="Core API primitive ID")
+    ueeLevel: str = Field(..., description="UEE level")
+    weight: float = Field(default=1.0, description="Question weight")
+    coreApiCompatible: bool = Field(default=True, description="Core API compatibility flag")
+    
+    @field_validator('ueeLevel')
+    @classmethod
+    def validate_uee_level(cls, v):
+        valid_levels = ['UNDERSTAND', 'USE', 'EXPLORE']
+        if v not in valid_levels:
+            raise ValueError(f'UEE level must be one of: {", ".join(valid_levels)}')
+        return v
+
+
+class CoreApiQuestionResponse(BaseModel):
+    """Response schema for Core API question generation."""
+    success: bool = Field(..., description="Whether generation was successful")
+    questions: List[CoreApiQuestionDto] = Field(..., description="Generated questions")
+    questionCount: int = Field(..., description="Number of questions generated")
+    criterionId: str = Field(..., description="Core API criterion ID")
+    primitiveId: str = Field(..., description="Core API primitive ID")
+    ueeLevel: str = Field(..., description="UEE level")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    warnings: List[str] = Field(default_factory=list, description="Any generation warnings")
+
+
+class BatchCoreApiQuestionRequest(BaseModel):
+    """Request schema for batch Core API question generation."""
+    criterionRequests: List[CoreApiQuestionRequest] = Field(..., description="List of criterion requests")
+    sourceContent: str = Field(..., description="Source content for context")
+    questionsPerCriterion: int = Field(default=3, description="Questions per criterion")
+    userPreferences: Optional[Dict[str, Any]] = Field(default_factory=dict, description="User preferences")
+    
+    @field_validator('criterionRequests')
+    @classmethod
+    def validate_criterion_requests(cls, v):
+        if len(v) == 0:
+            raise ValueError('At least one criterion request is required')
+        if len(v) > 20:  # Reasonable batch limit
+            raise ValueError('Maximum 20 criterion requests per batch')
+        return v
+
+
+class BatchCoreApiQuestionResponse(BaseModel):
+    """Response schema for batch Core API question generation."""
+    success: bool = Field(..., description="Whether batch operation was successful")
+    results: Dict[str, List[CoreApiQuestionDto]] = Field(..., description="Results by criterion ID")
+    totalQuestions: int = Field(..., description="Total questions generated")
+    processedCount: int = Field(..., description="Number of successfully processed criteria")
+    failedCount: int = Field(..., description="Number of failed criteria")
+    errors: List[str] = Field(default_factory=list, description="Any processing errors")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+
+
+class CoreApiQuestionValidationRequest(BaseModel):
+    """Request schema for Core API question validation."""
+    questions: List[CoreApiQuestionDto] = Field(..., description="Questions to validate")
+    strictMode: bool = Field(default=False, description="Enable strict validation mode")
+    validatePrismaSchema: bool = Field(default=True, description="Validate Prisma schema compatibility")
+    
+    @field_validator('questions')
+    @classmethod
+    def validate_questions(cls, v):
+        if len(v) == 0:
+            raise ValueError('At least one question is required for validation')
+        return v
+
+
+class CoreApiQuestionValidationResponse(BaseModel):
+    """Response schema for Core API question validation."""
+    success: bool = Field(..., description="Whether validation was successful")
+    isValid: bool = Field(..., description="Whether all questions are valid")
+    validationQuality: str = Field(..., description="Overall validation quality")
+    totalQuestions: int = Field(..., description="Total questions validated")
+    validQuestions: int = Field(..., description="Number of valid questions")
+    invalidQuestions: int = Field(..., description="Number of invalid questions")
+    issues: List[str] = Field(default_factory=list, description="Validation issues")
+    warnings: List[str] = Field(default_factory=list, description="Validation warnings")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Validation metadata")
+    format_for_core_api: bool = Field(default=False, description="Format response for Core API storage")
+    
+    @field_validator('validationQuality')
+    @classmethod
+    def validate_validation_quality(cls, v):
+        valid_qualities = ["excellent", "good", "fair", "poor"]
+        if v not in valid_qualities:
+            raise ValueError(f'Validation quality must be one of: {", ".join(valid_qualities)}')
+        return v
+
+
+class BlueprintPrimitivesResponse(BaseModel):
+    """Response schema for blueprint primitives."""
+    blueprint_id: str = Field(..., description="Source blueprint ID")
+    blueprint_title: str = Field(..., description="Blueprint title")
+    primitives: List[KnowledgePrimitiveDto] = Field(..., description="Extracted primitives")
+    total_primitives: int = Field(..., description="Total number of primitives")
+    mastery_criteria_coverage: Dict[str, Any] = Field(..., description="Coverage analysis")
+    created_at: str = Field(..., description="When primitives were extracted")
+
+
+class CriterionQuestionRequest(BaseModel):
+    """Request schema for generating questions for specific mastery criteria."""
+    primitive_id: str = Field(..., description="Target primitive ID")
+    criterion_id: str = Field(..., description="Target mastery criterion ID")
+    question_count: int = Field(default=3, ge=1, le=10, description="Number of questions")
+    question_types: Optional[List[str]] = Field(None, description="Preferred question types")
+    context: Optional[Dict[str, Any]] = Field(None, description="Additional context")
+    
+    @field_validator('question_types')
+    @classmethod
+    def validate_question_types(cls, v):
+        if v is not None:
+            valid_types = ["multiple_choice", "short_answer", "essay", "true_false", "fill_blank"]
+            invalid_types = [t for t in v if t not in valid_types]
+            if invalid_types:
+                raise ValueError(f'Invalid question types: {", ".join(invalid_types)}. Valid types: {", ".join(valid_types)}')
+        return v
+
+
+class CriterionQuestionResponse(BaseModel):
+    """Response schema for criterion-specific questions."""
+    primitive_id: str = Field(..., description="Source primitive ID")
+    criterion_id: str = Field(..., description="Source criterion ID")
+    criterion_description: str = Field(..., description="What the criterion tests")
+    uee_level: str = Field(..., description="UEE level of the criterion")
+    questions: List[CriterionQuestionDto] = Field(..., description="Generated questions")
+    quality_score: float = Field(..., description="Overall question quality score")
+    created_at: str = Field(..., description="When questions were generated")
+
+
+class EnhancedDeconstructRequest(BaseModel):
+    """Enhanced request schema for blueprint creation with primitive generation."""
+    source_text: str = Field(..., description="Raw text content to be deconstructed")
+    source_type_hint: Optional[str] = Field(None, description="Hint about the type of source")
+    generate_mastery_criteria: bool = Field(default=True, description="Generate mastery criteria for primitives")
+    user_preferences: Optional[Dict[str, Any]] = Field(None, description="User learning preferences")
+    primitive_options: Optional[Dict[str, Any]] = Field(None, description="Primitive generation options")
+    sync_to_core_api: bool = Field(default=False, description="Automatically sync to Core API")
+    
+    @field_validator('source_text')
+    @classmethod
+    def validate_source_text_not_empty(cls, v):
+        if not v or not v.strip():
+            raise ValueError('Source text cannot be empty')
+        return v.strip()
+
+
+class EnhancedDeconstructResponse(BaseModel):
+    """Enhanced response schema for blueprint creation with primitives."""
+    blueprint_id: str = Field(..., description="Unique identifier for the generated blueprint")
+    source_text: str = Field(..., description="Original source text")
+    blueprint_json: Dict[str, Any] = Field(..., description="Generated LearningBlueprint JSON")
+    primitives: List[KnowledgePrimitiveDto] = Field(..., description="Extracted primitives with mastery criteria")
+    mastery_criteria_coverage: Dict[str, Any] = Field(..., description="Coverage analysis")
+    quality_metrics: Dict[str, Any] = Field(..., description="Quality assessment metrics")
+    core_api_sync_status: Optional[str] = Field(None, description="Core API synchronization status")
+    created_at: str = Field(..., description="Timestamp of creation")
+    status: str = Field(..., description="Status of the deconstruction process") 
+# Import from answer evaluation schemas
+from app.api.answer_evaluation_schemas import (
+    PrismaCriterionEvaluationRequest,
+    PrismaCriterionEvaluationResponse
+)
+from app.api.criterion_question_schemas import CriterionQuestionDto

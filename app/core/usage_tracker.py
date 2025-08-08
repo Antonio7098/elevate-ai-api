@@ -220,7 +220,7 @@ class UsageTracker:
 usage_tracker = UsageTracker()
 
 
-def estimate_google_ai_cost(input_tokens: int, output_tokens: int, model: str = "gemini-1.5-flash") -> float:
+def estimate_google_ai_cost(input_tokens: int, output_tokens: int, model: str = "gemini-2.5-flash") -> float:
     """Estimate cost for Google AI API call.
     
     Args:
@@ -233,12 +233,12 @@ def estimate_google_ai_cost(input_tokens: int, output_tokens: int, model: str = 
     """
     # Google AI pricing (as of 2024, may need updates)
     pricing = {
-        "gemini-1.5-flash": {"input": 0.000075, "output": 0.0003},  # per 1K tokens
+        "gemini-2.5-flash": {"input": 0.000075, "output": 0.0003},  # per 1K tokens
         "gemini-1.5-pro": {"input": 0.0035, "output": 0.0105},      # per 1K tokens
         "gemini-pro": {"input": 0.0005, "output": 0.0015}           # per 1K tokens
     }
     
-    model_pricing = pricing.get(model, pricing["gemini-1.5-flash"])
+    model_pricing = pricing.get(model, pricing["gemini-2.5-flash"])
     
     input_cost = (input_tokens / 1000) * model_pricing["input"]
     output_cost = (output_tokens / 1000) * model_pricing["output"]

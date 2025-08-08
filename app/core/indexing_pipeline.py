@@ -79,16 +79,34 @@ class IndexingPipeline:
     async def _initialize_services(self):
         """Initialize vector store and embedding services."""
         if not self.vector_store:
-            self.vector_store = create_vector_store(
-                store_type=self.settings.vector_store_type,
-                api_key=self.settings.pinecone_api_key,
-                environment=self.settings.pinecone_environment,
-                persist_directory=self.settings.chroma_persist_directory
-            )
-            await self.vector_store.initialize()
+            try:
+                from app.core.services import get_vector_store as get_global_vector_store
+                self.vector_store = await get_global_vector_store()
+            except Exception:
+                self.vector_store = create_vector_store(
+                    store_type=self.settings.vector_store_type,
+                    api_key=self.settings.pinecone_api_key,
+                    environment=self.settings.pinecone_environment,
+                    persist_directory=self.settings.chroma_persist_directory
+                )
+                await self.vector_store.initialize()
         
         if not self.embedding_service:
             self.embedding_service = await get_embedding_service()
+        
+        # Ensure index/collection exists before use
+        try:
+            exists = await self.vector_store.index_exists("blueprint-nodes")
+            if not exists:
+                # Choose dimension from embedding service if available; fallback to 768
+                try:
+                    dim = self.embedding_service.get_dimension()
+                except Exception:
+                    dim = 768
+                await self.vector_store.create_index("blueprint-nodes", dimension=dim)
+        except Exception:
+            # Best-effort; continue even if create check fails
+            pass
     
     async def index_blueprint(self, blueprint: LearningBlueprint) -> Dict[str, Any]:
         """
@@ -255,11 +273,15 @@ class IndexingPipeline:
             if node.uue_stage:
                 metadata["uue_stage"] = node.uue_stage.value
                 
-            # Add node metadata, filtering out None values
+            # Add node metadata, filtering out None values and converting lists to strings
             if node.metadata:
                 for key, value in node.metadata.items():
                     if value is not None:
-                        metadata[key] = value
+                        # Convert lists to comma-separated strings for ChromaDB compatibility
+                        if isinstance(value, list):
+                            metadata[key] = ",".join(str(item) for item in value)
+                        else:
+                            metadata[key] = value
             
             vectors.append({
                 "id": node.id,

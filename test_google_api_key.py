@@ -60,7 +60,7 @@ except Exception as e:
 # Test 4: Try simple generation (if models work)
 try:
     print("\n🎯 Testing text generation...")
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('gemini-2.5-flash')
     response = model.generate_content("Hello, world!")
     print("✅ Text generation successful!")
     print(f"📝 Response: {response.text[:100]}...")

@@ -287,7 +287,7 @@ class RAGSearchService:
         # Generate embedding for the query
         print(f"[DEBUG] About to generate embedding for query...")
         try:
-            query_embedding = await self.embedding_service.generate_embedding(transformation.expanded_query)
+            query_embedding = await self.embedding_service.embed_text(transformation.expanded_query)
             print(f"[DEBUG] Query embedding generated successfully, dimension: {len(query_embedding)}")
         except Exception as e:
             print(f"[DEBUG] Failed to generate embedding: {e}")
@@ -381,7 +381,7 @@ class RAGSearchService:
     ) -> List[SearchResult]:
         """Perform broad semantic search for conceptual queries."""
         # Use expanded query for broader search
-        query_embedding = await self.embedding_service.generate_embedding(transformation.expanded_query)
+        query_embedding = await self.embedding_service.embed_text(transformation.expanded_query)
         
         metadata_filters = search_params.get('metadata_filters', {})
         
@@ -412,7 +412,7 @@ class RAGSearchService:
         # CRITICAL: Always filter by userId for user isolation
         metadata_filters['userId'] = request.user_id
         
-        query_embedding = await self.embedding_service.generate_embedding(transformation.expanded_query)
+        query_embedding = await self.embedding_service.embed_text(transformation.expanded_query)
         
         results = await self.vector_store.search(
             index_name=self.index_name,
@@ -434,7 +434,7 @@ class RAGSearchService:
         all_results = []
         
         # Main query
-        main_embedding = await self.embedding_service.generate_embedding(transformation.expanded_query)
+        main_embedding = await self.embedding_service.embed_text(transformation.expanded_query)
         metadata_filters = search_params.get('metadata_filters', {})
         
         # CRITICAL: Always filter by userId for user isolation
@@ -451,7 +451,7 @@ class RAGSearchService:
         # Reformulated queries
         for reformulated in transformation.reformulated_queries[:3]:  # Top 3 reformulations
             try:
-                reform_embedding = await self.embedding_service.generate_embedding(reformulated)
+                reform_embedding = await self.embedding_service.embed_text(reformulated)
                 reform_results = await self.vector_store.search(
                     index_name=self.index_name,
                     query_vector=reform_embedding,
@@ -490,7 +490,7 @@ class RAGSearchService:
             if recent_context:
                 context_query += " " + " ".join(recent_context)
         
-        query_embedding = await self.embedding_service.generate_embedding(context_query)
+        query_embedding = await self.embedding_service.embed_text(context_query)
         
         metadata_filters = search_params.get('metadata_filters', {})
         
@@ -520,7 +520,7 @@ class RAGSearchService:
         metadata_filters['userId'] = request.user_id
         
         # Search with lower threshold for more diverse results
-        query_embedding = await self.embedding_service.generate_embedding(transformation.expanded_query)
+        query_embedding = await self.embedding_service.embed_text(transformation.expanded_query)
         
         results = await self.vector_store.search(
             index_name=self.index_name,

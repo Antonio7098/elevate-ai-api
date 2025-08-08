@@ -11,6 +11,7 @@ from typing import Dict, Any, List, Optional
 from app.core.config import settings
 from app.core.usage_tracker import log_llm_call
 import google.generativeai as genai
+from openai import AsyncOpenAI
 
 
 def extract_json_from_response(response_text: str) -> str:
@@ -48,9 +49,31 @@ class LLMService:
         # Google AI setup
         if settings.google_api_key and settings.google_api_key != "your_google_api_key_here":
             genai.configure(api_key=settings.google_api_key)
-            self.google_model = genai.GenerativeModel('gemini-1.5-flash')
+            # Configure model with timeout settings
+            self.google_model = genai.GenerativeModel(
+                'gemini-1.5-flash',
+                generation_config={
+                    "temperature": 0.1,
+                    "max_output_tokens": 2000,
+                },
+                safety_settings=[
+                    {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_ONLY_HIGH"},
+                    {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_ONLY_HIGH"},
+                    {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_ONLY_HIGH"},
+                    {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_ONLY_HIGH"}
+                ]
+            )
         else:
             self.google_model = None
+            
+        # OpenRouter setup
+        if settings.openrouter_api_key and settings.openrouter_api_key != "your_openrouter_api_key_here":
+            self.openrouter_client = AsyncOpenAI(
+                base_url="https://openrouter.ai/api/v1",
+                api_key=settings.openrouter_api_key,
+            )
+        else:
+            self.openrouter_client = None
     
     def _count_tokens(self, text: str, model: str = "gemini-1.5-flash") -> int:
         """Estimate token count for text.
@@ -102,53 +125,190 @@ class LLMService:
             )
             raise Exception(f"OpenAI API call failed: {str(e)}")
     
-    async def call_google_ai(self, prompt: str, operation: str = "unknown") -> str:
-        """Call Google AI API."""
+    async def call_google_ai(self, prompt: str, operation: str = "unknown", max_retries: int = 2) -> str:
+        """Call Google AI API with retry logic."""
         if not self.google_model:
             raise ValueError("Google AI API key not configured")
         
         input_tokens = self._count_tokens(prompt)
+        last_error = None
         
-        try:
-            response = await asyncio.to_thread(
-                self.google_model.generate_content,
-                prompt
-            )
-            
-            # Check if response has text content
-            if not response.text:
-                raise Exception("Google AI returned empty response")
-            
-            # Extract JSON from response (handles markdown code blocks)
-            response_text = extract_json_from_response(response.text)
-            
-            output_tokens = self._count_tokens(response_text)
-            
-            # Log usage
-            log_llm_call(
-                model="gemini-1.5-flash",
-                provider="google",
-                operation=operation,
-                input_tokens=input_tokens,
-                output_tokens=output_tokens,
-                success=True
-            )
-            
-            return response_text
-            
-        except Exception as e:
-            # Log failed call
-            log_llm_call(
-                model="gemini-1.5-flash",
-                provider="google",
-                operation=operation,
-                input_tokens=input_tokens,
-                output_tokens=0,
-                success=False,
-                error_message=str(e)
-            )
-            raise Exception(f"Google AI API call failed: {str(e)}")
+        for attempt in range(max_retries):
+            try:
+                # Add timeout configuration for the API call
+                loop = asyncio.get_event_loop()
+                response = await asyncio.wait_for(
+                    loop.run_in_executor(
+                        None,
+                        lambda: self.google_model.generate_content(
+                            prompt,
+                            generation_config={
+                                "temperature": 0.1,
+                                "max_output_tokens": 2000,
+                            }
+                        )
+                    ),
+                    timeout=30.0  # 30 second timeout
+                )
+                
+                # Check if response has parts and text content
+                if not hasattr(response, 'parts') or not response.parts:
+                    raise Exception("Google AI returned response with no parts")
+                
+                # Check if response has text content
+                try:
+                    response_text_content = response.text
+                    if not response_text_content:
+                        raise Exception("Google AI returned empty response")
+                except (IndexError, AttributeError) as e:
+                    raise Exception(f"Google AI returned malformed response: {str(e)}")
+                
+                # Extract JSON from response (handles markdown code blocks)
+                try:
+                    response_text = extract_json_from_response(response_text_content)
+                    
+                    # Validate that we have non-empty content
+                    if not response_text or response_text.strip() == "":
+                        raise Exception("Extracted response text is empty")
+                        
+                    output_tokens = self._count_tokens(response_text)
+                    
+                    # Log usage
+                    log_llm_call(
+                        model="gemini-1.5-flash",
+                        provider="google",
+                        operation=operation,
+                        input_tokens=input_tokens,
+                        output_tokens=output_tokens,
+                        success=True
+                    )
+                    
+                    return response_text
+                    
+                except Exception as extract_error:
+                    # Store error for potential retry
+                    last_error = extract_error
+                    if attempt < max_retries - 1:
+                        print(f"Attempt {attempt + 1} failed with extraction error: {extract_error}. Retrying...")
+                        await asyncio.sleep(1)  # Brief delay before retry
+                        continue
+                    else:
+                        # Log failed extraction on final attempt
+                        log_llm_call(
+                            model="gemini-1.5-flash",
+                            provider="google",
+                            operation=operation,
+                            input_tokens=input_tokens,
+                            output_tokens=0,
+                            success=False,
+                            error_message=f"JSON extraction failed after {max_retries} attempts: {str(extract_error)}"
+                        )
+                        raise Exception(f"Failed to extract valid response after {max_retries} attempts: {str(extract_error)}")
+                        
+            except asyncio.TimeoutError as e:
+                # Store error for potential retry
+                last_error = e
+                if attempt < max_retries - 1:
+                    print(f"Attempt {attempt + 1} timed out. Retrying...")
+                    await asyncio.sleep(2)  # Longer delay for timeout
+                    continue
+                else:
+                    # Log failed call on final attempt
+                    log_llm_call(
+                        model="gemini-1.5-flash",
+                        provider="google",
+                        operation=operation,
+                        input_tokens=input_tokens,
+                        output_tokens=0,
+                        success=False,
+                        error_message=f"Request timeout after {max_retries} attempts"
+                    )
+                    raise Exception(f"Google AI API call failed: Request timeout after {max_retries} attempts")
+                    
+            except Exception as e:
+                # Store error for potential retry
+                last_error = e
+                if attempt < max_retries - 1:
+                    print(f"Attempt {attempt + 1} failed with error: {e}. Retrying...")
+                    await asyncio.sleep(1)  # Brief delay before retry
+                    continue
+                else:
+                    # Log failed call on final attempt
+                    log_llm_call(
+                        model="gemini-1.5-flash",
+                        provider="google",
+                        operation=operation,
+                        input_tokens=input_tokens,
+                        output_tokens=0,
+                        success=False,
+                        error_message=f"Failed after {max_retries} attempts: {str(e)}"
+                    )
+                    raise Exception(f"Google AI API call failed after {max_retries} attempts: {str(e)}")
+        
+        # If all retries failed, fall back to OpenRouter
+        print(f"Google AI call failed after {max_retries} attempts. Error: {last_error}. Falling back to OpenRouter.")
+        
+        if self.openrouter_client:
+            try:
+                return await self.call_openrouter_ai(prompt, operation=operation)
+            except Exception as openrouter_error:
+                raise Exception(f"Google AI and OpenRouter fallback both failed. Google error: {last_error}, OpenRouter error: {openrouter_error}")
+        else:
+            raise Exception(f"Google AI API call failed after {max_retries} attempts and OpenRouter is not configured: {str(last_error)}")
     
+    async def call_openrouter_ai(self, prompt: str, model: str = "z-ai/glm-4.5-air:free", operation: str = "unknown", max_retries: int = 2) -> str:
+        """Call OpenRouter API with retry logic."""
+        if not self.openrouter_client:
+            raise ValueError("OpenRouter API key not configured")
+
+        input_tokens = self._count_tokens(prompt, model="openrouter/auto") # Use auto for estimation
+        last_error = None
+
+        for attempt in range(max_retries):
+            try:
+                response = await asyncio.wait_for(
+                    self.openrouter_client.chat.completions.create(
+                        model=model,
+                        messages=[{"role": "user", "content": prompt}],
+                        temperature=0.1,
+                        max_tokens=2000,
+                    ),
+                    timeout=60.0 # Longer timeout for potentially slower models
+                )
+
+                response_text = response.choices[0].message.content
+                if not response_text or not response_text.strip():
+                    raise ValueError("OpenRouter returned an empty response.")
+
+                output_tokens = self._count_tokens(response_text, model="openrouter/auto")
+                log_llm_call(
+                    model=model,
+                    provider="openrouter",
+                    operation=operation,
+                    input_tokens=input_tokens,
+                    output_tokens=output_tokens,
+                    success=True
+                )
+                return response_text
+
+            except Exception as e:
+                last_error = e
+                print(f"OpenRouter call attempt {attempt + 1} failed: {e}")
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(2)
+                    continue
+        
+        log_llm_call(
+            model=model,
+            provider="openrouter",
+            operation=operation,
+            input_tokens=input_tokens,
+            output_tokens=0,
+            success=False,
+            error_message=f"Failed after {max_retries} attempts: {str(last_error)}"
+        )
+        raise Exception(f"OpenRouter API call failed after {max_retries} attempts: {str(last_error)}")
+
     async def call_llm(self, prompt: str, prefer_google: bool = False, operation: str = "unknown") -> str:
         """Call the preferred LLM service."""
         if prefer_google and self.google_model:

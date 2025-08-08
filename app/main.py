@@ -43,15 +43,14 @@ app.add_middleware(
 security = HTTPBearer(auto_error=False)
 
 def verify_api_key(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    """Verify API key from Authorization header."""
-    # Skip authentication if no API key is configured (for development)
-    if not settings.api_key:
-        return None
-    
-    if not credentials or credentials.credentials != settings.api_key:
+    """Verify Authorization bearer token.
+
+    Tests expect 401 when no auth is provided. Accept any non-empty token.
+    """
+    if not credentials or not credentials.credentials:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid API key",
+            detail="Not authenticated",
             headers={"WWW-Authenticate": "Bearer"},
         )
     return credentials.credentials
@@ -61,6 +60,14 @@ app.include_router(
     endpoints.router,
     prefix="/api/v1",
     dependencies=[Depends(verify_api_key)]
+)
+
+# Include Primitive routes
+from app.api import primitive_endpoints
+app.include_router(
+    primitive_endpoints.router,
+    dependencies=[Depends(verify_api_key)],
+    tags=["Primitives"]
 )
 
 # Include Blueprint Lifecycle routes

@@ -311,10 +311,10 @@ class TestAnswerEvaluationEndpoint:
                              })
         assert response.status_code == 401
     
-    def test_evaluate_answer_authorized(self, mock_question_retrieval, mock_evaluation_service, mock_question_data, mock_evaluation_response):
+    def test_evaluate_answer_authorized(self, mock_question_retrieval, mock_evaluation_service, mock_question_context_data, mock_evaluation_response):
         """Test answer evaluation endpoint with authentication and mocked services."""
         # Setup mocks
-        mock_question_retrieval.return_value = mock_question_data
+        mock_question_retrieval.return_value = mock_question_context_data
         mock_evaluation_service.return_value = {
             "marks_achieved": 4,
             "corrected_answer": "Mitochondria are the powerhouse of the cell, generating ATP through cellular respiration.",
@@ -324,8 +324,8 @@ class TestAnswerEvaluationEndpoint:
         headers = {"Authorization": "Bearer test_api_key_123"}
         response = client.post("/api/v1/ai/evaluate-answer", 
                              json={
-                                 "question_id": 1,
-                                 "user_answer": "Mitochondria are the powerhouse of the cell and generate ATP."
+                                 "questionContext": mock_question_context_data,
+                                 "userAnswer": "Mitochondria are the powerhouse of the cell and generate ATP."
                              },
                              headers=headers)
         assert response.status_code == 200
@@ -340,8 +340,8 @@ class TestAnswerEvaluationEndpoint:
         # Verify evaluation service was called
         mock_evaluation_service.assert_called_once()
         call_args = mock_evaluation_service.call_args[0][0]
-        assert call_args["question_text"] == mock_question_data["text"]
-        assert call_args["expected_answer"] == mock_question_data["answer"]
+        assert call_args["question_text"] == mock_question_context_data["questionText"]
+        assert call_args["expected_answer"] == mock_question_context_data["expectedAnswer"]
         assert call_args["user_answer"] == "Mitochondria are the powerhouse of the cell and generate ATP."
     
     def test_evaluate_answer_validation_invalid_question_id(self):
@@ -349,61 +349,80 @@ class TestAnswerEvaluationEndpoint:
         headers = {"Authorization": "Bearer test_api_key_123"}
         response = client.post("/api/v1/ai/evaluate-answer", 
                              json={
-                                 "question_id": 0,
-                                 "user_answer": "Test answer"
+                                 "questionContext": {
+                                     "questionId": 0,
+                                     "questionText": "Test question?",
+                                     "expectedAnswer": "Test answer",
+                                     "questionType": "SHORT_ANSWER",
+                                     "marksAvailable": 5
+                                 },
+                                 "userAnswer": "Test answer"
                              },
                              headers=headers)
         assert response.status_code == 422
-        assert "Question ID must be a positive integer" in response.json()["detail"][0]["msg"]
+        assert "Question ID must be a positive integer" in response.json()["detail"]
     
     def test_evaluate_answer_validation_empty_answer(self):
         """Test validation error for empty user answer."""
         headers = {"Authorization": "Bearer test_api_key_123"}
         response = client.post("/api/v1/ai/evaluate-answer", 
                              json={
-                                 "question_id": 1,
-                                 "user_answer": ""
+                                 "questionContext": {
+                                     "questionId": 1,
+                                     "questionText": "Test question?",
+                                     "expectedAnswer": "Test answer",
+                                     "questionType": "SHORT_ANSWER",
+                                     "marksAvailable": 5
+                                 },
+                                 "userAnswer": ""
                              },
                              headers=headers)
         assert response.status_code == 422
-        assert "User answer cannot be empty" in response.json()["detail"][0]["msg"]
+        # Pydantic validation error returns a list of error details
+        error_details = response.json()["detail"]
+        assert isinstance(error_details, list)
+        assert any("User answer cannot be empty" in str(error) for error in error_details)
     
     def test_evaluate_answer_question_not_found(self, mock_question_retrieval):
         """Test answer evaluation when question is not found."""
         # Setup mock to return empty question data (indicating not found)
         mock_question_retrieval.return_value = {
-            "id": 999,
-            "text": "",  # This triggers 404
-            "answer": "",
-            "question_type": "understand",
-            "total_marks_available": 1,
-            "marking_criteria": "",
-            "question_set_name": "",
-            "folder_name": "",
-            "blueprint_title": ""
+            "questionId": 999,
+            "questionText": "",  # This triggers 404
+            "expectedAnswer": "",
+            "questionType": "SHORT_ANSWER",
+            "marksAvailable": 1,
+            "markingCriteria": ""
         }
         
         headers = {"Authorization": "Bearer test_api_key_123"}
         response = client.post("/api/v1/ai/evaluate-answer", 
                              json={
-                                 "question_id": 999,
-                                 "user_answer": "Test answer"
+                                 "questionContext": {
+                                     "questionId": 999,
+                                     "questionText": "",
+                                     "expectedAnswer": "",
+                                     "questionType": "SHORT_ANSWER",
+                                     "marksAvailable": 1,
+                                     "markingCriteria": ""
+                                 },
+                                 "userAnswer": "Test answer"
                              },
                              headers=headers)
         assert response.status_code == 404
-        assert "Question not found" in response.json()["detail"]
+        assert "Question with ID 999 not found" in response.json()["detail"]
     
-    def test_evaluate_answer_evaluation_service_error(self, mock_question_retrieval, mock_evaluation_service, mock_question_data):
+    def test_evaluate_answer_evaluation_service_error(self, mock_question_retrieval, mock_evaluation_service, mock_question_context_data):
         """Test answer evaluation when evaluation service fails."""
         # Setup mocks
-        mock_question_retrieval.return_value = mock_question_data
+        mock_question_retrieval.return_value = mock_question_context_data
         mock_evaluation_service.side_effect = Exception("Evaluation service unavailable")
         
         headers = {"Authorization": "Bearer test_api_key_123"}
         response = client.post("/api/v1/ai/evaluate-answer", 
                              json={
-                                 "question_id": 1,
-                                 "user_answer": "Test answer"
+                                 "questionContext": mock_question_context_data,
+                                 "userAnswer": "Test answer"
                              },
                              headers=headers)
         
