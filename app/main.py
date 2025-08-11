@@ -6,7 +6,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import Dict, Any
 from app.core.config import settings
-from app.api import endpoints
 from app.api.blueprint_lifecycle_endpoints import lifecycle_router
 from app.core.indexing import evaluate_answer
 from app.core.services import initialize_services, shutdown_services
@@ -56,11 +55,7 @@ def verify_api_key(credentials: HTTPAuthorizationCredentials = Depends(security)
     return credentials.credentials
 
 # Include API routes
-app.include_router(
-    endpoints.router,
-    prefix="/api/v1",
-    dependencies=[Depends(verify_api_key)]
-)
+# Note: We include specific routers below; a generic endpoints.router is not used.
 
 # Include Primitive routes
 from app.api import primitive_endpoints
@@ -76,6 +71,23 @@ app.include_router(
     prefix="/api/v1",
     dependencies=[Depends(verify_api_key)],
     tags=["Blueprint Lifecycle"]
+)
+
+# Include Note Creation Agent routes
+from app.api.note_creation_endpoints import router as note_creation_router
+app.include_router(
+    note_creation_router,
+    dependencies=[Depends(verify_api_key)],
+    tags=["Note Creation Agent"]
+)
+
+# Include Premium API routes
+from app.api.premium import premium_router
+app.include_router(
+    premium_router,
+    prefix="/api/v1",
+    dependencies=[Depends(verify_api_key)],
+    tags=["Premium"]
 )
 
 # Startup and shutdown events

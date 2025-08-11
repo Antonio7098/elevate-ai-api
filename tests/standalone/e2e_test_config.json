@@ -1,0 +1,71 @@
+{
+  "test_configuration": {
+    "timeout": 60.0,
+    "retry_attempts": 3,
+    "retry_delay": 2.0,
+    "performance_threshold": 30.0,
+    "cost_threshold": 1.0,
+    "concurrent_requests": 5,
+    "test_iterations": 3
+  },
+  "api_endpoints": {
+    "ai_api_base_url": "http://localhost:8000",
+    "core_api_base_url": "http://localhost:3000",
+    "ai_api_health": "/health",
+    "premium_api_health": "/api/v1/premium/health",
+    "core_api_health": "/health"
+  },
+  "test_queries": {
+    "simple": [
+      "Hello, how are you?",
+      "What is the weather like?",
+      "Explain a simple concept"
+    ],
+    "medium": [
+      "Explain the basics of machine learning",
+      "What are the key differences between supervised and unsupervised learning?",
+      "How does a neural network work? Explain with examples."
+    ],
+    "complex": [
+      "Analyze the impact of AI on healthcare and provide detailed recommendations with examples",
+      "Explain quantum mechanics with examples and mathematical formulations",
+      "Provide a comprehensive analysis of blockchain technology and its applications"
+    ]
+  },
+  "performance_targets": {
+    "simple_query_response_time": 5.0,
+    "medium_query_response_time": 15.0,
+    "complex_query_response_time": 30.0,
+    "concurrent_response_time": 20.0,
+    "cost_per_query": 0.01,
+    "success_rate_threshold": 0.95
+  },
+  "load_testing": {
+    "concurrent_users": [1, 5, 10, 20],
+    "test_duration": 300,
+    "ramp_up_time": 60,
+    "steady_state_time": 180,
+    "ramp_down_time": 60
+  },
+  "monitoring": {
+    "enable_metrics_collection": true,
+    "metrics_interval": 10,
+    "enable_alerting": true,
+    "alert_thresholds": {
+      "response_time": 30.0,
+      "error_rate": 0.05,
+      "cost_per_minute": 0.10
+    }
+  },
+  "reporting": {
+    "generate_html_report": true,
+    "generate_json_report": true,
+    "include_performance_graphs": true,
+    "save_screenshots": false,
+    "report_directory": "./e2e_test_reports"
+  }
+}
+
+
+
+

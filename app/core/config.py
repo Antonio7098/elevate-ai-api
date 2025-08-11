@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     port: int = 8000
     debug: bool = True
     
+    # Feature Flags
+    use_llm: bool = False  # Toggle real LLM usage in endpoints (env: USE_LLM)
+    
     class Config:
         env_file = ".env"
         case_sensitive = False

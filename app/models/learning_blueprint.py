@@ -213,7 +213,11 @@ class LearningBlueprint(BaseModel):
     source_title: str = Field(..., description="Title of the learning source")
     source_type: str = Field(..., description="Type of source (e.g., chapter, article, video)")
     source_summary: dict = Field(..., description="Summary information about the source")
+    # Optional raw content and serialized form retained for compatibility with tests and services
+    content: Optional[str] = Field(default=None, description="Raw source content (optional)")
+    blueprint_json: Optional[Dict[str, Any]] = Field(default=None, description="Serialized blueprint payload (optional)")
     sections: List[Section] = Field(default_factory=list, description="Hierarchical sections of the source")
+    tags: List[str] = Field(default_factory=list, description="Optional tags associated with the blueprint")
     knowledge_primitives: KnowledgePrimitives = Field(..., description="All knowledge primitives extracted from the source")
     
     class Config:

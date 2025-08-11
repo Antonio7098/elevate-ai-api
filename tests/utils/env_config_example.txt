@@ -1,0 +1,36 @@
+# Environment Configuration for Elevate AI API
+# Copy this to .env and fill in your actual API keys
+
+# Google AI API Key (Required for Gemini models)
+GOOGLE_API_KEY=your_google_api_key_here
+
+# OpenRouter API Key (Required for GLM 4.5 Air fallback)
+OPENROUTER_API_KEY=your_openrouter_api_key_here
+
+# OpenAI API Key (Optional - currently disabled)
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Core API Configuration
+CORE_API_BASE_URL=http://localhost:3000
+CORE_API_TIMEOUT=30
+
+# Premium Features Configuration
+ENABLE_PREMIUM_FEATURES=true
+PREMIUM_USER_TIER=standard
+
+# Model Configuration
+PRIMARY_MODEL=gemini-1.5-flash
+FALLBACK_MODEL=z-ai/glm-4.5-air:free
+
+# Cost Optimization
+MAX_COST_PER_REQUEST=0.10
+COST_OPTIMIZATION_ENABLED=true
+
+# Performance Settings
+MAX_CONCURRENT_REQUESTS=10
+REQUEST_TIMEOUT=60
+MAX_RETRIES=3
+
+
+
+

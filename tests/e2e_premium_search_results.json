@@ -1,0 +1,32 @@
+[
+  {
+    "test": "Core API Knowledge Retrieval",
+    "success": true,
+    "timestamp": "2025-08-10 04:35:59.712193"
+  },
+  {
+    "test": "Basic Graph Search",
+    "success": false,
+    "timestamp": "2025-08-10 04:35:59.713687"
+  },
+  {
+    "test": "Advanced Search (RAG-Fusion)",
+    "success": false,
+    "timestamp": "2025-08-10 04:35:59.715148"
+  },
+  {
+    "test": "Multi-Modal Search",
+    "success": false,
+    "timestamp": "2025-08-10 04:35:59.716837"
+  },
+  {
+    "test": "Graph-Based Search",
+    "success": false,
+    "timestamp": "2025-08-10 04:35:59.718382"
+  },
+  {
+    "test": "Search Performance",
+    "success": false,
+    "timestamp": "2025-08-10 04:35:59.719846"
+  }
+]

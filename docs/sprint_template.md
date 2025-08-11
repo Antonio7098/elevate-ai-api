@@ -7,6 +7,16 @@
 
 ---
 
+## I. Sprint Goals & Objectives
+
+### Primary Goals:
+1. 
+
+### Success Criteria:
+- ...
+
+---
+
 ## I. Planned Tasks & To-Do List (Derived from Gemini's Prompt)
 
 *Instructions for Antonio: Review the prompt/instructions provided by Gemini for the current development task. Break down each distinct step or deliverable into a checkable to-do item below. Be specific.*

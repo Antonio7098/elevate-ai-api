@@ -1,0 +1,54 @@
+# Test dependencies for Elevate AI API
+# Core testing framework
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.0.0
+pytest-xdist>=3.0.0
+pytest-html>=3.1.0
+pytest-json-report>=1.5.0
+
+# HTTP client libraries for API testing
+httpx>=0.24.0
+aiohttp>=3.8.0
+requests>=2.28.0
+
+# Async testing support
+asyncio-mqtt>=0.11.0
+aioresponses>=0.7.0
+
+# Performance testing
+locust>=2.15.0
+pytest-benchmark>=4.0.0
+
+# Mocking and test utilities
+pytest-mock>=3.10.0
+responses>=0.23.0
+freezegun>=1.2.0
+
+# Data validation and serialization
+jsonschema>=4.17.0
+pydantic>=2.0.0
+
+# Reporting and visualization
+matplotlib>=3.6.0
+seaborn>=0.12.0
+plotly>=5.13.0
+
+# Environment and configuration
+python-dotenv>=1.0.0
+pyyaml>=6.0
+
+# Code quality and coverage
+coverage>=7.0.0
+flake8>=5.0.0
+black>=23.0.0
+isort>=5.12.0
+
+# Development utilities
+pre-commit>=3.0.0
+tox>=4.0.0
+
+# Optional: Advanced testing features
+# pytest-selenium>=4.0.0  # For browser testing
+# pytest-playwright>=0.3.0  # For modern browser testing
+# pytest-docker>=2.0.0  # For container testing
