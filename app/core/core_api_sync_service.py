@@ -10,6 +10,7 @@ import asyncio
 from typing import List, Dict, Any, Optional, Tuple
 from datetime import datetime, timezone
 from app.models.learning_blueprint import KnowledgePrimitive, MasteryCriterion, Question
+from app.models.blueprint_centric import BlueprintSection
 from app.core.core_api_integration import core_api_client
 from app.core.primitive_transformation import primitive_transformer
 
@@ -199,8 +200,8 @@ class CoreAPISyncService:
             'trackingIntensity': primitive.trackingIntensity,
             'blueprintId': blueprint_id,
             'userId': user_id,
-            'createdAt': datetime.utcnow().isoformat(),
-            'updatedAt': datetime.utcnow().isoformat()
+            'createdAt': datetime.now(timezone.utc).isoformat(),
+            'updatedAt': datetime.now(timezone.utc).isoformat()
         }
     
     def _prepare_criterion_data(
@@ -217,8 +218,8 @@ class CoreAPISyncService:
             'weight': criterion.weight,
             'isRequired': criterion.isRequired,
             'primitiveId': primitive_id,
-            'createdAt': datetime.utcnow().isoformat(),
-            'updatedAt': datetime.utcnow().isoformat()
+            'createdAt': datetime.now(timezone.utc).isoformat(),
+            'updatedAt': datetime.now(timezone.utc).isoformat()
         }
     
     async def sync_questions_to_criteria(
@@ -296,8 +297,8 @@ class CoreAPISyncService:
             'ueeLevel': getattr(question, 'uee_level', None),
             'weight': getattr(question, 'weight', 1.0),
             'userId': user_id,
-            'createdAt': datetime.utcnow().isoformat(),
-            'updatedAt': datetime.utcnow().isoformat()
+            'createdAt': datetime.now(timezone.utc).isoformat(),
+            'updatedAt': datetime.now(timezone.utc).isoformat()
         }
     
     async def verify_sync_integrity(
@@ -728,6 +729,197 @@ class CoreAPISyncService:
                 'status': 'not_found',
                 'error': 'Task ID not found'
             }
+
+    async def sync_blueprint_with_sections(
+        self,
+        blueprint_sections: List[BlueprintSection],
+        blueprint_id: str,
+        user_id: str
+    ) -> Dict[str, Any]:
+        """
+        Synchronize blueprint sections with Core API.
+        
+        Args:
+            blueprint_sections: List of BlueprintSection instances to sync
+            blueprint_id: Associated blueprint ID
+            user_id: User ID for ownership
+            
+        Returns:
+            Sync result with success/failure counts and created IDs
+        """
+        sync_result = {
+            'success': True,
+            'sections_created': 0,
+            'sections_updated': 0,
+            'errors': [],
+            'created_section_ids': [],
+            'updated_section_ids': []
+        }
+        
+        try:
+            # Process sections in batches
+            for i in range(0, len(blueprint_sections), self.batch_size):
+                batch = blueprint_sections[i:i + self.batch_size]
+                batch_result = await self._sync_section_batch(batch, blueprint_id, user_id)
+                
+                # Accumulate results
+                sync_result['sections_created'] += batch_result['sections_created']
+                sync_result['sections_updated'] += batch_result['sections_updated']
+                sync_result['created_section_ids'].extend(batch_result['created_section_ids'])
+                sync_result['updated_section_ids'].extend(batch_result['updated_section_ids'])
+                sync_result['errors'].extend(batch_result['errors'])
+                
+                if not batch_result['success']:
+                    sync_result['success'] = False
+                
+                # Brief delay between batches to avoid overwhelming Core API
+                await asyncio.sleep(0.1)
+            
+            logger.info(
+                f"Blueprint sections sync completed: {sync_result['sections_created']} created, "
+                f"{sync_result['sections_updated']} updated"
+            )
+            
+            return sync_result
+            
+        except Exception as e:
+            logger.error(f"Failed to sync blueprint sections: {e}")
+            sync_result['success'] = False
+            sync_result['errors'].append(f"Blueprint sections sync failed: {str(e)}")
+            return sync_result
+    
+    async def _sync_section_batch(
+        self,
+        batch: List[BlueprintSection],
+        blueprint_id: str,
+        user_id: str
+    ) -> Dict[str, Any]:
+        """Sync a batch of blueprint sections with retry logic."""
+        batch_result = {
+            'success': True,
+            'sections_created': 0,
+            'sections_updated': 0,
+            'errors': [],
+            'created_section_ids': [],
+            'updated_section_ids': []
+        }
+        
+        for section in batch:
+            for attempt in range(self.retry_attempts):
+                try:
+                    section_result = await self._sync_single_section(
+                        section, blueprint_id, user_id
+                    )
+                    
+                    if section_result['success']:
+                        if section_result['action'] == 'created':
+                            batch_result['sections_created'] += 1
+                            batch_result['created_section_ids'].append(section_result['section_id'])
+                        else:
+                            batch_result['sections_updated'] += 1
+                            batch_result['updated_section_ids'].append(section_result['section_id'])
+                        break  # Success, no need to retry
+                        
+                    else:
+                        if attempt == self.retry_attempts - 1:  # Last attempt
+                            batch_result['success'] = False
+                            batch_result['errors'].append(
+                                f"Failed to sync section {section.id} after {self.retry_attempts} attempts: "
+                                f"{section_result.get('error', 'Unknown error')}"
+                            )
+                        else:
+                            await asyncio.sleep(self.retry_delay * (attempt + 1))
+                            
+                except Exception as e:
+                    logger.error(f"Error syncing section {section.id}, attempt {attempt + 1}: {e}")
+                    if attempt == self.retry_attempts - 1:
+                        batch_result['success'] = False
+                        batch_result['errors'].append(f"Section {section.id}: {str(e)}")
+                    else:
+                        await asyncio.sleep(self.retry_delay * (attempt + 1))
+        
+        return batch_result
+    
+    async def _sync_single_section(
+        self,
+        section: BlueprintSection,
+        blueprint_id: str,
+        user_id: str
+    ) -> Dict[str, Any]:
+        """Sync a single blueprint section."""
+        try:
+            # Check if section already exists in Core API
+            existing_section = await self.core_api_client.get_section(section.id)
+            
+            if existing_section.get('success') and existing_section.get('section'):
+                # Section exists, update it
+                section_data = self._prepare_section_data(section, blueprint_id, user_id)
+                update_response = await self.core_api_client.update_section(section.id, section_data)
+                
+                if update_response.get('success'):
+                    return {
+                        'success': True,
+                        'action': 'updated',
+                        'section_id': section.id
+                    }
+                else:
+                    return {
+                        'success': False,
+                        'error': f"Failed to update section: {update_response.get('error', 'Unknown error')}"
+                    }
+            else:
+                # Section doesn't exist, create it
+                section_data = self._prepare_section_data(section, blueprint_id, user_id)
+                create_response = await self.core_api_client.create_section(section_data)
+                
+                if create_response.get('success'):
+                    created_section_id = create_response.get('section_id')
+                    if not created_section_id:
+                        return {
+                            'success': False,
+                            'error': "No section ID returned from Core API"
+                        }
+                    
+                    return {
+                        'success': True,
+                        'action': 'created',
+                        'section_id': created_section_id
+                    }
+                else:
+                    return {
+                        'success': False,
+                        'error': f"Failed to create section: {create_response.get('error', 'Unknown error')}"
+                    }
+            
+        except Exception as e:
+            logger.error(f"Error in _sync_single_section: {e}")
+            return {
+                'success': False,
+                'error': str(e)
+            }
+    
+    def _prepare_section_data(
+        self,
+        section: BlueprintSection,
+        blueprint_id: str,
+        user_id: str
+    ) -> Dict[str, Any]:
+        """Prepare blueprint section data for Core API creation/update."""
+        return {
+            'id': section.id,
+            'title': section.title,
+            'description': section.description,
+            'content': section.content,
+            'order_index': section.order_index,
+            'depth': section.depth,
+            'parent_section_id': section.parent_section_id,
+            'blueprint_id': blueprint_id,
+            'user_id': user_id,
+            'difficulty_level': section.difficulty_level.value if section.difficulty_level else 'intermediate',
+            'estimated_time_minutes': section.estimated_time_minutes,
+            'created_at': datetime.now(timezone.utc).isoformat(),
+            'updated_at': datetime.now(timezone.utc).isoformat()
+        }
 
 
 # Global service instance

@@ -675,6 +675,7 @@ class TestBlueprintPerformance:
         
         # Simulate cache with 50% hit rate
         def mock_get_blueprint_with_cache(blueprint_id: str):
+            nonlocal cache_hits, cache_misses
             if hash(blueprint_id) % 2 == 0:  # 50% cache hit rate
                 cache_hits += 1
                 return Blueprint(id=blueprint_id, **sample_blueprint_data)

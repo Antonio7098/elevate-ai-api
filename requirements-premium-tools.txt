@@ -1,0 +1,27 @@
+# Premium Tools Dependencies
+# These packages are required for the real premium tools implementation
+
+# Mathematical operations and unit conversion
+sympy>=1.12.0
+pint>=0.22
+
+# Code execution and containerization
+docker>=6.1.0
+
+# Web search and HTTP requests
+aiohttp>=3.8.0
+
+# Diagram generation tools (optional - for full functionality)
+# graphviz>=0.20.1  # Python Graphviz bindings
+# mermaid-cli>=10.0.0  # Mermaid diagram rendering
+# plantuml>=0.3.0  # PlantUML diagram rendering
+
+# Additional utilities
+numpy>=1.24.0  # For mathematical operations
+pandas>=2.0.0  # For data processing
+Pillow>=10.0.0  # For image processing (diagrams)
+
+# Development and testing
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+pytest-mock>=3.10.0

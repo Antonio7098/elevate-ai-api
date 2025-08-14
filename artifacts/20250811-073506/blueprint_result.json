@@ -1,0 +1,29 @@
+{
+  "input_preview": "# Software Development Lifecycle\n        \n        ## Planning Phase\n        - Requirements gathering\n        - Feasibility analysis\n        - Resource planning\n        \n        ## Design Phase\n        - System architecture\n        - Database design\n        - UI/UX design\n        \n        ## Development Phase\n        - Coding standards\n        - Version control\n        - Code review process\n        \n        ## Testing Phase\n        - Unit testing\n        - Integration testing\n        - User accep",
+  "blueprint_result": {
+    "blueprint_id": "software-development-lifecycle-sdlc-edc06884",
+    "name": "Software Development Lifecycle (SDLC)",
+    "description": "A comprehensive overview of the Software Development Lifecycle, covering key phases and activities.",
+    "concepts": [
+      "Requirements Gathering",
+      "System Design",
+      "Software Development",
+      "Testing",
+      "Deployment",
+      "Maintenance"
+    ],
+    "learning_objectives": [
+      "Understand the phases of SDLC.",
+      "Identify key activities in each phase.",
+      "Explain the importance of planning and testing."
+    ],
+    "difficulty_level": "beginner",
+    "estimated_duration": "2 hours",
+    "prerequisites": [
+      "Basic programming knowledge",
+      "Understanding of project management"
+    ],
+    "created_at": "2025-08-11T06:35:13.642225",
+    "user_id": "test-user-123"
+  }
+}

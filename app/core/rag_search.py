@@ -3,20 +3,22 @@ RAG-optimized Semantic Search Implementation.
 
 This module provides advanced search capabilities optimized for RAG (Retrieval-Augmented Generation)
 including vector-based similarity search, metadata filtering, hybrid search, and intelligent re-ranking.
+Enhanced with blueprint section hierarchy support.
 """
 
 import asyncio
 import time
 from typing import List, Dict, Any, Optional, Set, Tuple
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 from dataclasses import dataclass
 from enum import Enum
 
-from app.core.vector_store import VectorStore, SearchResult, VectorStoreError
+from app.core.vector_store import VectorStore, SearchResult, SectionSearchResult, VectorStoreError
 from app.core.embeddings import EmbeddingService, EmbeddingError
 from app.core.query_transformer import QueryTransformer, QueryTransformation, QueryIntent
 from app.models.text_node import TextNode, LocusType, UUEStage
+from app.models.blueprint_centric import BlueprintSection, DifficultyLevel, UueStage
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +31,8 @@ class SearchStrategy(Enum):
     MULTI_CONCEPT_SEARCH = "multi_concept_search"
     CONTEXTUAL_SEARCH = "contextual_search"
     ASSOCIATIVE_SEARCH = "associative_search"
+    SECTION_HIERARCHY = "section_hierarchy"
+    SECTION_CONTEXTUAL = "section_contextual"
 
 
 @dataclass
@@ -52,6 +56,12 @@ class RAGSearchResult:
     search_reason: str  # Why this result was selected
     created_at: str
     indexed_at: str
+    # Section-specific fields
+    section_id: Optional[int] = None
+    section_title: Optional[str] = None
+    section_depth: Optional[int] = None
+    section_path: Optional[List[str]] = None
+    parent_section_id: Optional[int] = None
 
 
 @dataclass
@@ -68,6 +78,10 @@ class RAGSearchRequest:
     max_chunk_size: Optional[int] = None
     min_chunk_size: Optional[int] = None
     blueprint_filter: Optional[str] = None
+    # Section-specific filters
+    section_filter: Optional[Dict[str, Any]] = None
+    section_depth_limit: Optional[int] = None
+    include_section_hierarchy: bool = True
 
 
 @dataclass
@@ -82,6 +96,9 @@ class RAGSearchResponse:
     reranking_time_ms: float
     filters_applied: Dict[str, Any]
     created_at: str
+    # Section-specific information
+    section_statistics: Optional[Dict[str, Any]] = None
+    hierarchy_depth: Optional[int] = None
 
 
 class RAGSearchService:
@@ -248,6 +265,12 @@ class RAGSearchService:
         elif strategy == SearchStrategy.ASSOCIATIVE_SEARCH:
             print(f"[DEBUG] Calling _associative_search")
             return await self._associative_search(transformation, search_params, request)
+        elif strategy == SearchStrategy.SECTION_HIERARCHY:
+            print(f"[DEBUG] Calling _section_hierarchy_search")
+            return await self._section_hierarchy_search(transformation, search_params, request)
+        elif strategy == SearchStrategy.SECTION_CONTEXTUAL:
+            print(f"[DEBUG] Calling _section_contextual_search")
+            return await self._section_contextual_search(transformation, search_params, request)
         else:
             print(f"[DEBUG] Fallback to _semantic_broad_search")
             return await self._semantic_broad_search(transformation, search_params, request)
@@ -533,6 +556,135 @@ class RAGSearchService:
         threshold = search_params.get('similarity_threshold', 0.5)
         return [r for r in results if r.score >= threshold]
     
+    async def _section_hierarchy_search(
+        self, 
+        transformation: QueryTransformation, 
+        search_params: Dict[str, Any],
+        request: RAGSearchRequest
+    ) -> List[SearchResult]:
+        """Perform search within a specific blueprint section hierarchy."""
+        blueprint_id = search_params.get('blueprint_id')
+        if not blueprint_id:
+            print(f"[DEBUG] blueprint_id not provided for section hierarchy search.")
+            return []
+
+        section_id = search_params.get('section_id')
+        if not section_id:
+            print(f"[DEBUG] section_id not provided for section hierarchy search.")
+            return []
+
+        print(f"[DEBUG] Searching blueprint {blueprint_id} section {section_id}...")
+
+        # Get the section path to filter by
+        section_path = []
+        if request.include_section_hierarchy:
+            try:
+                blueprint_sections = await self.vector_store.get_blueprint_sections(blueprint_id)
+                if blueprint_sections:
+                    section_path = self._get_section_path(blueprint_sections, section_id)
+                    print(f"[DEBUG] Section path: {section_path}")
+                else:
+                    print(f"[DEBUG] No sections found for blueprint {blueprint_id}.")
+                    return []
+            except Exception as e:
+                print(f"[DEBUG] Failed to get blueprint sections: {e}")
+                logger.error(f"Failed to get blueprint sections for section hierarchy search: {e}")
+                return []
+
+        # Filter by section path
+        metadata_filters = search_params.get('metadata_filters', {})
+        metadata_filters['section_path'] = section_path
+        print(f"[DEBUG] Applying section path filter: {section_path}")
+
+        # CRITICAL: Always filter by userId for user isolation
+        metadata_filters['userId'] = request.user_id
+
+        query_embedding = await self.embedding_service.embed_text(transformation.expanded_query)
+
+        results = await self.vector_store.search(
+            index_name=self.index_name,
+            query_vector=query_embedding,
+            top_k=search_params.get('top_k', 10), # Default to 10 for section search
+            filter_metadata=metadata_filters
+        )
+
+        return results
+
+    async def _section_contextual_search(
+        self, 
+        transformation: QueryTransformation, 
+        search_params: Dict[str, Any],
+        request: RAGSearchRequest
+    ) -> List[SearchResult]:
+        """Perform contextual search within a specific blueprint section."""
+        blueprint_id = search_params.get('blueprint_id')
+        if not blueprint_id:
+            print(f"[DEBUG] blueprint_id not provided for section contextual search.")
+            return []
+
+        section_id = search_params.get('section_id')
+        if not section_id:
+            print(f"[DEBUG] section_id not provided for section contextual search.")
+            return []
+
+        print(f"[DEBUG] Searching blueprint {blueprint_id} section {section_id} contextually...")
+
+        # Get the section path to filter by
+        section_path = []
+        if request.include_section_hierarchy:
+            try:
+                blueprint_sections = await self.vector_store.get_blueprint_sections(blueprint_id)
+                if blueprint_sections:
+                    section_path = self._get_section_path(blueprint_sections, section_id)
+                    print(f"[DEBUG] Section path: {section_path}")
+                else:
+                    print(f"[DEBUG] No sections found for blueprint {blueprint_id}.")
+                    return []
+            except Exception as e:
+                print(f"[DEBUG] Failed to get blueprint sections: {e}")
+                logger.error(f"Failed to get blueprint sections for section contextual search: {e}")
+                return []
+
+        # Filter by section path
+        metadata_filters = search_params.get('metadata_filters', {})
+        metadata_filters['section_path'] = section_path
+        print(f"[DEBUG] Applying section path filter: {section_path}")
+
+        # CRITICAL: Always filter by userId for user isolation
+        metadata_filters['userId'] = request.user_id
+
+        # Include conversation history in search context
+        context_query = transformation.expanded_query
+        if request.conversation_history:
+            recent_context = []
+            for msg in request.conversation_history[-3:]:
+                if msg.get('role') == 'user':
+                    recent_context.append(msg.get('content', ''))
+            if recent_context:
+                context_query += " " + " ".join(recent_context)
+
+        query_embedding = await self.embedding_service.embed_text(context_query)
+
+        results = await self.vector_store.search(
+            index_name=self.index_name,
+            query_vector=query_embedding,
+            top_k=search_params.get('top_k', 15), # Default to 15 for section contextual search
+            filter_metadata=metadata_filters
+        )
+
+        return results
+
+    def _get_section_path(self, sections: List[BlueprintSection], target_section_id: int) -> List[str]:
+        """Helper to find the path from root to a specific section."""
+        for section in sections:
+            if section.id == target_section_id:
+                if section.parent_section_id:
+                    parent_path = self._get_section_path(sections, section.parent_section_id)
+                    return parent_path + [section.title]
+                else:
+                    return [section.title]
+        return []
+
     async def _rerank_results(
         self, 
         results: List[SearchResult], 
@@ -580,7 +732,12 @@ class RAGSearchService:
                 metadata=result.metadata,
                 search_reason=search_reason,
                 created_at=result.metadata.get("created_at", ""),
-                indexed_at=result.metadata.get("indexed_at", "")
+                indexed_at=result.metadata.get("indexed_at", ""),
+                section_id=result.metadata.get("section_id"),
+                section_title=result.metadata.get("section_title"),
+                section_depth=result.metadata.get("section_depth"),
+                section_path=result.metadata.get("section_path"),
+                parent_section_id=result.metadata.get("parent_section_id")
             )
             
             rag_results.append(rag_result)

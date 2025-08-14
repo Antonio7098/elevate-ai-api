@@ -3,14 +3,16 @@ Indexing pipeline for orchestrating blueprint ingestion into the vector database
 
 This module handles the batch processing of LearningBlueprints into searchable
 TextNodes with vector embeddings and metadata indexing.
+Enhanced with blueprint section hierarchy support.
 """
 
 import logging
 import asyncio
 from typing import List, Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from app.models.learning_blueprint import LearningBlueprint
 from app.models.text_node import TextNode, TextNodeBatch
+from app.models.blueprint_centric import BlueprintSection
 from app.core.blueprint_parser import BlueprintParser, BlueprintParserError
 from app.core.vector_store import create_vector_store
 from app.core.embeddings import get_embedding_service
@@ -32,8 +34,9 @@ class IndexingProgress:
         self.processed_nodes = 0
         self.failed_nodes = 0
         self.current_blueprint: Optional[str] = None
+        self.current_section: Optional[str] = None
         self.current_locus: Optional[str] = None
-        self.start_time = datetime.utcnow()
+        self.start_time = datetime.now(timezone.utc)
         self.errors = []
     
     def update_progress(self, nodes_processed: int = 1, failed: bool = False):
@@ -45,13 +48,13 @@ class IndexingProgress:
     def add_error(self, error: str):
         """Add an error message."""
         self.errors.append({
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "error": error
         })
     
     def get_stats(self) -> Dict[str, Any]:
         """Get current progress statistics."""
-        elapsed = datetime.utcnow() - self.start_time
+        elapsed = datetime.now(timezone.utc) - self.start_time
         success_rate = ((self.processed_nodes - self.failed_nodes) / self.total_nodes * 100) if self.total_nodes > 0 else 0
         
         return {
@@ -61,6 +64,7 @@ class IndexingProgress:
             "success_rate": round(success_rate, 2),
             "elapsed_seconds": elapsed.total_seconds(),
             "current_blueprint": self.current_blueprint,
+            "current_section": self.current_section,
             "current_locus": self.current_locus,
             "errors": self.errors[-10:]  # Last 10 errors
         }
@@ -107,6 +111,161 @@ class IndexingPipeline:
         except Exception:
             # Best-effort; continue even if create check fails
             pass
+    
+    async def index_blueprint_with_sections(
+        self, 
+        blueprint: LearningBlueprint, 
+        sections: List[BlueprintSection]
+    ) -> Dict[str, Any]:
+        """
+        Index a LearningBlueprint with its sections into the vector database.
+        
+        Args:
+            blueprint: The LearningBlueprint to index
+            sections: List of BlueprintSection objects for the blueprint
+            
+        Returns:
+            Dictionary with indexing results and statistics
+        """
+        try:
+            logger.info(f"Starting section-aware indexing for blueprint: {blueprint.source_id}")
+            
+            # Parse blueprint into TextNodes
+            nodes = self.parser.parse_blueprint(blueprint)
+            logger.info(f"Parsed {len(nodes)} TextNodes from blueprint")
+            
+            # Enhance nodes with section information
+            enhanced_nodes = await self._enhance_nodes_with_sections(nodes, sections)
+            logger.info(f"Enhanced {len(enhanced_nodes)} nodes with section information")
+            
+            # Initialize progress tracking
+            progress = IndexingProgress(len(enhanced_nodes))
+            progress.current_blueprint = blueprint.source_id
+            
+            # Process nodes in batches
+            results = await self._process_nodes_batch(enhanced_nodes, progress)
+            
+            # Get final statistics
+            stats = progress.get_stats()
+            stats.update({
+                "blueprint_id": blueprint.source_id,
+                "blueprint_title": blueprint.source_title,
+                "sections_processed": len(sections),
+                "indexing_completed": True,
+                "results": results
+            })
+            
+            logger.info(f"Completed section-aware indexing for blueprint {blueprint.source_id}: {stats}")
+            return stats
+            
+        except Exception as e:
+            logger.error(f"Failed to index blueprint with sections {blueprint.source_id}: {e}")
+            raise IndexingPipelineError(f"Blueprint section indexing failed: {e}")
+    
+    async def _enhance_nodes_with_sections(
+        self, 
+        nodes: List[TextNode], 
+        sections: List[BlueprintSection]
+    ) -> List[TextNode]:
+        """
+        Enhance TextNodes with blueprint section information.
+        
+        Args:
+            nodes: List of TextNodes to enhance
+            sections: List of BlueprintSection objects
+            
+        Returns:
+            List of enhanced TextNodes with section metadata
+        """
+        # Create section lookup maps
+        section_map = {section.id: section for section in sections}
+        section_path_map = {}
+        
+        # Build section paths for each section
+        for section in sections:
+            path = [section.title]
+            current = section
+            while current.parent_section_id and current.parent_section_id in section_map:
+                current = section_map[current.parent_section_id]
+                path.insert(0, current.title)
+            section_path_map[section.id] = path
+        
+        enhanced_nodes = []
+        for node in nodes:
+            # Find the section this node belongs to based on locus_id or other criteria
+            # For now, we'll use a simple mapping - in practice, this would be more sophisticated
+            section_id = self._map_node_to_section(node, sections)
+            
+            if section_id:
+                section = section_map.get(section_id)
+                if section:
+                    # Create enhanced metadata
+                    enhanced_metadata = node.metadata.copy()
+                    enhanced_metadata.update({
+                        "section_id": section.id,
+                        "section_title": section.title,
+                        "section_depth": section.depth,
+                        "section_path": section_path_map.get(section.id, []),
+                        "parent_section_id": section.parent_section_id,
+                        "blueprint_id": section.blueprint_id,
+                        "section_difficulty": section.difficulty.value if section.difficulty else "BEGINNER",
+                        "section_estimated_time": section.estimated_time_minutes
+                    })
+                    
+                    # Create enhanced node
+                    enhanced_node = TextNode(
+                        id=node.id,
+                        content=node.content,
+                        blueprint_id=node.blueprint_id,
+                        source_text_hash=node.source_text_hash,
+                        locus_id=node.locus_id,
+                        locus_type=node.locus_type,
+                        locus_title=node.locus_title,
+                        uue_stage=node.uue_stage,
+                        pathway_ids=node.pathway_ids,
+                        related_locus_ids=node.related_locus_ids,
+                        chunk_index=node.chunk_index,
+                        total_chunks=node.total_chunks,
+                        word_count=node.word_count,
+                        embedding_dimension=node.embedding_dimension,
+                        embedding_model=node.embedding_model,
+                        created_at=node.created_at,
+                        updated_at=node.updated_at,
+                        metadata=enhanced_metadata
+                    )
+                    enhanced_nodes.append(enhanced_node)
+                else:
+                    enhanced_nodes.append(node)
+            else:
+                enhanced_nodes.append(node)
+        
+        return enhanced_nodes
+    
+    def _map_node_to_section(self, node: TextNode, sections: List[BlueprintSection]) -> Optional[int]:
+        """
+        Map a TextNode to a BlueprintSection based on various criteria.
+        
+        This is a simplified mapping - in practice, this would use more sophisticated
+        logic based on content analysis, locus relationships, etc.
+        
+        Args:
+            node: TextNode to map
+            sections: List of available sections
+            
+        Returns:
+            Section ID if mapping found, None otherwise
+        """
+        # Simple mapping based on locus_id if available
+        if node.locus_id:
+            # Try to find section by locus_id (this would need to be implemented based on your data model)
+            pass
+        
+        # Fallback: map to first section (this is just a placeholder)
+        # In practice, you'd implement proper content-based mapping
+        if sections:
+            return sections[0].id
+        
+        return None
     
     async def index_blueprint(self, blueprint: LearningBlueprint) -> Dict[str, Any]:
         """

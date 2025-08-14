@@ -1,0 +1,79 @@
+{
+  "tree_construction_10_sections": {
+    "operation": "section_tree_construction",
+    "iterations": 10,
+    "avg_duration": 2.408027648925781e-06,
+    "min_duration": 1.430511474609375e-06,
+    "max_duration": 5.9604644775390625e-06,
+    "p95_duration": 6.496906280517578e-06,
+    "p99_duration": 7.0214271545410155e-06,
+    "success_rate": 1.0,
+    "throughput": 415277.62376237626
+  },
+  "tree_construction_50_sections": {
+    "operation": "section_tree_construction",
+    "iterations": 10,
+    "avg_duration": 1.9073486328125e-06,
+    "min_duration": 1.1920928955078125e-06,
+    "max_duration": 4.0531158447265625e-06,
+    "p95_duration": 4.696846008300781e-06,
+    "p99_duration": 5.326271057128906e-06,
+    "success_rate": 1.0,
+    "throughput": 524288.0
+  },
+  "tree_construction_100_sections": {
+    "operation": "section_tree_construction",
+    "iterations": 10,
+    "avg_duration": 1.931190490722656e-06,
+    "min_duration": 1.1920928955078125e-06,
+    "max_duration": 4.5299530029296875e-06,
+    "p95_duration": 5.495548248291016e-06,
+    "p99_duration": 6.4396858215332035e-06,
+    "success_rate": 1.0,
+    "throughput": 517815.30864197534
+  },
+  "tree_construction_500_sections": {
+    "operation": "section_tree_construction",
+    "iterations": 10,
+    "avg_duration": 2.6464462280273437e-06,
+    "min_duration": 1.6689300537109375e-06,
+    "max_duration": 7.62939453125e-06,
+    "p95_duration": 9.775161743164062e-06,
+    "p99_duration": 1.1873245239257812e-05,
+    "success_rate": 1.0,
+    "throughput": 377865.22522522527
+  },
+  "content_aggregation": {
+    "operation": "content_aggregation",
+    "iterations": 10,
+    "avg_duration": 1.7905235290527342e-05,
+    "min_duration": 1.0013580322265625e-05,
+    "max_duration": 6.341934204101562e-05,
+    "p95_duration": 8.165836334228516e-05,
+    "p99_duration": 9.949207305908203e-05,
+    "success_rate": 1.0,
+    "throughput": 55849.58721704395
+  },
+  "graph_traversal": {
+    "operation": "graph_traversal",
+    "iterations": 10,
+    "avg_duration": 5.8650970458984375e-05,
+    "min_duration": 4.1961669921875e-05,
+    "max_duration": 0.00011277198791503906,
+    "p95_duration": 0.00011920928955078125,
+    "p99_duration": 0.0001255035400390625,
+    "success_rate": 1.0,
+    "throughput": 17050.016260162603
+  },
+  "concurrent_operations": {
+    "operation": "concurrent_section_operations",
+    "iterations": 50,
+    "avg_duration": 1.8930435180664063e-06,
+    "min_duration": 1.430511474609375e-06,
+    "max_duration": 1.0728836059570312e-05,
+    "p95_duration": 2.8133392333984377e-06,
+    "p99_duration": 1.4350414276123046e-05,
+    "success_rate": 1.0,
+    "throughput": 37176.954440702
+  }
+}

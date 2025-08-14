@@ -45,6 +45,9 @@ class CostTracker:
         "gemini-1.5-flash": 0.0005,
         "gemini-1.5-pro": 0.0025,
         "gemini-2.0-pro": 0.0040,
+        "gemini-2.5-flash": 0.000075,
+        "gemini-2.5-flash-lite": 0.000025,  # NEW: Perfect for routing/summarization
+        "gemini-2.5-pro": 0.0040,
         # OpenRouter models (per 1K tokens)
         "z-ai/glm-4.5-air:free": 0.0001,  # Free tier
         "z-ai/glm-4.5-air": 0.0005,       # Paid tier
@@ -55,29 +58,51 @@ class CostTracker:
         # Rough proportional cost; in production use actual tokens
         return rate * max(1, chars // 1000)
 
+    def get_cost_efficient_model(self, task_type: str) -> str:
+        """Get most cost-efficient model for specific task types"""
+        if task_type in ["routing", "summarization", "classification", "compression"]:
+            return "gemini-2.5-flash-lite"  # Best for context assembly tasks
+        elif task_type in ["simple_generation", "basic_qa"]:
+            return "gemini-2.5-flash"  # Good balance for simple tasks
+        elif task_type in ["complex_reasoning", "large_context"]:
+            return "gemini-1.5-pro"  # Only for complex tasks
+        else:
+            return "gemini-2.5-flash-lite"  # Default to most cost-effective
+
 
 class ModelCascader:
     """Intelligent model selection with fallback to OpenRouter."""
 
     def __init__(self):
-        # Primary models (Google Gemini)
-        self.primary_models = ["gemini-1.5-flash", "gemini-1.5-pro"]
-        # Fallback models (OpenRouter)
+        # Primary models (Google Gemini) - START WITH MOST COST-EFFECTIVE
+        self.primary_models = [
+            "gemini-2.5-flash-lite",  # NEW: Most cost-effective for routing/summarization
+            "gemini-2.5-flash",       # Good balance
+            "gemini-1.5-flash",       # Fallback
+            "gemini-1.5-pro"          # Only for complex reasoning
+        ]
+        # Fallback models (OpenRouter) - EVEN CHEAPER
         self.fallback_models = ["z-ai/glm-4.5-air:free", "z-ai/glm-4.5-air"]
         
         self.gemini_service = GeminiService()
         self.confidence_checker = ConfidenceChecker()
         self.cost_tracker = CostTracker()
 
-    async def select_and_execute(self, query: str, user_tier: str = "standard", min_confidence: float = 0.65) -> CascadedResponse:
+    async def select_and_execute(self, query: str, user_tier: str = "standard", min_confidence: float = 0.65, task_type: str = "general") -> CascadedResponse:
         """Execute with cascading; premium users can escalate further."""
-        max_primary_models = 2 if user_tier in ["premium", "enterprise"] else 1
+        max_primary_models = 3 if user_tier in ["premium", "enterprise"] else 2
         escalations = 0
         last_response: Optional[str] = None
         last_model = self.primary_models[0]
         confidence = 0.0
 
-        # Try primary models (Google Gemini)
+        # Start with most cost-effective model for the task
+        if task_type in ["routing", "summarization", "classification", "compression"]:
+            start_model = "gemini-2.5-flash-lite"
+        else:
+            start_model = self.cost_tracker.get_cost_efficient_model(task_type)
+
+        # Try primary models (Google Gemini) - starting with most cost-effective
         for idx, model in enumerate(self.primary_models[:max_primary_models]):
             try:
                 last_model = model
@@ -95,35 +120,34 @@ class ModelCascader:
                 continue
 
         # If primary models didn't achieve confidence, try fallback (OpenRouter)
-        if confidence < min_confidence and self.fallback_models:
-            try:
-                fallback_model = self.fallback_models[0]  # Use free tier first
-                prompt = f"[model={fallback_model}] Answer the following query succinctly and accurately. Query: {query}"
-                last_response = await llm_service.call_openrouter_ai(
-                    prompt, 
-                    model=fallback_model,
-                    operation="model_cascading_fallback"
-                )
-                last_model = fallback_model
-                confidence = self.confidence_checker.estimate_confidence(last_response)
-                escalations += 1
-                
-            except Exception as e:
-                print(f"Fallback model {fallback_model} failed: {e}")
+        if confidence < min_confidence:
+            for model in self.fallback_models:
+                try:
+                    last_model = model
+                    prompt = f"[fallback={model}] Answer the following query: {query}"
+                    last_response = await self.gemini_service.generate(prompt, model)
+                    confidence = self.confidence_checker.estimate_confidence(last_response)
+                    
+                    if confidence >= min_confidence:
+                        break
+                    escalations += 1
+                    
+                except Exception as e:
+                    print(f"Fallback model {model} failed: {e}")
+                    escalations += 1
+                    continue
 
-        # Ensure we have a response
-        if not last_response:
-            raise Exception("All models failed to generate a response")
-
-        cost = self.cost_tracker.estimate_cost(last_model, len(last_response))
+        # Calculate estimated cost
+        estimated_cost = self.cost_tracker.estimate_cost(last_model, len(last_response or ""))
+        
         return CascadedResponse(
-            content=last_response,
+            content=last_response or "Failed to generate response",
             model_used=last_model,
             confidence=confidence,
-            cost_estimate=cost,
+            cost_estimate=estimated_cost,
             escalations=escalations,
             timestamp=datetime.utcnow(),
-            metadata={"user_tier": user_tier, "min_confidence": min_confidence},
+            metadata={"user_tier": user_tier, "min_confidence": min_confidence, "task_type": task_type}
         )
 
     async def early_exit_optimization(self, query: str) -> CascadedResponse:
@@ -170,4 +194,28 @@ class ModelCascader:
 
         # For complex queries, use normal cascading
         return await self.select_and_execute(query, user_tier="standard")
+
+    async def select_context_assembly_model(self, context_size: int, complexity: str, task_type: str) -> str:
+        """Select optimal model for context assembly tasks"""
+        try:
+            # For context assembly, prioritize cost efficiency
+            if task_type in ["routing", "summarization", "classification", "compression"]:
+                if context_size < 10000:  # Small contexts
+                    return "gemini-2.5-flash-lite"  # Most cost-effective
+                elif context_size < 100000:  # Medium contexts
+                    return "gemini-2.5-flash"  # Good balance
+                else:  # Large contexts
+                    return "gemini-1.5-pro"  # Only when necessary
+            
+            # For other tasks, use standard selection
+            elif complexity == "simple":
+                return "gemini-2.5-flash-lite"
+            elif complexity == "medium":
+                return "gemini-2.5-flash"
+            else:
+                return "gemini-1.5-pro"
+                
+        except Exception as e:
+            print(f"Error selecting context assembly model: {e}")
+            return "gemini-2.5-flash-lite"  # Default to most cost-effective
 

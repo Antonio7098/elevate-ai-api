@@ -18,9 +18,9 @@ from app.core.rag_search import RAGSearchService, RAGSearchRequest
 from app.core.context_assembly import ContextAssembler, ConversationMessage, AssembledContext
 from app.core.response_generation import ResponseGenerator, ResponseGenerationRequest
 from app.core.query_transformer import QueryIntent
-from app.models.user_profile import CognitiveProfile
-from app.models.session import SessionState
-from app.services.embedding_service import get_embedding_service
+from app.core.context_assembly import CognitiveProfile
+from app.core.context_assembly import SessionState
+from app.core.embeddings import get_embedding_service
 
 async def test_single_rag_query():
     """Test a single RAG query end-to-end"""

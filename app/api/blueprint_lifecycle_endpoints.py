@@ -49,7 +49,7 @@ async def lifecycle_health_check_early():
         return {
             "status": "healthy",
             "service": "BlueprintLifecycleService",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now().isoformat(),
             "message": "Lifecycle service is operational",
             "llm": {
                 "use_llm": bool(settings.use_llm),
@@ -338,7 +338,7 @@ async def generate_blueprint(request: GenerateBlueprintRequest):
         "difficulty_level": difficulty_level,
         "estimated_duration": estimated_duration,
         "prerequisites": opts.get("prerequisites", []),
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.now().isoformat(),
         "user_id": user_id,
     }
 
@@ -674,3 +674,675 @@ async def lifecycle_health_check():
                 "google_api_key_present": bool(settings.google_api_key)
             }
         }
+
+
+# Blueprint Section Endpoints
+from app.services.blueprint_section_service import BlueprintSectionService
+from app.services.knowledge_graph_update_service import KnowledgeGraphUpdateService, UpdateType
+from app.core.vector_store import PineconeVectorStore, ChromaDBVectorStore
+from app.core.config import settings
+from app.services.knowledge_graph_traversal import KnowledgeGraphTraversal
+from app.api.schemas import (
+    BlueprintSectionRequest,
+    BlueprintSectionResponse,
+    BlueprintSectionTreeResponse,
+    SectionMoveRequest,
+    SectionReorderRequest,
+    SectionContentRequest,
+    SectionContentResponse,
+    SectionStatsResponse,
+    BlueprintSectionSyncRequest,
+    BlueprintSectionSyncResponse
+)
+
+
+@lifecycle_router.post("/blueprints/{blueprint_id}/sections", response_model=BlueprintSectionResponse)
+async def create_blueprint_section(
+    blueprint_id: str = Path(..., description="ID of the blueprint"),
+    section_data: BlueprintSectionRequest = ...,
+    user_id: str = Query(..., description="User ID for ownership")
+):
+    """
+    Create a new section within a blueprint.
+    
+    This endpoint creates a new blueprint section with the specified hierarchy and content.
+    """
+    try:
+        logger.info(f"Creating section for blueprint {blueprint_id}")
+        
+        service = BlueprintSectionService()
+        section = await service.create_section(
+            blueprint_id=blueprint_id,
+            title=section_data.title,
+            description=section_data.description,
+            content=section_data.content,
+            order_index=section_data.order_index,
+            parent_section_id=section_data.parent_section_id,
+            difficulty_level=section_data.difficulty_level,
+            estimated_time_minutes=section_data.estimated_time_minutes
+        )
+        
+        return BlueprintSectionResponse(
+            id=section.id,
+            title=section.title,
+            description=section.description,
+            content="",  # BlueprintSection doesn't have content field
+            order_index=section.order_index,
+            depth=section.depth,
+            parent_section_id=section.parent_section_id,
+            blueprint_id=blueprint_id,
+            difficulty_level=section.difficulty.value if section.difficulty else "intermediate",
+            estimated_time_minutes=section.estimated_time_minutes,
+            created_at=section.created_at.isoformat() if section.created_at else datetime.now().isoformat(),
+            updated_at=section.updated_at.isoformat() if section.updated_at else datetime.now().isoformat()
+        )
+        
+    except Exception as e:
+        logger.error(f"Failed to create section for blueprint {blueprint_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Section creation failed: {str(e)}"
+        )
+
+
+@lifecycle_router.get("/blueprints/{blueprint_id}/sections", response_model=BlueprintSectionTreeResponse)
+async def get_blueprint_sections(
+    blueprint_id: str = Path(..., description="ID of the blueprint")
+):
+    """
+    Get the complete section hierarchy for a blueprint.
+    
+    Returns all sections organized in a hierarchical tree structure.
+    """
+    try:
+        logger.info(f"Retrieving sections for blueprint {blueprint_id}")
+        
+        service = BlueprintSectionService()
+        sections = await service.get_section_tree(blueprint_id)
+        
+        # Convert to response format
+        section_responses = []
+        for section in sections:
+            section_responses.append(BlueprintSectionResponse(
+                id=section.id,
+                title=section.title,
+                description=section.description,
+                content="",  # BlueprintSection doesn't have content field
+                order_index=section.order_index,
+                depth=section.depth,
+                parent_section_id=section.parent_section_id,
+                blueprint_id=blueprint_id,
+                difficulty_level=section.difficulty.value if section.difficulty else "intermediate",
+                estimated_time_minutes=section.estimated_time_minutes,
+                created_at=section.created_at.isoformat() if section.created_at else datetime.now().isoformat(),
+                updated_at=section.updated_at.isoformat() if section.updated_at else datetime.now().isoformat()
+            ))
+        
+        # Build hierarchy structure
+        hierarchy = {}
+        max_depth = 0
+        for section in sections:
+            if section.depth > max_depth:
+                max_depth = section.depth
+            if section.parent_section_id is None:
+                hierarchy[str(section.id)] = {
+                    "section": section,
+                    "children": []
+                }
+            else:
+                # Find parent and add as child
+                parent_id = str(section.parent_section_id)
+                if parent_id in hierarchy:
+                    hierarchy[parent_id]["children"].append(section)
+        
+        return BlueprintSectionTreeResponse(
+            blueprint_id=blueprint_id,
+            sections=section_responses,
+            hierarchy=hierarchy,
+            total_sections=len(sections),
+            max_depth=max_depth,
+            created_at=datetime.now().isoformat()
+        )
+        
+    except Exception as e:
+        logger.error(f"Failed to retrieve sections for blueprint {blueprint_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Section retrieval failed: {str(e)}"
+        )
+
+
+@lifecycle_router.put("/blueprints/{blueprint_id}/sections/{section_id}/move")
+async def move_blueprint_section(
+    blueprint_id: str = Path(..., description="ID of the blueprint"),
+    section_id: int = Path(..., description="ID of the section to move"),
+    move_data: SectionMoveRequest = ...
+):
+    """
+    Move a section within the blueprint hierarchy.
+    
+    This endpoint allows moving sections to different parents or changing their order.
+    """
+    try:
+        logger.info(f"Moving section {section_id} in blueprint {blueprint_id}")
+        
+        service = BlueprintSectionService()
+        result = await service.move_section(
+            section_id=section_id,
+            new_parent_id=move_data.new_parent_id,
+            new_order_index=move_data.new_order_index
+        )
+        
+        return {
+            "success": True,
+            "section_id": section_id,
+            "blueprint_id": blueprint_id,
+            "new_parent_id": move_data.new_parent_id,
+            "new_order_index": move_data.new_order_index,
+            "message": "Section moved successfully"
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to move section {section_id} in blueprint {blueprint_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Section move failed: {str(e)}"
+        )
+
+
+@lifecycle_router.put("/blueprints/{blueprint_id}/sections/reorder")
+async def reorder_blueprint_sections(
+    blueprint_id: str = Path(..., description="ID of the blueprint"),
+    reorder_data: SectionReorderRequest = ...
+):
+    """
+    Reorder multiple sections within the blueprint.
+    
+    This endpoint allows bulk reordering of sections for better organization.
+    """
+    try:
+        logger.info(f"Reordering sections for blueprint {blueprint_id}")
+        
+        service = BlueprintSectionService()
+        result = await service.reorder_sections(reorder_data.section_orders)
+        
+        return {
+            "success": True,
+            "blueprint_id": blueprint_id,
+            "sections_reordered": len(reorder_data.section_orders),
+            "message": "Sections reordered successfully"
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to reorder sections for blueprint {blueprint_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Section reordering failed: {str(e)}"
+        )
+
+
+@lifecycle_router.get("/blueprints/{blueprint_id}/sections/{section_id}/content", response_model=SectionContentResponse)
+async def get_section_content(
+    blueprint_id: str = Path(..., description="ID of the blueprint"),
+    section_id: int = Path(..., description="ID of the section"),
+    include_metadata: bool = Query(True, description="Include section metadata"),
+    include_primitives: bool = Query(True, description="Include associated primitives"),
+    include_criteria: bool = Query(True, description="Include mastery criteria")
+):
+    """
+    Get detailed content for a specific section.
+    
+    Returns section information along with associated primitives and mastery criteria.
+    """
+    try:
+        logger.info(f"Retrieving content for section {section_id} in blueprint {blueprint_id}")
+        
+        service = BlueprintSectionService()
+        content = await service.get_section_content(
+            section_id=section_id,
+            include_metadata=include_metadata,
+            include_primitives=include_primitives,
+            include_criteria=include_criteria
+        )
+        
+        # Convert to response format
+        section = content.get("section")
+        if not section:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Section {section_id} not found"
+            )
+        
+        return SectionContentResponse(
+            section=BlueprintSectionResponse(
+                id=section.id,
+                title=section.title,
+                description=section.description,
+                content="",  # BlueprintSection doesn't have content field
+                order_index=section.order_index,
+                depth=section.depth,
+                parent_section_id=section.parent_section_id,
+                blueprint_id=blueprint_id,
+                difficulty_level=section.difficulty.value if section.difficulty else "intermediate",
+                estimated_time_minutes=section.estimated_time_minutes,
+                created_at=section.created_at.isoformat() if section.created_at else datetime.now().isoformat(),
+                updated_at=section.updated_at.isoformat() if section.updated_at else datetime.now().isoformat()
+            ),
+            primitives=content.get("primitives", []),
+            mastery_criteria=content.get("mastery_criteria", []),
+            content_summary=content.get("content_summary"),
+            learning_progress=content.get("learning_progress"),
+            related_sections=content.get("related_sections", [])
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to retrieve content for section {section_id} in blueprint {blueprint_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Section content retrieval failed: {str(e)}"
+        )
+
+
+@lifecycle_router.get("/blueprints/{blueprint_id}/sections/{section_id}/stats", response_model=SectionStatsResponse)
+async def get_section_stats(
+    blueprint_id: str = Path(..., description="ID of the blueprint"),
+    section_id: int = Path(..., description="ID of the section")
+):
+    """
+    Get statistics for a specific section.
+    
+    Returns comprehensive statistics including primitive counts, difficulty distribution, and completion estimates.
+    """
+    try:
+        logger.info(f"Retrieving stats for section {section_id} in blueprint {blueprint_id}")
+        
+        service = BlueprintSectionService()
+        stats = await service.get_section_stats(section_id)
+        
+        return SectionStatsResponse(
+            section_id=section_id,
+            total_primitives=stats.get("total_primitives", 0),
+            total_criteria=stats.get("total_criteria", 0),
+            difficulty_distribution=stats.get("difficulty_distribution", {}),
+            uue_stage_distribution=stats.get("uue_stage_distribution", {}),
+            estimated_completion_time=stats.get("estimated_completion_time", 0),
+            created_at=datetime.now().isoformat()
+        )
+        
+    except Exception as e:
+        logger.error(f"Failed to retrieve stats for section {section_id} in blueprint {blueprint_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Section stats retrieval failed: {str(e)}"
+        )
+
+
+@lifecycle_router.post("/blueprints/{blueprint_id}/sections/sync", response_model=BlueprintSectionSyncResponse)
+async def sync_blueprint_sections(
+    blueprint_id: str = Path(..., description="ID of the blueprint"),
+    sync_data: BlueprintSectionSyncRequest = ...
+):
+    """
+    Sync blueprint sections with Core API.
+    
+    This endpoint synchronizes the blueprint sections with the Core API system,
+    creating or updating sections as needed.
+    """
+    try:
+        logger.info(f"Syncing sections for blueprint {blueprint_id} with Core API")
+        
+        from app.core.core_api_sync_service import CoreAPISyncService
+        sync_service = CoreAPISyncService()
+        
+        # Convert request data to BlueprintSection instances
+        sections = []
+        for section_req in sync_data.sections:
+            section = BlueprintSection(
+                id=0,  # Will be assigned by Core API
+                title=section_req.title,
+                description=section_req.description,
+                content=section_req.content,
+                order_index=section_req.order_index or 0,
+                depth=0,  # Will be calculated
+                parent_section_id=section_req.parent_section_id,
+                blueprint_id=blueprint_id,
+                difficulty_level=section_req.difficulty_level,
+                estimated_time_minutes=section_req.estimated_time_minutes
+            )
+            sections.append(section)
+        
+        # Perform sync
+        sync_result = await sync_service.sync_blueprint_with_sections(
+            sections, blueprint_id, sync_data.user_id
+        )
+        
+        return BlueprintSectionSyncResponse(
+            blueprint_id=blueprint_id,
+            sync_success=sync_result['success'],
+            sections_created=sync_result['sections_created'],
+            sections_updated=sync_result['sections_updated'],
+            errors=sync_result['errors'],
+            created_section_ids=sync_result['created_section_ids'],
+            updated_section_ids=sync_result['updated_section_ids'],
+            sync_timestamp=datetime.now().isoformat()
+        )
+        
+    except Exception as e:
+        logger.error(f"Failed to sync sections for blueprint {blueprint_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Section sync failed: {str(e)}"
+        )
+
+# Knowledge Graph Update Endpoints
+
+@lifecycle_router.post("/blueprints/{blueprint_id}/knowledge-graph/update")
+async def trigger_knowledge_graph_update(
+    blueprint_id: str = Path(..., description="ID of the blueprint"),
+    update_type: UpdateType = Query(..., description="Type of update to trigger"),
+    section_id: Optional[str] = Query(None, description="ID of the section being updated"),
+    metadata: Optional[str] = Query(None, description="Additional metadata for the update (JSON string)")
+):
+    """
+    Trigger a knowledge graph update for blueprint changes.
+    
+    This endpoint schedules knowledge graph updates when blueprints or sections change,
+    ensuring the knowledge graph stays synchronized with blueprint modifications.
+    """
+    try:
+        logger.info(f"Triggering knowledge graph update for blueprint {blueprint_id}, type: {update_type}")
+        
+        # Initialize services with proper error handling
+        try:
+            # Use concrete implementation based on configuration
+            if settings.vector_store_type == "pinecone":
+                vector_store = PineconeVectorStore()
+            elif settings.vector_store_type == "chromadb":
+                vector_store = ChromaDBVectorStore()
+            else:
+                raise ValueError(f"Unsupported vector store type: {settings.vector_store_type}")
+            
+            traversal_service = KnowledgeGraphTraversal()
+            update_service = KnowledgeGraphUpdateService(vector_store, traversal_service)
+        except Exception as e:
+            logger.error(f"Failed to initialize services: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=f"Service initialization failed: {str(e)}"
+            )
+        
+        # Parse metadata if provided
+        parsed_metadata = None
+        if metadata:
+            try:
+                parsed_metadata = json.loads(metadata)
+            except json.JSONDecodeError:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid JSON format for metadata"
+                )
+        
+        # Schedule the update based on type
+        if update_type in [UpdateType.SECTION_ADDED, UpdateType.SECTION_UPDATED, UpdateType.SECTION_DELETED]:
+            if not section_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Section ID is required for section-related updates"
+                )
+            
+            batch_id = await update_service.schedule_section_update(
+                blueprint_id=blueprint_id,
+                section_id=section_id,
+                update_type=update_type,
+                metadata=parsed_metadata
+            )
+        else:
+            # For blueprint-level updates, we'll need to implement blueprint_update method
+            raise HTTPException(
+                status_code=status.HTTP_501_NOT_IMPLEMENTED,
+                detail=f"Blueprint-level updates of type {update_type} not yet implemented"
+            )
+        
+        return {
+            "message": "Knowledge graph update scheduled successfully",
+            "batch_id": batch_id,
+            "blueprint_id": blueprint_id,
+            "update_type": update_type,
+            "status": "scheduled",
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to trigger knowledge graph update for blueprint {blueprint_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Knowledge graph update failed: {str(e)}"
+        )
+
+
+@lifecycle_router.get("/blueprints/{blueprint_id}/knowledge-graph/consistency")
+async def check_knowledge_graph_consistency(
+    blueprint_id: str = Path(..., description="ID of the blueprint")
+):
+    """
+    Check knowledge graph consistency for a specific blueprint.
+    
+    This endpoint performs consistency checks on the knowledge graph to identify
+    orphaned nodes, broken relationships, and other integrity issues.
+    """
+    try:
+        logger.info(f"Checking knowledge graph consistency for blueprint {blueprint_id}")
+        
+        # Initialize services with proper error handling
+        try:
+            # Use concrete implementation based on configuration
+            if settings.vector_store_type == "pinecone":
+                vector_store = PineconeVectorStore()
+            elif settings.vector_store_type == "chromadb":
+                vector_store = ChromaDBVectorStore()
+            else:
+                raise ValueError(f"Unsupported vector store type: {settings.vector_store_type}")
+            
+            traversal_service = KnowledgeGraphTraversal()
+            update_service = KnowledgeGraphUpdateService(vector_store, traversal_service)
+        except Exception as e:
+            logger.error(f"Failed to initialize services: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=f"Service initialization failed: {str(e)}"
+            )
+        
+        # Perform consistency check
+        consistency_result = await update_service.check_graph_consistency(blueprint_id)
+        
+        return {
+            "blueprint_id": blueprint_id,
+            "consistent": consistency_result["consistent"],
+            "issues": consistency_result["issues"],
+            "warnings": consistency_result["warnings"],
+            "orphaned_nodes_count": consistency_result["orphaned_nodes_count"],
+            "broken_relationships_count": consistency_result["broken_relationships_count"],
+            "circular_dependencies_count": consistency_result["circular_dependencies_count"],
+            "missing_metadata_count": consistency_result["missing_metadata_count"],
+            "check_duration": consistency_result["check_duration"],
+            "timestamp": consistency_result["timestamp"]
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to check knowledge graph consistency for blueprint {blueprint_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Consistency check failed: {str(e)}"
+        )
+
+
+@lifecycle_router.get("/blueprints/{blueprint_id}/knowledge-graph/performance")
+async def get_knowledge_graph_performance(
+    blueprint_id: str = Path(..., description="ID of the blueprint")
+):
+    """
+    Get performance metrics for knowledge graph operations.
+    
+    This endpoint provides performance metrics including update durations,
+    operations per second, and queue status for monitoring and optimization.
+    """
+    try:
+        logger.info(f"Retrieving knowledge graph performance metrics for blueprint {blueprint_id}")
+        
+        # Initialize services with proper error handling
+        try:
+            # Use concrete implementation based on configuration
+            if settings.vector_store_type == "pinecone":
+                vector_store = PineconeVectorStore()
+            elif settings.vector_store_type == "chromadb":
+                vector_store = ChromaDBVectorStore()
+            else:
+                raise ValueError(f"Unsupported vector store type: {settings.vector_store_type}")
+            
+            traversal_service = KnowledgeGraphTraversal()
+            update_service = KnowledgeGraphUpdateService(vector_store, traversal_service)
+        except Exception as e:
+            logger.error(f"Failed to initialize services: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=f"Service initialization failed: {str(e)}"
+            )
+        
+        # Get performance metrics
+        metrics = update_service.get_performance_metrics()
+        
+        return {
+            "blueprint_id": blueprint_id,
+            "update_duration": metrics["update_duration"],
+            "consistency_check_duration": metrics["consistency_check_duration"],
+            "queue_status": metrics["queue_status"],
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to retrieve performance metrics for blueprint {blueprint_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Performance metrics retrieval failed: {str(e)}"
+        )
+
+# Section Hierarchy Management Endpoints
+
+@lifecycle_router.get("/blueprints/{blueprint_id}/sections/hierarchy")
+async def get_section_hierarchy(
+    blueprint_id: str = Path(..., description="ID of the blueprint")
+):
+    """
+    Get the complete section hierarchy for a blueprint with enhanced metadata.
+    
+    This endpoint provides a comprehensive view of the section hierarchy including
+    navigation paths, content summaries, and relationship information.
+    """
+    try:
+        logger.info(f"Retrieving section hierarchy for blueprint {blueprint_id}")
+        
+        service = BlueprintSectionService()
+        sections = await service.get_section_tree(blueprint_id)
+        
+        # Build hierarchical structure with enhanced metadata
+        hierarchy = await service.build_section_hierarchy(blueprint_id)
+        
+        return {
+            "blueprint_id": blueprint_id,
+            "hierarchy": hierarchy,
+            "total_sections": len(sections),
+            "max_depth": max([s.depth for s in sections]) if sections else 0,
+            "navigation_paths": await service.get_navigation_paths(blueprint_id),
+            "created_at": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to retrieve section hierarchy for blueprint {blueprint_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Section hierarchy retrieval failed: {str(e)}"
+        )
+
+@lifecycle_router.get("/blueprints/{blueprint_id}/sections/{section_id}/navigation")
+async def get_section_navigation(
+    blueprint_id: str = Path(..., description="ID of the blueprint"),
+    section_id: int = Path(..., description="ID of the section")
+):
+    """
+    Get navigation information for a specific section.
+    
+    This endpoint provides navigation context including parent sections,
+    child sections, sibling sections, and breadcrumb navigation.
+    """
+    try:
+        logger.info(f"Retrieving navigation for section {section_id} in blueprint {blueprint_id}")
+        
+        service = BlueprintSectionService()
+        
+        # Get navigation context
+        navigation = await service.get_section_navigation(section_id, blueprint_id)
+        
+        return {
+            "section_id": section_id,
+            "blueprint_id": blueprint_id,
+            "navigation": navigation,
+            "breadcrumbs": await service.get_section_breadcrumbs(section_id),
+            "related_sections": await service.get_related_sections(section_id),
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to retrieve navigation for section {section_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Section navigation retrieval failed: {str(e)}"
+        )
+
+@lifecycle_router.post("/blueprints/{blueprint_id}/sections/{section_id}/clone")
+async def clone_section(
+    blueprint_id: str = Path(..., description="ID of the blueprint"),
+    section_id: int = Path(..., description="ID of the section to clone"),
+    target_parent_id: Optional[int] = Query(None, description="Target parent section ID"),
+    include_content: bool = Query(True, description="Include section content in clone"),
+    include_primitives: bool = Query(True, description="Include primitives in clone")
+):
+    """
+    Clone a section with all its content and structure.
+    
+    This endpoint creates a deep copy of a section, optionally including
+    its content, primitives, and mastery criteria.
+    """
+    try:
+        logger.info(f"Cloning section {section_id} in blueprint {blueprint_id}")
+        
+        service = BlueprintSectionService()
+        
+        # Clone the section
+        cloned_section = await service.clone_section(
+            section_id=section_id,
+            target_parent_id=target_parent_id,
+            include_content=include_content,
+            include_primitives=include_primitives
+        )
+        
+        return {
+            "original_section_id": section_id,
+            "cloned_section_id": cloned_section.id,
+            "blueprint_id": blueprint_id,
+            "clone_options": {
+                "include_content": include_content,
+                "include_primitives": include_primitives
+            },
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to clone section {section_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Section cloning failed: {str(e)}"
+        )

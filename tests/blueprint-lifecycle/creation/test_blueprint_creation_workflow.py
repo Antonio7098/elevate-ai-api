@@ -40,6 +40,10 @@ class BlueprintCreationTester:
         self.client = httpx.AsyncClient(
             timeout=httpx.Timeout(connect=10.0, read=300.0, write=30.0, pool=30.0)
         )
+        # Artifact tracking for monitoring: save intermediate responses per run
+        self.run_id = datetime.now().strftime("%Y%m%d-%H%M%S")
+        self.artifacts_dir = Path("artifacts") / self.run_id
+        self.artifacts_dir.mkdir(parents=True, exist_ok=True)
         
     async def run(self) -> None:
         """Run the complete blueprint creation test suite."""
@@ -242,6 +246,17 @@ class BlueprintCreationTester:
         if len(parse_result["concepts"]) < 5:
             raise Exception(f"Insufficient concepts extracted: {len(parse_result['concepts'])}")
         
+        # Persist artifact for monitoring
+        parse_path = self.artifacts_dir / "parse_result.json"
+        with open(parse_path, "w", encoding="utf-8") as f:
+            json.dump({
+                "input_preview": complex_content.strip()[:500],
+                "parse_result": parse_result
+            }, f, ensure_ascii=False, indent=2)
+        
+        # Store for cross-step access
+        self.test_data["parse_result_path"] = str(parse_path)
+        
         print("   ✅ Content parsing successful")
 
     async def test_blueprint_generation(self) -> None:
@@ -307,6 +322,16 @@ class BlueprintCreationTester:
         
         # Store blueprint ID for later tests
         self.test_data["blueprint_id"] = blueprint_result["blueprint_id"]
+        
+        # Persist artifact for monitoring
+        blueprint_path = self.artifacts_dir / "blueprint_result.json"
+        with open(blueprint_path, "w", encoding="utf-8") as f:
+            json.dump({
+                "input_preview": test_content.strip()[:500],
+                "blueprint_result": blueprint_result
+            }, f, ensure_ascii=False, indent=2)
+        
+        self.test_data["blueprint_result_path"] = str(blueprint_path)
         
         # Validate blueprint structure
         required_blueprint_fields = [
@@ -456,6 +481,14 @@ class BlueprintCreationTester:
             print(f"  {status_icon} {result.step}: {result.details}")
             if result.error:
                 print(f"    Error: {result.error}")
+        
+        # Surface artifact locations for monitoring/troubleshooting
+        if hasattr(self, "artifacts_dir"):
+            print(f"\nArtifacts saved to: {self.artifacts_dir}")
+            if "parse_result_path" in self.test_data:
+                print(f"  - Parse result: {self.test_data['parse_result_path']}")
+            if "blueprint_result_path" in self.test_data:
+                print(f"  - Blueprint result: {self.test_data['blueprint_result_path']}")
         
         if failed_tests == 0:
             print(f"\n🎉 All tests passed! Blueprint creation system is working correctly.")

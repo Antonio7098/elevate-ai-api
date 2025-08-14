@@ -12,7 +12,7 @@ from datetime import datetime
 # Add the app directory to the Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'app'))
 
-from app.core.premium.model_cascader import ModelCascader, Response, OptimizedResponse
+from app.core.premium.model_cascader import ModelCascader, CascadedResponse
 from app.core.premium.intelligent_cache import IntelligentCache, CachedResponse
 from app.core.premium.monitoring import PremiumMonitoringSystem, PerformanceMetrics
 

@@ -1,0 +1,79 @@
+{
+  "tree_construction_10_sections": {
+    "operation": "section_tree_construction",
+    "iterations": 10,
+    "avg_duration": 3.135204315185547e-05,
+    "min_duration": 2.2411346435546875e-05,
+    "max_duration": 9.107589721679688e-05,
+    "p95_duration": 0.00011703968048095703,
+    "p99_duration": 0.0001424264907836914,
+    "success_rate": 1.0,
+    "throughput": 31895.847908745247
+  },
+  "tree_construction_50_sections": {
+    "operation": "section_tree_construction",
+    "iterations": 10,
+    "avg_duration": 0.00011744499206542969,
+    "min_duration": 0.00010967254638671875,
+    "max_duration": 0.00014472007751464844,
+    "p95_duration": 0.00014793872833251953,
+    "p99_duration": 0.00015108585357666017,
+    "success_rate": 1.0,
+    "throughput": 8514.624441737718
+  },
+  "tree_construction_100_sections": {
+    "operation": "section_tree_construction",
+    "iterations": 10,
+    "avg_duration": 0.0002984046936035156,
+    "min_duration": 0.00028324127197265625,
+    "max_duration": 0.0003273487091064453,
+    "p95_duration": 0.0003291726112365723,
+    "p99_duration": 0.000330955982208252,
+    "success_rate": 1.0,
+    "throughput": 3351.1537232342603
+  },
+  "tree_construction_500_sections": {
+    "operation": "section_tree_construction",
+    "iterations": 10,
+    "avg_duration": 0.0012401819229125976,
+    "min_duration": 0.0011851787567138672,
+    "max_duration": 0.001340627670288086,
+    "p95_duration": 0.0013602614402770997,
+    "p99_duration": 0.0013794589042663574,
+    "success_rate": 1.0,
+    "throughput": 806.3333141088491
+  },
+  "content_aggregation": {
+    "operation": "content_aggregation",
+    "iterations": 10,
+    "avg_duration": 1.6307830810546876e-05,
+    "min_duration": 7.3909759521484375e-06,
+    "max_duration": 4.410743713378906e-05,
+    "p95_duration": 5.0115585327148435e-05,
+    "p99_duration": 5.599021911621094e-05,
+    "success_rate": 1.0,
+    "throughput": 61320.23391812865
+  },
+  "graph_traversal": {
+    "operation": "graph_traversal",
+    "iterations": 10,
+    "avg_duration": 5.323886871337891e-05,
+    "min_duration": 3.24249267578125e-05,
+    "max_duration": 0.00011086463928222656,
+    "p95_duration": 0.00011687278747558593,
+    "p99_duration": 0.00012274742126464845,
+    "success_rate": 1.0,
+    "throughput": 18783.269144648453
+  },
+  "concurrent_operations": {
+    "operation": "concurrent_section_operations",
+    "iterations": 50,
+    "avg_duration": 0.0012429237365722656,
+    "min_duration": 0.0012021064758300781,
+    "max_duration": 0.0014193058013916016,
+    "p95_duration": 0.0013363003730773927,
+    "p99_duration": 0.0014578580856323242,
+    "success_rate": 1.0,
+    "throughput": 787.7662791352853
+  }
+}

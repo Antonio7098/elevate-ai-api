@@ -415,7 +415,7 @@ class TestAdvancedBlueprintValidation:
         validation_steps = []
         
         def mock_validate_step(step_name):
-            async def validate():
+            async def validate(*args, **kwargs):
                 validation_steps.append(step_name)
                 return {"is_valid": True, "step": step_name}
             return validate

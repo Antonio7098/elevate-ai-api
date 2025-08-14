@@ -9,6 +9,7 @@ from datetime import datetime
 # from ..langgraph_setup import PremiumAgentState  # Commented out as not used in CAA
 from .core_api_client import CoreAPIClient
 from .gemini_service import GeminiService
+from .model_cascader import ModelCascader, CostTracker
 
 @dataclass
 class CAARequest:
@@ -112,65 +113,60 @@ class ContextAssemblyAgent:
     """Context Assembly Agent with 10-stage pipeline"""
     
     def __init__(self):
-        self.pipeline_stages = [
-            self.input_normalization,
-            self.query_augmentation,
-            self.coarse_retrieval,
-            self.graph_traversal,
-            self.cross_encoder_rerank,
-            self.sufficiency_check,
-            self.context_condensation,
-            self.tool_enrichment,
-            self.final_assembly,
-            self.cache_and_metrics
-        ]
         self.core_api_client = CoreAPIClient()
-        self.llm = GeminiService()
+        self.gemini_service = GeminiService()
+        self.model_cascader = ModelCascader()
+        self.cost_tracker = CostTracker()
         self.hybrid_retriever = HybridRetriever()
         self.cross_encoder = CrossEncoderReranker()
         self.sufficiency_classifier = SufficiencyClassifier()
     
     async def assemble_context(self, request: CAARequest) -> CAAResponse:
-        """Execute the full 10-stage context assembly pipeline with Core API data"""
+        """Execute 10-stage context assembly pipeline"""
         try:
-            state = CAAState(request)
+            # Initialize state
+            state = CAAState(
+                request=request
+            )
             
-            # Enrich state with Core API user data
-            user_analytics = await self.core_api_client.get_user_learning_analytics(request.user_id)
-            memory_insights = await self.core_api_client.get_user_memory_insights(request.user_id)
-            learning_paths = await self.core_api_client.get_user_learning_paths(request.user_id)
+            # Stage 1: Input Normalization (No LLM needed)
+            state = await self.normalize_input(state)
             
-            state.user_context.update({
-                "analytics": user_analytics,
-                "insights": memory_insights,
-                "learning_paths": learning_paths
-            })
+            # Stage 2: Query Augmentation (Use Flash Lite - routing task)
+            state = await self.augment_query(state)
             
-            # Execute pipeline stages
-            for stage in self.pipeline_stages:
-                state = await stage(state)
+            # Stage 3: Coarse Retrieval (No LLM needed - vector search)
+            state = await self.coarse_retrieval(state)
             
+            # Stage 4: Graph Traversal (No LLM needed - graph algorithms)
+            state = await self.graph_traversal(state)
+            
+            # Stage 5: Cross-Encoder Reranking (Use Flash Lite - classification task)
+            state = await self.cross_encoder_reranking(state)
+            
+            # Stage 6: Sufficiency Checking (Use Flash Lite - classification task)
+            state = await self.sufficiency_checking(state)
+            
+            # Stage 7: Context Condensation (Use Flash Lite - compression task)
+            state = await self.compress_context(state, state.request.token_budget)
+            
+            # Stage 8: Tool Enrichment (Use Flash Lite - routing task)
+            state = await self.tool_enrichment(state)
+            
+            # Stage 9: Final Assembly (Use Flash Lite - summarization task)
+            state = await self.assemble_final_context(state)
+            
+            # Stage 10: Cache & Metrics (No LLM needed)
+            state = await self.cache_and_metrics(state)
+            
+            # Generate response
             return CAAResponse.from_state(state)
             
         except Exception as e:
             print(f"Error in context assembly: {e}")
-            # Return fallback response
-            return CAAResponse(
-                assembled_context="Error assembling context",
-                short_context="Error",
-                long_context=[],
-                knowledge_primitives=[],
-                examples=[],
-                tool_outputs=[],
-                sufficiency_score=0.0,
-                token_count=0,
-                rerank_scores={},
-                warnings=[f"Error: {str(e)}"],
-                cache_key="",
-                timestamp=datetime.utcnow()
-            )
-    
-    async def input_normalization(self, state: CAAState) -> CAAState:
+            raise e
+
+    async def normalize_input(self, state: CAAState) -> CAAState:
         """Normalize input using Core API user memory data"""
         try:
             user_memory = await self.core_api_client.get_user_memory(state.request.user_id)
@@ -190,7 +186,7 @@ class ContextAssemblyAgent:
             Return only the normalized query, not an explanation.
             """
             
-            normalized = await self.llm.generate(normalization_prompt)
+            normalized = await self.gemini_service.generate(normalization_prompt, "flash_lite")
             # For testing, use the original query if normalization fails
             if "mock" in normalized.lower() or len(normalized) > 100:
                 state.normalized_query = state.request.query
@@ -203,35 +199,42 @@ class ContextAssemblyAgent:
             print(f"Error in input normalization: {e}")
             state.normalized_query = state.request.query
             return state
-    
-    async def query_augmentation(self, state: CAAState) -> CAAState:
-        """Augment query using Core API learning analytics"""
+
+    async def augment_query(self, state: CAAState) -> CAAState:
+        """Stage 2: Query Augmentation using cost-effective model"""
         try:
-            analytics = state.user_context.get("analytics", {})
+            # Use Flash Lite for query augmentation (routing task)
+            model = await self.model_cascader.select_context_assembly_model(
+                context_size=len(state.request.query),
+                complexity="simple",
+                task_type="routing"
+            )
             
-            # Augment query based on user's learning efficiency and focus areas
-            augmentation_prompt = f"""
-            Augment the following query based on user learning analytics:
+            prompt = f"""
+            Augment this query with context from the user's session:
+            Query: {state.request.query}
+            Session Context: {state.request.session_context}
+            Hints: {state.request.hints}
             
-            Query: {state.normalized_query}
-            Learning Analytics: {analytics}
-            
-            Generate 3 augmented queries that:
-            1. Address the user's focus areas: {analytics.get('focusAreas', [])}
-            2. Match their learning efficiency: {analytics.get('learningEfficiency', 0.5)}
-            3. Consider their mastery level: {analytics.get('masteryLevel', 'BEGINNER')}
+            Provide 3-5 augmented queries for better retrieval.
             """
             
-            augmented = await self.llm.generate(augmentation_prompt)
-            state.augmented_queries = [state.normalized_query] + augmented.split('\n')[:2]
+            augmented_queries = await self.gemini_service.generate(prompt, model)
+            state.augmented_queries = [augmented_queries]  # Simplified for now
+            
+            # Track cost
+            cost_estimate = await self.gemini_service.get_cost_estimate(
+                model, len(prompt), len(augmented_queries)
+            )
+            state.metrics["query_augmentation_cost"] = cost_estimate
             
             return state
             
         except Exception as e:
             print(f"Error in query augmentation: {e}")
-            state.augmented_queries = [state.normalized_query]
+            state.augmented_queries = [state.request.query]  # Fallback to original
             return state
-    
+
     async def coarse_retrieval(self, state: CAAState) -> CAAState:
         """Perform coarse retrieval using hybrid search"""
         try:
@@ -267,75 +270,180 @@ class ContextAssemblyAgent:
             state.graph_results = []
             return state
     
-    async def cross_encoder_rerank(self, state: CAAState) -> CAAState:
-        """Rerank chunks using cross-encoder"""
+    async def cross_encoder_reranking(self, state: CAAState) -> CAAState:
+        """Stage 5: Cross-Encoder Reranking using cost-effective model"""
         try:
-            # Rerank chunks for relevance and suitability
-            reranked_chunks = await self.cross_encoder.rerank_chunks(
-                chunks=state.retrieved_chunks,
-                query=state.normalized_query,
-                mode=state.request.mode
+            # Use Flash Lite for reranking (classification task)
+            model = await self.model_cascader.select_context_assembly_model(
+                context_size=len(str(state.retrieved_chunks)),
+                complexity="simple",
+                task_type="classification"
             )
+            
+            # Rerank chunks using cross-encoder
+            reranked_chunks = await self.cross_encoder.rerank_chunks(
+                state.retrieved_chunks, state.normalized_query, state.request.mode
+            )
+            
+            # Use Flash Lite for additional relevance scoring
+            for chunk in reranked_chunks:
+                relevance_prompt = f"""
+                Rate the relevance of this content to the query (0-1):
+                Query: {state.normalized_query}
+                Content: {chunk.get('content', '')[:500]}
+                
+                Return only a number between 0 and 1.
+                """
+                
+                relevance_score = await self.gemini_service.generate(relevance_prompt, model)
+                try:
+                    chunk["llm_relevance_score"] = float(relevance_score.strip())
+                except:
+                    chunk["llm_relevance_score"] = chunk.get("rerank_score", 0.5)
             
             state.reranked_chunks = reranked_chunks
-            return state
             
-        except Exception as e:
-            print(f"Error in cross-encoder rerank: {e}")
-            state.reranked_chunks = state.retrieved_chunks
-            return state
-    
-    async def sufficiency_check(self, state: CAAState) -> CAAState:
-        """Check if assembled context is sufficient"""
-        try:
-            # Check sufficiency of current context
-            sufficiency_result = await self.sufficiency_classifier.check_sufficiency(
-                context=state.reranked_chunks,
-                query=state.normalized_query
-            )
-            
-            state.sufficiency_score = sufficiency_result.get("score", 0.5)
-            
-            # If insufficient, expand context
-            if sufficiency_result.get("score", 0.5) < 0.7:
-                expanded_chunks = await self.sufficiency_classifier.iterative_expansion(
-                    context=state.reranked_chunks,
-                    query=state.normalized_query
+            # Track cost
+            total_cost = 0
+            for chunk in reranked_chunks:
+                cost_estimate = await self.gemini_service.get_cost_estimate(
+                    model, len(relevance_prompt), len(relevance_score)
                 )
-                state.reranked_chunks.extend(expanded_chunks)
+                total_cost += cost_estimate.get("total_cost", 0)
+            
+            state.metrics["reranking_cost"] = total_cost
             
             return state
             
         except Exception as e:
-            print(f"Error in sufficiency check: {e}")
-            state.sufficiency_score = 0.5
+            print(f"Error in cross-encoder reranking: {e}")
             return state
-    
-    async def context_condensation(self, state: CAAState) -> CAAState:
-        """Condense context while preserving important information"""
+
+    async def sufficiency_checking(self, state: CAAState) -> CAAState:
+        """Stage 6: Sufficiency Checking using cost-effective model"""
         try:
-            # Compress context to fit token budget
-            compressed_context = await self.compress_context(
-                chunks=state.reranked_chunks,
-                target_tokens=state.request.token_budget // 2
+            # Use Flash Lite for sufficiency checking (classification task)
+            model = await self.model_cascader.select_context_assembly_model(
+                context_size=len(str(state.reranked_chunks)),
+                complexity="simple",
+                task_type="classification"
             )
             
-            state.condensed_context = compressed_context
+            # Check if context is sufficient
+            sufficiency_result = await self.sufficiency_classifier.check_sufficiency(
+                state.reranked_chunks, state.normalized_query
+            )
+            
+            # Use Flash Lite for additional sufficiency analysis
+            sufficiency_prompt = f"""
+            Analyze if this context can answer the query:
+            Query: {state.normalized_query}
+            Context: {str(state.reranked_chunks)[:1000]}
+            
+            Return: SUFFICIENT or INSUFFICIENT
+            """
+            
+            sufficiency_analysis = await self.gemini_service.generate(sufficiency_prompt, model)
+            state.sufficiency_score = 0.8 if "SUFFICIENT" in sufficiency_analysis.upper() else 0.3
+            
+            # Track cost
+            cost_estimate = await self.gemini_service.get_cost_estimate(
+                model, len(sufficiency_prompt), len(sufficiency_analysis)
+            )
+            state.metrics["sufficiency_checking_cost"] = cost_estimate
+            
             return state
             
         except Exception as e:
-            print(f"Error in context condensation: {e}")
-            state.condensed_context = "Context condensation failed"
+            print(f"Error in sufficiency checking: {e}")
+            state.sufficiency_score = 0.5  # Default score
+            return state
+
+    async def compress_context(self, state: CAAState, target_tokens: int = None) -> CAAState:
+        """Stage 7: Context Condensation using cost-effective model"""
+        try:
+            if target_tokens is None:
+                target_tokens = state.request.token_budget // 2
+            
+            # Use Flash Lite for context compression (compression task)
+            model = await self.model_cascader.select_context_assembly_model(
+                context_size=len(str(state.reranked_chunks)),
+                complexity="medium",
+                task_type="compression"
+            )
+            
+            # Compress context while preserving key information
+            compression_prompt = f"""
+            Compress this context to approximately {target_tokens} tokens while preserving:
+            - Key facts and information
+            - Source citations
+            - Important relationships
+            
+            Context: {str(state.reranked_chunks)[:2000]}
+            """
+            
+            condensed_context = await self.gemini_service.generate(compression_prompt, model)
+            state.condensed_context = condensed_context
+            
+            # Track cost
+            cost_estimate = await self.gemini_service.get_cost_estimate(
+                model, len(compression_prompt), len(condensed_context)
+            )
+            state.metrics["context_compression_cost"] = cost_estimate
+            
+            return state
+            
+        except Exception as e:
+            print(f"Error in context compression: {e}")
+            state.condensed_context = "Context compression failed"
             return state
     
     async def tool_enrichment(self, state: CAAState) -> CAAState:
-        """Enrich context with tool outputs"""
+        """Stage 8: Tool Enrichment using cost-effective model"""
         try:
-            # Select and execute tools based on query
-            selected_tools = await self.select_tools(state.normalized_query)
-            tool_outputs = await self.execute_tools(selected_tools, state.normalized_query)
+            # Select tools (No LLM needed - keyword detection)
+            tools = await self.select_tools(state.normalized_query)
             
-            state.tool_outputs = tool_outputs
+            # Execute tools (No LLM needed - tool execution)
+            tool_outputs = await self.execute_tools(tools, state.normalized_query)
+            
+            # Use Flash Lite for tool output enhancement (routing task)
+            model = await self.model_cascader.select_context_assembly_model(
+                context_size=len(str(tool_outputs)),
+                complexity="simple",
+                task_type="routing"
+            )
+            
+            # Enhance tool outputs with context
+            enhanced_outputs = []
+            for output in tool_outputs:
+                enhancement_prompt = f"""
+                Enhance this tool output with context relevance:
+                Query: {state.normalized_query}
+                Tool: {output.get('tool', '')}
+                Output: {output.get('output', '')}
+                
+                Provide a brief enhancement explaining relevance.
+                """
+                
+                enhancement = await self.gemini_service.generate(enhancement_prompt, model)
+                enhanced_outputs.append({
+                    **output,
+                    "enhancement": enhancement
+                })
+            
+            state.tool_outputs = enhanced_outputs
+            
+            # Track cost
+            total_cost = 0
+            for output in enhanced_outputs:
+                cost_estimate = await self.gemini_service.get_cost_estimate(
+                    model, len(enhancement_prompt), len(enhancement)
+                )
+                total_cost += cost_estimate.get("total_cost", 0)
+            
+            state.metrics["tool_enrichment_cost"] = total_cost
+            
             return state
             
         except Exception as e:
@@ -343,18 +451,37 @@ class ContextAssemblyAgent:
             state.tool_outputs = []
             return state
     
-    async def final_assembly(self, state: CAAState) -> CAAState:
-        """Assemble final context from all components"""
+    async def assemble_final_context(self, state: CAAState) -> CAAState:
+        """Stage 9: Final Assembly using cost-effective model"""
         try:
-            # Combine condensed context, tool outputs, and knowledge primitives
-            final_context = await self.assemble_final_context(
-                condensed_context=state.condensed_context,
-                tool_outputs=state.tool_outputs,
-                knowledge_primitives=state.graph_results,
-                mode=state.request.mode
+            # Use Flash Lite for final assembly (summarization task)
+            model = await self.model_cascader.select_context_assembly_model(
+                context_size=len(state.condensed_context) + len(str(state.tool_outputs)),
+                complexity="medium",
+                task_type="summarization"
             )
             
+            # Assemble final context
+            assembly_prompt = f"""
+            Assemble a comprehensive context from these components:
+            
+            Condensed Context: {state.condensed_context}
+            Tool Outputs: {str(state.tool_outputs)}
+            Knowledge Primitives: {str(state.graph_results)}
+            
+            Create a well-structured, coherent context that answers the query:
+            {state.normalized_query}
+            """
+            
+            final_context = await self.gemini_service.generate(assembly_prompt, model)
             state.final_context = final_context
+            
+            # Track cost
+            cost_estimate = await self.gemini_service.get_cost_estimate(
+                model, len(assembly_prompt), len(final_context)
+            )
+            state.metrics["final_assembly_cost"] = cost_estimate
+            
             return state
             
         except Exception as e:
@@ -363,31 +490,47 @@ class ContextAssemblyAgent:
             return state
     
     async def cache_and_metrics(self, state: CAAState) -> CAAState:
-        """Cache results and collect metrics"""
+        """Stage 10: Cache & Metrics (No LLM needed)"""
         try:
             # Generate cache key
-            state.cache_key = self.generate_cache_key(state.request)
+            state.cache_key = self.generate_cache_key(CAARequest(
+                query=state.request.query,
+                user_id=state.request.user_id,
+                mode=state.request.mode,
+                session_context=state.request.session_context,
+                hints=state.request.hints,
+                token_budget=state.request.token_budget,
+                latency_budget_ms=state.request.latency_budget_ms
+            ))
             
-            # Collect metrics
-            state.metrics = {
-                "pipeline_stages": len(self.pipeline_stages),
-                "retrieved_chunks": len(state.retrieved_chunks),
-                "reranked_chunks": len(state.reranked_chunks),
-                "sufficiency_score": state.sufficiency_score,
-                "tool_outputs": len(state.tool_outputs),
-                "final_context_length": len(state.final_context)
+            # Calculate total cost
+            total_cost = sum([
+                state.metrics.get("query_augmentation_cost", {}).get("total_cost", 0),
+                state.metrics.get("reranking_cost", 0),
+                state.metrics.get("sufficiency_checking_cost", {}).get("total_cost", 0),
+                state.metrics.get("context_compression_cost", {}).get("total_cost", 0),
+                state.metrics.get("tool_enrichment_cost", 0),
+                state.metrics.get("final_assembly_cost", {}).get("total_cost", 0)
+            ])
+            
+            state.metrics["total_cost"] = total_cost
+            state.metrics["cost_breakdown"] = {
+                "query_augmentation": state.metrics.get("query_augmentation_cost", {}).get("total_cost", 0),
+                "reranking": state.metrics.get("reranking_cost", 0),
+                "sufficiency_checking": state.metrics.get("sufficiency_checking_cost", {}).get("total_cost", 0),
+                "context_compression": state.metrics.get("context_compression_cost", {}).get("total_cost", 0),
+                "tool_enrichment": state.metrics.get("tool_enrichment_cost", 0),
+                "final_assembly": state.metrics.get("final_assembly_cost", {}).get("total_cost", 0)
             }
             
             return state
             
         except Exception as e:
             print(f"Error in cache and metrics: {e}")
-            state.cache_key = ""
-            state.metrics = {"error": str(e)}
             return state
     
-    async def compress_context(self, chunks: List[Dict[str, Any]], target_tokens: int) -> str:
-        """Compress context to target token count"""
+    async def compress_chunks(self, chunks: List[Dict[str, Any]], target_tokens: int) -> str:
+        """Compress context chunks to target token count"""
         try:
             # Simple compression - in production, use more sophisticated methods
             combined_text = " ".join([chunk.get("content", "") for chunk in chunks])
@@ -400,7 +543,7 @@ class ContextAssemblyAgent:
             return " ".join(words[:target_tokens])
             
         except Exception as e:
-            print(f"Error compressing context: {e}")
+            print(f"Error compressing chunks: {e}")
             return "Context compression failed"
     
     async def select_tools(self, query: str) -> List[str]:
@@ -436,27 +579,186 @@ class ContextAssemblyAgent:
         return tools
     
     async def execute_tools(self, tools: List[str], query: str) -> List[Dict[str, Any]]:
-        """Execute selected tools"""
-        outputs = []
+        """Execute selected tools using real implementations"""
+        from .tools import ToolsIntegrationService, ToolExecutionRequest
         
+        outputs = []
+        tools_service = ToolsIntegrationService()
+        
+        # Create tool execution requests
+        tool_requests = []
         for tool in tools:
-            try:
-                if tool == "calculator":
-                    outputs.append({"tool": "calculator", "output": "Mock calculation result for mathematical operations"})
-                elif tool == "code_executor":
-                    outputs.append({"tool": "code_executor", "output": "Mock code execution result with syntax highlighting"})
-                elif tool == "web_search":
-                    outputs.append({"tool": "web_search", "output": "Mock search result with relevant information"})
-                elif tool == "diagram_generator":
-                    outputs.append({"tool": "diagram_generator", "output": "Mock diagram showing visual representation"})
-                elif tool == "example_generator":
-                    outputs.append({"tool": "example_generator", "output": "Mock practical example demonstrating the concept"})
+            # Determine tool parameters based on query analysis
+            parameters = self._determine_tool_parameters(tool, query)
+            
+            request = ToolExecutionRequest(
+                tool_name=tool,
+                parameters=parameters,
+                user_id="user_123",  # Would come from actual user context
+                context={"query": query, "mode": "premium"}
+            )
+            tool_requests.append(request)
+        
+        # Execute tools concurrently
+        try:
+            results = await tools_service.execute_multiple_tools(tool_requests)
+            
+            for result in results:
+                if result.success:
+                    outputs.append({
+                        "tool": result.tool_name,
+                        "output": self._format_tool_output(result),
+                        "execution_time": result.execution_time,
+                        "metadata": result.metadata
+                    })
                 else:
-                    outputs.append({"tool": tool, "output": f"Mock output for {tool}"})
-            except Exception as e:
-                outputs.append({"tool": tool, "error": str(e)})
+                    outputs.append({
+                        "tool": result.tool_name,
+                        "error": result.error,
+                        "execution_time": result.execution_time
+                    })
+        except Exception as e:
+            # Fallback to mock responses if real tools fail
+            for tool in tools:
+                outputs.append({
+                    "tool": tool,
+                    "output": f"Real tool execution failed, using fallback: {str(e)}",
+                    "fallback": True
+                })
         
         return outputs
+    
+    def _determine_tool_parameters(self, tool: str, query: str) -> Dict[str, Any]:
+        """Determine appropriate parameters for tool execution based on query"""
+        parameters = {}
+        
+        if tool == "calculator":
+            # Extract mathematical expressions from query
+            import re
+            math_patterns = [
+                r'(\d+[\+\-\*/]\d+)',  # Basic arithmetic
+                r'(sin|cos|tan|log|sqrt)\s*\([^)]+\)',  # Functions
+                r'(\d+\s*[a-zA-Z]+\s*to\s*[a-zA-Z]+)',  # Unit conversions
+            ]
+            
+            for pattern in math_patterns:
+                matches = re.findall(pattern, query, re.IGNORECASE)
+                if matches:
+                    parameters["expression"] = matches[0]
+                    parameters["operation"] = "evaluate"
+                    break
+            
+            if not parameters:
+                parameters = {"expression": "2 + 2", "operation": "evaluate"}
+        
+        elif tool == "code_executor":
+            # Extract code snippets from query
+            code_patterns = [
+                r'```(\w+)\n(.*?)\n```',  # Code blocks
+                r'def\s+\w+\s*\([^)]*\):',  # Function definitions
+                r'print\s*\([^)]*\)',  # Print statements
+            ]
+            
+            for pattern in code_patterns:
+                matches = re.findall(pattern, query, re.DOTALL)
+                if matches:
+                    if len(matches[0]) == 2:  # Code block with language
+                        parameters["language"] = matches[0][0]
+                        parameters["code"] = matches[0][1]
+                    else:  # Single code snippet
+                        parameters["code"] = matches[0]
+                        parameters["language"] = "python"
+                    break
+            
+            if not parameters:
+                parameters = {"code": "print('Hello, World!')", "language": "python"}
+        
+        elif tool == "web_search":
+            # Extract search queries
+            if "weather" in query.lower():
+                parameters = {"query": "current weather", "search_type": "basic"}
+            elif "news" in query.lower():
+                parameters = {"query": "latest news", "search_type": "basic"}
+            elif "stock" in query.lower() or "price" in query.lower():
+                parameters = {"query": "stock market prices", "search_type": "basic"}
+            else:
+                # Use the query itself for search
+                parameters = {"query": query[:100], "search_type": "basic"}
+        
+        elif tool == "diagram_generator":
+            # Determine diagram type and create sample data
+            if "flow" in query.lower() or "process" in query.lower():
+                parameters = {
+                    "diagram_type": "flowchart",
+                    "data": {
+                        "nodes": [
+                            {"id": "start", "label": "Start", "type": "start"},
+                            {"id": "process", "label": "Process", "type": "default"},
+                            {"id": "end", "label": "End", "type": "end"}
+                        ],
+                        "edges": [
+                            {"from": "start", "to": "process"},
+                            {"from": "process", "to": "end"}
+                        ]
+                    }
+                }
+            elif "mind" in query.lower() or "concept" in query.lower():
+                parameters = {
+                    "diagram_type": "mindmap",
+                    "data": {
+                        "nodes": [
+                            {"id": "root", "label": "Main Concept", "type": "root"},
+                            {"id": "branch1", "label": "Branch 1", "type": "branch"},
+                            {"id": "branch2", "label": "Branch 2", "type": "branch"}
+                        ]
+                    }
+                }
+            else:
+                parameters = {
+                    "diagram_type": "flowchart",
+                    "data": {"nodes": [], "edges": []}
+                }
+        
+        elif tool == "example_generator":
+            # Extract concept for example generation
+            parameters = {
+                "concept": query[:50],  # Use first 50 chars as concept
+                "example_type": "code",
+                "user_level": "intermediate",
+                "learning_style": "visual"
+            }
+        
+        return parameters
+    
+    def _format_tool_output(self, result) -> str:
+        """Format tool output for display"""
+        if result.tool_name == "calculator":
+            if hasattr(result.result, 'result'):
+                return f"Calculation: {result.result.result}"
+            return str(result.result)
+        
+        elif result.tool_name == "code_executor":
+            if hasattr(result.result, 'output'):
+                return f"Code Output: {result.result.output}"
+            return str(result.result)
+        
+        elif result.tool_name == "web_search":
+            if hasattr(result.result, 'results') and result.result.results:
+                first_result = result.result.results[0]
+                return f"Search Result: {first_result.title} - {first_result.content[:100]}..."
+            return str(result.result)
+        
+        elif result.tool_name == "diagram_generator":
+            if hasattr(result.result, 'content'):
+                return f"Diagram Generated: {result.result.diagram_type} ({result.result.format})"
+            return str(result.result)
+        
+        elif result.tool_name == "example_generator":
+            if hasattr(result.result, 'examples') and result.result.examples:
+                return f"Examples Generated: {len(result.result.examples)} examples for {result.result.concept}"
+            return str(result.result)
+        
+        return str(result.result)
     
     async def assemble_final_context(self, condensed_context: str, tool_outputs: List[Dict[str, Any]], 
                                    knowledge_primitives: List[Dict[str, Any]], mode: str) -> str:

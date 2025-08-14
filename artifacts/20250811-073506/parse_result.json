@@ -1,0 +1,119 @@
+{
+  "input_preview": "# Advanced Machine Learning Concepts\n        \n        ## Supervised Learning\n        Supervised learning involves training a model on labeled data.\n        \n        ### Classification\n        - Binary Classification: Two classes (e.g., spam/not spam)\n        - Multi-class Classification: Multiple classes (e.g., image categories)\n        \n        ### Regression\n        - Linear Regression: Predicts continuous values\n        - Logistic Regression: Predicts probabilities\n        \n        ## Unsuper",
+  "parse_result": {
+    "concepts": [
+      {
+        "name": "Supervised Learning",
+        "type": "Concept",
+        "confidence": 1.0
+      },
+      {
+        "name": "Classification",
+        "type": "Concept",
+        "confidence": 1.0
+      },
+      {
+        "name": "Binary Classification",
+        "type": "Concept",
+        "confidence": 1.0
+      },
+      {
+        "name": "Multi-class Classification",
+        "type": "Concept",
+        "confidence": 1.0
+      },
+      {
+        "name": "Regression",
+        "type": "Concept",
+        "confidence": 1.0
+      },
+      {
+        "name": "Linear Regression",
+        "type": "Concept",
+        "confidence": 1.0
+      },
+      {
+        "name": "Logistic Regression",
+        "type": "Concept",
+        "confidence": 1.0
+      },
+      {
+        "name": "Unsupervised Learning",
+        "type": "Concept",
+        "confidence": 1.0
+      },
+      {
+        "name": "Clustering",
+        "type": "Concept",
+        "confidence": 1.0
+      },
+      {
+        "name": "K-means",
+        "type": "Concept",
+        "confidence": 1.0
+      },
+      {
+        "name": "Hierarchical Clustering",
+        "type": "Concept",
+        "confidence": 1.0
+      },
+      {
+        "name": "Dimensionality Reduction",
+        "type": "Concept",
+        "confidence": 1.0
+      },
+      {
+        "name": "PCA",
+        "type": "Concept",
+        "confidence": 1.0
+      },
+      {
+        "name": "t-SNE",
+        "type": "Concept",
+        "confidence": 1.0
+      }
+    ],
+    "relationships": [
+      {
+        "source": "Supervised Learning",
+        "target": "Classification",
+        "type": "is_a"
+      },
+      {
+        "source": "Supervised Learning",
+        "target": "Regression",
+        "type": "is_a"
+      },
+      {
+        "source": "Unsupervised Learning",
+        "target": "Clustering",
+        "type": "is_a"
+      },
+      {
+        "source": "Unsupervised Learning",
+        "target": "Dimensionality Reduction",
+        "type": "is_a"
+      }
+    ],
+    "summary": "This document covers advanced machine learning concepts, categorized into supervised and unsupervised learning. Supervised learning includes classification (binary and multi-class) and regression (linear and logistic). Unsupervised learning includes clustering (K-means and hierarchical) and dimensionality reduction (PCA and t-SNE).",
+    "structure": {
+      "title": "Advanced Machine Learning Concepts",
+      "sections": [
+        {
+          "title": "Supervised Learning",
+          "items": [
+            "Classification",
+            "Regression"
+          ]
+        },
+        {
+          "title": "Unsupervised Learning",
+          "items": [
+            "Clustering",
+            "Dimensionality Reduction"
+          ]
+        }
+      ]
+    }
+  }
+}

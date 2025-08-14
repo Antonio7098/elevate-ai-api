@@ -34,6 +34,7 @@ from ...core.premium.token_optimizer import TokenOptimizer
 from ...core.premium.privacy import PrivacyPreservingAnalytics
 from ...core.premium.load_balancer import PremiumLoadBalancer
 from ...core.premium.monitoring import PremiumMonitoringSystem
+from ...core.premium.cost_optimization_service import CostOptimizationService
 
 # Premium API router with authentication
 premium_router = APIRouter(prefix="/premium", tags=["premium"])
@@ -55,6 +56,7 @@ token_optimizer = TokenOptimizer()
 privacy_analytics = PrivacyPreservingAnalytics()
 load_balancer = PremiumLoadBalancer()
 premium_monitoring = PremiumMonitoringSystem()
+cost_optimization = CostOptimizationService()  # NEW: Cost optimization service
 
 # In-memory budget store (stub)
 _user_budget_store = {}
@@ -536,6 +538,133 @@ async def cost_optimization(user_id: Optional[str] = None, time_range: str = "24
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Cost optimization retrieval failed: {str(e)}")
+
+
+@premium_router.post("/cost/analyze")
+async def cost_analysis_endpoint(request: CAARequest):
+    """Analyze costs for context assembly and provide optimization recommendations"""
+    # Validate premium access
+    if not await premium_middleware.validate_premium_access(request.user_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Premium subscription required"
+        )
+    
+    try:
+        # Execute context assembly to get cost metrics
+        caa_request = CAARequest(
+            query=request.query,
+            user_id=request.user_id,
+            mode=request.mode,
+            session_context=request.session_context,
+            hints=request.hints,
+            token_budget=request.token_budget,
+            latency_budget_ms=request.latency_budget_ms
+        )
+        
+        response = await context_assembly_agent.assemble_context(caa_request)
+        
+        # Analyze costs using the cost optimization service
+        cost_analysis = await cost_optimization.analyze_costs(response.tool_outputs)
+        
+        # Get cost summary
+        cost_summary = await cost_optimization.get_cost_summary(cost_analysis)
+        
+        # Validate budget compliance
+        budget_compliance = await cost_optimization.validate_budget_compliance(
+            cost_analysis, "premium"  # Default to premium tier
+        )
+        
+        return {
+            "cost_analysis": {
+                "total_cost": cost_analysis.total_cost,
+                "total_savings_potential": cost_analysis.total_savings_potential,
+                "cost_efficiency_score": cost_analysis.cost_efficiency_score,
+                "timestamp": cost_analysis.timestamp.isoformat()
+            },
+            "cost_breakdown": [
+                {
+                    "stage": breakdown.stage,
+                    "model_used": breakdown.model_used,
+                    "total_cost": breakdown.total_cost,
+                    "optimization_potential": breakdown.optimization_potential,
+                    "recommended_model": breakdown.recommended_model
+                }
+                for breakdown in cost_analysis.cost_breakdown
+            ],
+            "optimization_recommendations": [
+                {
+                    "stage": rec.stage,
+                    "current_cost": rec.current_cost,
+                    "optimized_cost": rec.optimized_cost,
+                    "savings_percentage": rec.savings_percentage,
+                    "recommended_model": rec.recommended_model,
+                    "reasoning": rec.reasoning,
+                    "implementation_effort": rec.implementation_effort
+                }
+                for rec in cost_analysis.optimization_recommendations
+            ],
+            "cost_summary": cost_summary,
+            "budget_compliance": budget_compliance,
+            "context_assembly_response": {
+                "assembled_context": response.assembled_context,
+                "sufficiency_score": response.sufficiency_score,
+                "token_count": response.token_count
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Cost analysis failed: {str(e)}"
+        )
+
+@premium_router.get("/cost/optimization-tips")
+async def get_optimization_tips():
+    """Get general cost optimization tips for premium users"""
+    return {
+        "optimization_tips": [
+            {
+                "tip": "Use Gemini 2.5 Flash Lite for routing and summarization tasks",
+                "explanation": "Flash Lite is specifically designed for these tasks and costs 3x less than Flash",
+                "savings": "Up to 70% cost reduction"
+            },
+            {
+                "tip": "Reserve Gemini Pro only for complex reasoning tasks",
+                "explanation": "Pro models are expensive and only necessary for advanced cognitive tasks",
+                "savings": "Up to 90% cost reduction for simple tasks"
+            },
+            {
+                "tip": "Batch similar queries together",
+                "explanation": "Group related questions to reduce repeated context assembly costs",
+                "savings": "20-40% cost reduction"
+            },
+            {
+                "tip": "Use appropriate token budgets",
+                "explanation": "Set realistic token budgets to avoid unnecessary context expansion",
+                "savings": "15-30% cost reduction"
+            },
+            {
+                "tip": "Leverage caching for repeated queries",
+                "explanation": "The system automatically caches context assembly results",
+                "savings": "50-80% cost reduction for repeated queries"
+            }
+        ],
+        "model_recommendations": {
+            "routing_tasks": "gemini-2.5-flash-lite",
+            "summarization_tasks": "gemini-2.5-flash-lite", 
+            "classification_tasks": "gemini-2.5-flash",
+            "compression_tasks": "gemini-2.5-flash",
+            "complex_reasoning": "gemini-1.5-pro",
+            "large_context": "gemini-1.5-pro"
+        },
+        "cost_comparison": {
+            "gemini-2.5-flash-lite": "$0.000125 per 1K tokens (most cost-effective)",
+            "gemini-2.5-flash": "$0.000375 per 1K tokens (good balance)",
+            "gemini-1.5-flash": "$0.0008 per 1K tokens (standard)",
+            "gemini-1.5-pro": "$0.014 per 1K tokens (premium)"
+        }
+    }
 
 
 class Budget(BaseModel):

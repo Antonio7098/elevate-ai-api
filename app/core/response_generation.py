@@ -3,17 +3,18 @@ Response Generation for RAG Chat Core.
 
 This module handles prompt assembly, LLM response generation, factual accuracy checking,
 and response formatting for the Elevate AI chat system.
+Enhanced with blueprint section hierarchy support.
 """
 
 import json
 import time
 import re
 from typing import Dict, List, Optional, Any, Tuple
-from datetime import datetime
+from datetime import datetime, timezone
 from dataclasses import dataclass, asdict
 from enum import Enum
 
-from app.core.context_assembly import AssembledContext, CognitiveProfile
+from app.core.context_assembly import AssembledContext, CognitiveProfile, SectionContext
 from app.core.query_transformer import QueryTransformation, QueryIntent
 from app.services.gemini_service import GeminiService
 
@@ -27,6 +28,11 @@ class ResponseType(Enum):
     ENCOURAGEMENT = "encouragement"
     SUMMARY = "summary"
     ASSESSMENT = "assessment"
+    # Section-specific response types
+    SECTION_OVERVIEW = "section_overview"
+    SECTION_NAVIGATION = "section_navigation"
+    SECTION_PROGRESS = "section_progress"
+    HIERARCHY_EXPLANATION = "hierarchy_explanation"
 
 
 class ToneStyle(Enum):
@@ -37,6 +43,9 @@ class ToneStyle(Enum):
     SOCRATIC = "socratic"
     TECHNICAL = "technical"
     SIMPLIFIED = "simplified"
+    # Section-specific tone styles
+    GUIDED = "guided"  # For step-by-step section navigation
+    PROGRESS_ORIENTED = "progress_oriented"  # For progress tracking
 
 
 @dataclass
@@ -51,6 +60,9 @@ class ResponseGenerationRequest:
     temperature: float = 0.7
     include_sources: bool = True
     metadata: Dict[str, Any] = None
+    # Section-specific fields
+    section_context: Optional[SectionContext] = None
+    include_section_hierarchy: bool = False
 
 
 @dataclass
@@ -65,6 +77,9 @@ class GeneratedResponse:
     generation_time_ms: float
     token_count: int
     metadata: Dict[str, Any]
+    # Section-specific fields
+    section_references: Optional[List[Dict[str, Any]]] = None
+    navigation_suggestions: Optional[List[str]] = None
 
 
 class ResponseGenerator:
@@ -89,7 +104,12 @@ class ResponseGenerator:
             ResponseType.CORRECTION: self._get_correction_template(),
             ResponseType.ENCOURAGEMENT: self._get_encouragement_template(),
             ResponseType.SUMMARY: self._get_summary_template(),
-            ResponseType.ASSESSMENT: self._get_assessment_template()
+            ResponseType.ASSESSMENT: self._get_assessment_template(),
+            # Section-specific templates
+            ResponseType.SECTION_OVERVIEW: self._get_section_overview_template(),
+            ResponseType.SECTION_NAVIGATION: self._get_section_navigation_template(),
+            ResponseType.SECTION_PROGRESS: self._get_section_progress_template(),
+            ResponseType.HIERARCHY_EXPLANATION: self._get_hierarchy_explanation_template()
         }
         
         # Tone style configurations
@@ -99,24 +119,33 @@ class ResponseGenerator:
                 'avoid': "contractions, colloquialisms, overly casual language"
             },
             ToneStyle.CONVERSATIONAL: {
-                'instructions': "Use natural, conversational language. Be friendly and approachable.",
-                'avoid': "overly formal or academic jargon"
+                'instructions': "Use conversational, friendly language. Be approachable and engaging.",
+                'avoid': "overly formal language, jargon without explanation"
             },
             ToneStyle.ENCOURAGING: {
-                'instructions': "Be supportive and encouraging. Focus on growth and learning.",
-                'avoid': "negative criticism, discouragement"
+                'instructions': "Use encouraging, supportive language. Be positive and motivating.",
+                'avoid': "negative language, discouraging phrases"
             },
             ToneStyle.SOCRATIC: {
-                'instructions': "Ask guiding questions to help the user discover answers.",
-                'avoid': "direct answers, telling instead of asking"
+                'instructions': "Use Socratic method. Ask guiding questions to help discovery.",
+                'avoid': "direct answers, spoon-feeding information"
             },
             ToneStyle.TECHNICAL: {
-                'instructions': "Use precise technical language. Include relevant details.",
-                'avoid': "oversimplification, vague explanations"
+                'instructions': "Use technical, precise language. Include relevant terminology.",
+                'avoid': "oversimplification, vague language"
             },
             ToneStyle.SIMPLIFIED: {
-                'instructions': "Use simple, clear language. Avoid technical jargon.",
-                'avoid': "complex terminology, lengthy explanations"
+                'instructions': "Use simple, clear language. Break down complex concepts.",
+                'avoid': "jargon, complex sentence structures"
+            },
+            # Section-specific tone configurations
+            ToneStyle.GUIDED: {
+                'instructions': "Use guided, step-by-step language. Provide clear navigation cues.",
+                'avoid': "vague directions, overwhelming information"
+            },
+            ToneStyle.PROGRESS_ORIENTED: {
+                'instructions': "Use progress-focused language. Celebrate achievements and set clear next steps.",
+                'avoid': "discouraging language, unclear progress indicators"
             }
         }
     
@@ -194,6 +223,149 @@ class ResponseGenerator:
             token_count=len(formatted_response.split()),
             metadata=request.metadata or {}
         )
+    
+    async def generate_section_overview_response(
+        self,
+        request: ResponseGenerationRequest,
+        section_context: SectionContext
+    ) -> GeneratedResponse:
+        """
+        Generate a response that provides an overview of a specific section.
+        
+        Args:
+            request: Response generation request
+            section_context: Context for the specific section
+            
+        Returns:
+            Generated response with section overview
+        """
+        try:
+            start_time = time.time()
+            
+            # Prepare section-specific context
+            section_info = {
+                "section_title": section_context.section_title,
+                "section_description": section_context.section_description,
+                "section_depth": section_context.section_depth,
+                "section_path": " > ".join(section_context.section_path),
+                "difficulty": section_context.difficulty.value,
+                "estimated_time": section_context.estimated_time_minutes,
+                "key_concepts": section_context.key_concepts,
+                "prerequisites": section_context.prerequisites,
+                "learning_objectives": section_context.learning_objectives,
+                "user_progress": f"{section_context.user_progress * 100:.1f}%"
+            }
+            
+            # Build prompt with section context
+            prompt = self._build_section_prompt(
+                request, 
+                ResponseType.SECTION_OVERVIEW,
+                section_info
+            )
+            
+            # Generate response using LLM
+            response_content = await self.gemini_service.generate_response(prompt)
+            
+            # Process and format response
+            formatted_response = self._format_section_response(
+                response_content, 
+                section_context,
+                ResponseType.SECTION_OVERVIEW
+            )
+            
+            generation_time = (time.time() - start_time) * 1000
+            
+            return GeneratedResponse(
+                content=formatted_response,
+                response_type=ResponseType.SECTION_OVERVIEW,
+                tone_style=request.tone_style or ToneStyle.CONVERSATIONAL,
+                confidence_score=0.85,  # Placeholder
+                sources=[f"Section: {section_context.section_title}"],
+                factual_accuracy_score=0.90,  # Placeholder
+                generation_time_ms=generation_time,
+                token_count=len(formatted_response.split()),
+                metadata={"section_id": section_context.section_id},
+                section_references=[{
+                    "section_id": section_context.section_id,
+                    "section_title": section_context.section_title,
+                    "section_path": section_context.section_path
+                }],
+                navigation_suggestions=self._generate_navigation_suggestions(section_context)
+            )
+            
+        except Exception as e:
+            logger.error(f"Failed to generate section overview response: {e}")
+            raise
+    
+    async def generate_section_navigation_response(
+        self,
+        request: ResponseGenerationRequest,
+        section_context: SectionContext
+    ) -> GeneratedResponse:
+        """
+        Generate a response that provides navigation guidance for a section.
+        
+        Args:
+            request: Response generation request
+            section_context: Context for the specific section
+            
+        Returns:
+            Generated response with navigation guidance
+        """
+        try:
+            start_time = time.time()
+            
+            # Prepare navigation-specific context
+            navigation_info = {
+                "section_title": section_context.section_title,
+                "section_path": " > ".join(section_context.section_path),
+                "section_depth": section_context.section_depth,
+                "parent_section": section_context.parent_section_id,
+                "key_concepts": section_context.key_concepts,
+                "prerequisites": section_context.prerequisites,
+                "estimated_time": section_context.estimated_time_minutes
+            }
+            
+            # Build prompt with navigation context
+            prompt = self._build_section_prompt(
+                request, 
+                ResponseType.SECTION_NAVIGATION,
+                navigation_info
+            )
+            
+            # Generate response using LLM
+            response_content = await self.gemini_service.generate_response(prompt)
+            
+            # Process and format response
+            formatted_response = self._format_section_response(
+                response_content, 
+                section_context,
+                ResponseType.SECTION_NAVIGATION
+            )
+            
+            generation_time = (time.time() - start_time) * 1000
+            
+            return GeneratedResponse(
+                content=formatted_response,
+                response_type=ResponseType.SECTION_NAVIGATION,
+                tone_style=request.tone_style or ToneStyle.GUIDED,
+                confidence_score=0.85,  # Placeholder
+                sources=[f"Section: {section_context.section_title}"],
+                factual_accuracy_score=0.90,  # Placeholder
+                generation_time_ms=generation_time,
+                token_count=len(formatted_response.split()),
+                metadata={"section_id": section_context.section_id},
+                section_references=[{
+                    "section_id": section_context.section_id,
+                    "section_title": section_context.section_title,
+                    "section_path": section_context.section_path
+                }],
+                navigation_suggestions=self._generate_navigation_suggestions(section_context)
+            )
+            
+        except Exception as e:
+            logger.error(f"Failed to generate section navigation response: {e}")
+            raise
     
     def _determine_response_type(self, user_query: str, transformation: QueryTransformation) -> ResponseType:
         """Determine the appropriate response type based on query analysis."""
@@ -598,6 +770,239 @@ Please provide assessment that:
 
 Response:
 """
+
+    def _get_section_overview_template(self) -> str:
+        return """
+You are an expert educational AI assistant for Elevate AI. Your role is to provide a clear, concise overview of a specific section or topic.
+
+USER QUERY: {user_query}
+QUERY INTENT: {query_intent}
+EXPANDED QUERY: {expanded_query}
+
+CONVERSATION CONTEXT:
+{conversation_history}
+
+CURRENT TOPIC: {current_topic}
+DISCUSSED CONCEPTS: {discussed_concepts}
+
+RETRIEVED KNOWLEDGE:
+{retrieved_knowledge}
+
+USER LEARNING PROFILE:
+{learning_profile}
+
+TONE INSTRUCTIONS: {tone_instructions}
+AVOID: {tone_avoid}
+
+Please provide a concise overview of the following section:
+{section_context}
+
+Response:
+"""
+
+    def _get_section_navigation_template(self) -> str:
+        return """
+You are an expert educational AI assistant for Elevate AI. Your role is to provide clear, step-by-step navigation cues for a user to find specific information within a document or section.
+
+USER QUERY: {user_query}
+QUERY INTENT: {query_intent}
+EXPANDED QUERY: {expanded_query}
+
+CONVERSATION CONTEXT:
+{conversation_history}
+
+CURRENT TOPIC: {current_topic}
+DISCUSSED CONCEPTS: {discussed_concepts}
+
+RETRIEVED KNOWLEDGE:
+{retrieved_knowledge}
+
+USER LEARNING PROFILE:
+{learning_profile}
+
+TONE INSTRUCTIONS: {tone_instructions}
+AVOID: {tone_avoid}
+
+Please provide a step-by-step navigation guide for the user to find the following information:
+{section_context}
+
+Response:
+"""
+
+    def _get_section_progress_template(self) -> str:
+        return """
+You are an expert educational AI assistant for Elevate AI. Your role is to provide progress-focused feedback and encouragement to the user.
+
+USER QUERY: {user_query}
+QUERY INTENT: {query_intent}
+EXPANDED QUERY: {expanded_query}
+
+CONVERSATION CONTEXT:
+{conversation_history}
+
+CURRENT TOPIC: {current_topic}
+DISCUSSED CONCEPTS: {discussed_concepts}
+
+RETRIEVED KNOWLEDGE:
+{retrieved_knowledge}
+
+USER LEARNING PROFILE:
+{learning_profile}
+
+TONE INSTRUCTIONS: {tone_instructions}
+AVOID: {tone_avoid}
+
+Please provide progress-oriented feedback for the user's current learning journey.
+{section_context}
+
+Response:
+"""
+
+    def _get_hierarchy_explanation_template(self) -> str:
+        return """
+You are an expert educational AI assistant for Elevate AI. Your role is to provide a clear, hierarchical explanation of the blueprint section hierarchy.
+
+USER QUERY: {user_query}
+QUERY INTENT: {query_intent}
+EXPANDED QUERY: {expanded_query}
+
+CONVERSATION CONTEXT:
+{conversation_history}
+
+CURRENT TOPIC: {current_topic}
+DISCUSSED CONCEPTS: {discussed_concepts}
+
+RETRIEVED KNOWLEDGE:
+{retrieved_knowledge}
+
+USER LEARNING PROFILE:
+{learning_profile}
+
+TONE INSTRUCTIONS: {tone_instructions}
+AVOID: {tone_avoid}
+
+Please provide a hierarchical explanation of the blueprint section hierarchy.
+{section_context}
+
+Response:
+"""
+
+    def _build_section_prompt(
+        self, 
+        request: ResponseGenerationRequest, 
+        response_type: ResponseType,
+        section_info: Dict[str, Any]
+    ) -> str:
+        """
+        Build a prompt for section-specific response generation.
+        
+        Args:
+            request: Response generation request
+            response_type: Type of response to generate
+            section_info: Section-specific information
+            
+        Returns:
+            Formatted prompt string
+        """
+        template = self.prompt_templates.get(response_type, "")
+        tone_config = self.tone_configs.get(request.tone_style or ToneStyle.CONVERSATIONAL, {})
+        
+        # Format section context
+        section_context = f"""
+Section Information:
+- Title: {section_info.get('section_title', 'N/A')}
+- Path: {section_info.get('section_path', 'N/A')}
+- Depth: {section_info.get('section_depth', 'N/A')}
+- Difficulty: {section_info.get('difficulty', 'N/A')}
+- Estimated Time: {section_info.get('estimated_time', 'N/A')} minutes
+- Key Concepts: {', '.join(section_info.get('key_concepts', []))}
+- Prerequisites: {', '.join(section_info.get('prerequisites', []))}
+- Learning Objectives: {', '.join(section_info.get('learning_objectives', []))}
+- User Progress: {section_info.get('user_progress', 'N/A')}
+"""
+        
+        return template.format(
+            user_query=request.user_query,
+            query_intent=request.query_transformation.intent.value,
+            expanded_query=request.query_transformation.expanded_query,
+            conversation_history=self._format_conversation_history(request.assembled_context),
+            current_topic=request.assembled_context.session_context.current_topic or "General",
+            discussed_concepts=", ".join(request.assembled_context.session_context.discussed_concepts),
+            retrieved_knowledge=self._format_retrieved_knowledge(request.assembled_context),
+            learning_profile=self._format_learning_profile(request.assembled_context.cognitive_profile),
+            tone_instructions=tone_config.get('instructions', ''),
+            tone_avoid=tone_config.get('avoid', ''),
+            section_context=section_context
+        )
+    
+    def _format_section_response(
+        self, 
+        response_content: str, 
+        section_context: SectionContext,
+        response_type: ResponseType
+    ) -> str:
+        """
+        Format a section-specific response with additional context.
+        
+        Args:
+            response_content: Raw response content from LLM
+            section_context: Section context information
+            response_type: Type of response generated
+            
+        Returns:
+            Formatted response string
+        """
+        # Add section context header
+        header = f"📚 **{section_context.section_title}**\n"
+        path_info = f"📍 **Location:** {' > '.join(section_context.section_path)}\n"
+        progress_info = f"📊 **Your Progress:** {section_context.user_progress * 100:.1f}%\n\n"
+        
+        # Add response type indicator
+        type_indicators = {
+            ResponseType.SECTION_OVERVIEW: "🔍 **Section Overview**\n",
+            ResponseType.SECTION_NAVIGATION: "🧭 **Navigation Guide**\n",
+            ResponseType.SECTION_PROGRESS: "📈 **Progress Update**\n",
+            ResponseType.HIERARCHY_EXPLANATION: "🌳 **Hierarchy Structure**\n"
+        }
+        
+        type_indicator = type_indicators.get(response_type, "")
+        
+        # Combine all parts
+        formatted_response = f"{header}{path_info}{progress_info}{type_indicator}\n{response_content}"
+        
+        return formatted_response
+    
+    def _generate_navigation_suggestions(self, section_context: SectionContext) -> List[str]:
+        """
+        Generate navigation suggestions based on section context.
+        
+        Args:
+            section_context: Section context information
+            
+        Returns:
+            List of navigation suggestions
+        """
+        suggestions = []
+        
+        # Add section-specific suggestions
+        if section_context.user_progress < 0.3:
+            suggestions.append("Start with the foundational concepts in this section")
+            suggestions.append("Review any prerequisites before diving deeper")
+        elif section_context.user_progress < 0.7:
+            suggestions.append("Focus on the key concepts and learning objectives")
+            suggestions.append("Practice with the provided examples and exercises")
+        else:
+            suggestions.append("Review and reinforce your understanding")
+            suggestions.append("Consider exploring related sections or advanced topics")
+        
+        # Add navigation suggestions
+        if section_context.parent_section_id:
+            suggestions.append("You can return to the parent section for broader context")
+        
+        if section_context.section_depth < 3:
+            suggestions.append("Explore child sections for more detailed information")
+        
+        return suggestions
 # PromptTemplate class for response_generation.py
 # This will be appended to the main file
 

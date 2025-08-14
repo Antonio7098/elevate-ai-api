@@ -8,6 +8,7 @@ context retrieval, answer generation, and integration testing.
 import asyncio
 import json
 import pytest
+import pytest_asyncio
 from typing import List, Dict, Any, Optional
 from unittest.mock import Mock, patch, AsyncMock
 
@@ -22,7 +23,7 @@ from tests.conftest import get_test_config
 class TestBlueprintRAG:
     """RAG test suite for blueprint operations."""
     
-    @pytest.fixture(autouse=True)
+    @pytest_asyncio.fixture(autouse=True)
     async def setup(self):
         """Setup test environment."""
         self.config = get_test_config()

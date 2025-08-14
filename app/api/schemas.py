@@ -812,3 +812,244 @@ from app.api.answer_evaluation_schemas import (
     PrismaCriterionEvaluationResponse
 )
 from app.api.criterion_question_schemas import CriterionQuestionDto
+
+
+# Blueprint Section Schemas
+class BlueprintSectionRequest(BaseModel):
+    """Request schema for blueprint section operations."""
+    title: str = Field(..., description="Section title")
+    description: Optional[str] = Field(None, description="Section description")
+    content: Optional[str] = Field(None, description="Section content")
+    order_index: Optional[int] = Field(None, description="Order index within parent")
+    parent_section_id: Optional[int] = Field(None, description="Parent section ID")
+    difficulty_level: Optional[str] = Field("intermediate", description="Difficulty level")
+    estimated_time_minutes: Optional[int] = Field(None, description="Estimated completion time")
+    
+    @field_validator('title')
+    @classmethod
+    def validate_title(cls, v):
+        if not v or not v.strip():
+            raise ValueError('Section title cannot be empty')
+        return v.strip()
+    
+    @field_validator('difficulty_level')
+    @classmethod
+    def validate_difficulty_level(cls, v):
+        valid_levels = ["beginner", "intermediate", "advanced", "expert"]
+        if v not in valid_levels:
+            raise ValueError(f'Difficulty level must be one of: {", ".join(valid_levels)}')
+        return v
+
+
+class BlueprintSectionResponse(BaseModel):
+    """Response schema for blueprint section operations."""
+    id: int = Field(..., description="Section ID")
+    title: str = Field(..., description="Section title")
+    description: Optional[str] = Field(None, description="Section description")
+    content: Optional[str] = Field(None, description="Section content")
+    order_index: int = Field(..., description="Order index within parent")
+    depth: int = Field(..., description="Hierarchical depth")
+    parent_section_id: Optional[int] = Field(None, description="Parent section ID")
+    blueprint_id: str = Field(..., description="Associated blueprint ID")
+    difficulty_level: str = Field(..., description="Difficulty level")
+    estimated_time_minutes: Optional[int] = Field(None, description="Estimated completion time")
+    created_at: str = Field(..., description="Creation timestamp")
+    updated_at: str = Field(..., description="Last update timestamp")
+
+
+class BlueprintSectionTreeResponse(BaseModel):
+    """Response schema for blueprint section hierarchy tree."""
+    blueprint_id: str = Field(..., description="Blueprint ID")
+    sections: List[BlueprintSectionResponse] = Field(..., description="All sections")
+    hierarchy: Dict[str, Any] = Field(..., description="Hierarchical structure")
+    total_sections: int = Field(..., description="Total number of sections")
+    max_depth: int = Field(..., description="Maximum hierarchy depth")
+    created_at: str = Field(..., description="When tree was generated")
+
+
+class SectionMoveRequest(BaseModel):
+    """Request schema for moving sections within hierarchy."""
+    section_id: int = Field(..., description="Section to move")
+    new_parent_id: Optional[int] = Field(None, description="New parent section ID")
+    new_order_index: Optional[int] = Field(None, description="New order index")
+    
+    @field_validator('section_id')
+    @classmethod
+    def validate_section_id(cls, v):
+        if v <= 0:
+            raise ValueError('Section ID must be a positive integer')
+        return v
+
+
+class SectionReorderRequest(BaseModel):
+    """Request schema for reordering sections."""
+    section_orders: List[Dict[str, int]] = Field(..., description="List of section ID to order index mappings")
+    
+    @field_validator('section_orders')
+    @classmethod
+    def validate_section_orders(cls, v):
+        if not v:
+            raise ValueError('Section orders cannot be empty')
+        for item in v:
+            if not isinstance(item, dict) or 'section_id' not in item or 'order_index' not in item:
+                raise ValueError('Each item must contain section_id and order_index')
+        return v
+
+
+class SectionContentRequest(BaseModel):
+    """Request schema for retrieving section content."""
+    section_id: int = Field(..., description="Section ID")
+    include_metadata: bool = Field(default=True, description="Include section metadata")
+    include_primitives: bool = Field(default=True, description="Include associated primitives")
+    include_criteria: bool = Field(default=True, description="Include mastery criteria")
+    
+    @field_validator('section_id')
+    @classmethod
+    def validate_section_id(cls, v):
+        if v <= 0:
+            raise ValueError('Section ID must be a positive integer')
+        return v
+
+
+class SectionContentResponse(BaseModel):
+    """Response schema for section content."""
+    section: BlueprintSectionResponse = Field(..., description="Section information")
+    primitives: List[Dict[str, Any]] = Field(default_factory=list, description="Associated primitives")
+    mastery_criteria: List[Dict[str, Any]] = Field(default_factory=list, description="Mastery criteria")
+    content_summary: Optional[str] = Field(None, description="Content summary")
+    learning_progress: Optional[Dict[str, Any]] = Field(None, description="Learning progress data")
+    related_sections: List[Dict[str, Any]] = Field(default_factory=list, description="Related sections")
+
+
+class SectionStatsResponse(BaseModel):
+    """Response schema for section statistics."""
+    section_id: int = Field(..., description="Section ID")
+    total_primitives: int = Field(..., description="Total primitives in section")
+    total_criteria: int = Field(..., description="Total mastery criteria")
+    difficulty_distribution: Dict[str, int] = Field(..., description="Difficulty level distribution")
+    uue_stage_distribution: Dict[str, int] = Field(..., description="UUE stage distribution")
+    estimated_completion_time: int = Field(..., description="Total estimated completion time")
+    created_at: str = Field(..., description="When stats were generated")
+
+
+class BlueprintSectionSyncRequest(BaseModel):
+    """Request schema for syncing blueprint sections with Core API."""
+    blueprint_id: str = Field(..., description="Blueprint ID to sync")
+    sections: List[BlueprintSectionRequest] = Field(..., description="Sections to sync")
+    user_id: str = Field(..., description="User ID for ownership")
+    force_update: bool = Field(default=False, description="Force update existing sections")
+    
+    @field_validator('blueprint_id')
+    @classmethod
+    def validate_blueprint_id(cls, v):
+        if not v or not v.strip():
+            raise ValueError('Blueprint ID cannot be empty')
+        return v.strip()
+
+
+class BlueprintSectionSyncResponse(BaseModel):
+    """Response schema for blueprint section sync operations."""
+    blueprint_id: str = Field(..., description="Blueprint ID")
+    sync_success: bool = Field(..., description="Overall sync success")
+    sections_created: int = Field(..., description="Number of sections created")
+    sections_updated: int = Field(..., description="Number of sections updated")
+    errors: List[str] = Field(default_factory=list, description="Sync errors")
+    created_section_ids: List[int] = Field(default_factory=list, description="IDs of created sections")
+    updated_section_ids: List[int] = Field(default_factory=list, description="IDs of updated sections")
+    sync_timestamp: str = Field(..., description="When sync was completed")
+
+# Section-Aware Primitive Schemas
+
+class SectionPrimitivesRequest(BaseModel):
+    """Request model for section-specific primitive operations."""
+    section_id: str = Field(..., description="ID of the section")
+    include_metadata: bool = Field(True, description="Include primitive metadata")
+    include_criteria: bool = Field(True, description="Include mastery criteria")
+    include_relationships: bool = Field(False, description="Include primitive relationships")
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "section_id": "section-123",
+                "include_metadata": True,
+                "include_criteria": True,
+                "include_relationships": False
+            }
+        }
+
+class SectionPrimitivesResponse(BaseModel):
+    """Response model for section-specific primitive operations."""
+    section_id: str = Field(..., description="ID of the section")
+    blueprint_id: str = Field(..., description="ID of the blueprint")
+    primitives: List[KnowledgePrimitiveDto] = Field(..., description="Section primitives")
+    mastery_criteria: List[MasteryCriterionDto] = Field(..., description="Section mastery criteria")
+    total_primitives: int = Field(..., description="Total number of primitives")
+    total_criteria: int = Field(..., description="Total number of mastery criteria")
+    section_info: Dict[str, Any] = Field(..., description="Section metadata")
+    extraction_timestamp: str = Field(..., description="When primitives were extracted")
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "section_id": "section-123",
+                "blueprint_id": "blueprint-456",
+                "primitives": [],
+                "mastery_criteria": [],
+                "total_primitives": 0,
+                "total_criteria": 0,
+                "section_info": {
+                    "section_title": "Introduction",
+                    "section_depth": 0,
+                    "parent_section_id": None
+                },
+                "extraction_timestamp": "2025-08-13T14:45:00Z"
+            }
+        }
+
+class SectionSearchRequest(BaseModel):
+    """Request model for section-specific search operations."""
+    query: str = Field(..., description="Search query")
+    search_type: str = Field("semantic", description="Type of search: semantic, vector, or hybrid")
+    limit: int = Field(10, description="Maximum number of results to return")
+    filters: Optional[Dict[str, Any]] = Field(None, description="Additional search filters")
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "query": "machine learning algorithms",
+                "search_type": "semantic",
+                "limit": 10,
+                "filters": {
+                    "primitive_type": "process",
+                    "difficulty_level": "intermediate"
+                }
+            }
+        }
+
+class SectionSearchResponse(BaseModel):
+    """Response model for section-specific search operations."""
+    query: str = Field(..., description="Search query")
+    results: List[Dict[str, Any]] = Field(..., description="Search results")
+    total_results: int = Field(..., description="Total number of results")
+    search_type: str = Field(..., description="Type of search performed")
+    section_context: Dict[str, Any] = Field(..., description="Section context for search")
+    search_metadata: Dict[str, Any] = Field(default_factory=dict, description="Search metadata")
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "query": "machine learning algorithms",
+                "results": [],
+                "total_results": 0,
+                "search_type": "semantic",
+                "section_context": {
+                    "section_id": "section-123",
+                    "section_title": "Introduction",
+                    "blueprint_id": "blueprint-456"
+                },
+                "search_metadata": {
+                    "search_duration": 0.15,
+                    "vector_store_type": "pinecone"
+                }
+            }
+        }

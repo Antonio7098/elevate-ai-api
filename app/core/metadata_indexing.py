@@ -1,408 +1,366 @@
 """
-Metadata indexing service for fast filtering and retrieval.
+Metadata indexing utilities for the RAG system.
 
-This module provides optimized metadata indexing to improve performance
-of filtering operations by locus type, UUE stage, and relationships.
+This module provides utilities for indexing and managing metadata
+for vector database operations.
+Enhanced with blueprint section hierarchy support.
 """
 
 import logging
-from typing import Dict, List, Set, Optional, Any
-from collections import defaultdict
-from datetime import datetime
-import asyncio
-import json
-
-from app.core.vector_store import VectorStore, VectorStoreError
+from typing import Dict, Any, List, Optional, Union
+from datetime import datetime, timezone
+from app.models.blueprint_centric import BlueprintSection, DifficultyLevel, UueStage
 from app.models.text_node import TextNode, LocusType, UUEStage
 
 logger = logging.getLogger(__name__)
 
 
 class MetadataIndexingError(Exception):
-    """Exception raised for metadata indexing errors."""
+    """Base exception for metadata indexing operations."""
     pass
 
 
-class MetadataIndex:
-    """
-    In-memory metadata index for fast filtering.
-    
-    This class maintains indexes for common metadata filters to avoid
-    scanning all vectors for metadata-based queries.
-    """
+class MetadataIndexer:
+    """Handles metadata indexing operations for blueprint sections."""
     
     def __init__(self):
-        # Index by locus type
-        self.locus_type_index: Dict[str, Set[str]] = defaultdict(set)
-        
-        # Index by UUE stage
-        self.uue_stage_index: Dict[str, Set[str]] = defaultdict(set)
-        
-        # Index by blueprint ID
-        self.blueprint_index: Dict[str, Set[str]] = defaultdict(set)
-        
-        # Index by locus ID
-        self.locus_index: Dict[str, Set[str]] = defaultdict(set)
-        
-        # Relationship index: locus_id -> set of related locus_ids
-        self.relationship_index: Dict[str, Set[str]] = defaultdict(set)
-        
-        # Reverse relationship index: target_locus_id -> set of source locus_ids
-        self.reverse_relationship_index: Dict[str, Set[str]] = defaultdict(set)
-        
-        # Relationship type index: relationship_type -> set of (source, target) pairs
-        self.relationship_type_index: Dict[str, Set[tuple]] = defaultdict(set)
-        
-        # Word count index for content filtering
-        self.word_count_index: Dict[str, int] = {}
-        
-        # Last updated timestamp
-        self.last_updated = datetime.utcnow()
-        
-        # Lock for thread safety
-        self._lock = asyncio.Lock()
-    
-    async def add_node(self, node_id: str, metadata: Dict[str, Any]) -> None:
-        """Add a node to the metadata index."""
-        async with self._lock:
-            # Index by locus type
-            locus_type = metadata.get("locus_type")
-            if locus_type:
-                self.locus_type_index[locus_type].add(node_id)
-            
-            # Index by UUE stage
-            uue_stage = metadata.get("uue_stage")
-            if uue_stage:
-                self.uue_stage_index[uue_stage].add(node_id)
-            
-            # Index by blueprint ID
-            blueprint_id = metadata.get("blueprint_id")
-            if blueprint_id:
-                self.blueprint_index[blueprint_id].add(node_id)
-            
-            # Index by locus ID
-            locus_id = metadata.get("locus_id")
-            if locus_id:
-                self.locus_index[locus_id].add(node_id)
-            
-            # Index relationships
-            relationships = metadata.get("relationships", [])
-            if relationships and locus_id:
-                for rel in relationships:
-                    target_locus = rel.get("target_locus_id")
-                    rel_type = rel.get("relationship_type")
-                    
-                    if target_locus:
-                        self.relationship_index[locus_id].add(target_locus)
-                        self.reverse_relationship_index[target_locus].add(locus_id)
-                        
-                        if rel_type:
-                            self.relationship_type_index[rel_type].add((locus_id, target_locus))
-            
-            # Index word count
-            word_count = metadata.get("word_count", 0)
-            self.word_count_index[node_id] = word_count
-            
-            self.last_updated = datetime.utcnow()
-    
-    async def remove_node(self, node_id: str) -> None:
-        """Remove a node from the metadata index."""
-        async with self._lock:
-            # Remove from all indexes
-            for locus_type_nodes in self.locus_type_index.values():
-                locus_type_nodes.discard(node_id)
-            
-            for uue_stage_nodes in self.uue_stage_index.values():
-                uue_stage_nodes.discard(node_id)
-            
-            for blueprint_nodes in self.blueprint_index.values():
-                blueprint_nodes.discard(node_id)
-            
-            for locus_nodes in self.locus_index.values():
-                locus_nodes.discard(node_id)
-            
-            # Remove from relationship indexes
-            for related_nodes in self.relationship_index.values():
-                related_nodes.discard(node_id)
-            
-            for related_nodes in self.reverse_relationship_index.values():
-                related_nodes.discard(node_id)
-            
-            # Clean up relationship type index
-            for rel_type, pairs in self.relationship_type_index.items():
-                pairs_to_remove = {pair for pair in pairs if node_id in pair}
-                pairs -= pairs_to_remove
-            
-            # Remove from word count index
-            self.word_count_index.pop(node_id, None)
-            
-            self.last_updated = datetime.utcnow()
-    
-    async def filter_by_locus_type(self, locus_type: str) -> Set[str]:
-        """Get node IDs filtered by locus type."""
-        async with self._lock:
-            return self.locus_type_index[locus_type].copy()
-    
-    async def filter_by_uue_stage(self, uue_stage: str) -> Set[str]:
-        """Get node IDs filtered by UUE stage."""
-        async with self._lock:
-            return self.uue_stage_index[uue_stage].copy()
-    
-    async def filter_by_blueprint(self, blueprint_id: str) -> Set[str]:
-        """Get node IDs filtered by blueprint ID."""
-        async with self._lock:
-            return self.blueprint_index[blueprint_id].copy()
-    
-    async def filter_by_locus(self, locus_id: str) -> Set[str]:
-        """Get node IDs filtered by locus ID."""
-        async with self._lock:
-            return self.locus_index[locus_id].copy()
-    
-    async def get_related_loci(self, locus_id: str) -> Set[str]:
-        """Get loci related to the given locus."""
-        async with self._lock:
-            return self.relationship_index[locus_id].copy()
-    
-    async def get_reverse_related_loci(self, locus_id: str) -> Set[str]:
-        """Get loci that relate to the given locus."""
-        async with self._lock:
-            return self.reverse_relationship_index[locus_id].copy()
-    
-    async def filter_by_relationship_type(self, relationship_type: str) -> Set[tuple]:
-        """Get (source, target) pairs filtered by relationship type."""
-        async with self._lock:
-            return self.relationship_type_index[relationship_type].copy()
-    
-    async def filter_by_word_count(self, min_count: Optional[int] = None,
-                                   max_count: Optional[int] = None) -> Set[str]:
-        """Get node IDs filtered by word count range."""
-        async with self._lock:
-            result = set()
-            for node_id, count in self.word_count_index.items():
-                if min_count is not None and count < min_count:
-                    continue
-                if max_count is not None and count > max_count:
-                    continue
-                result.add(node_id)
-            return result
-    
-    async def get_stats(self) -> Dict[str, Any]:
-        """Get statistics about the metadata index."""
-        async with self._lock:
-            return {
-                "total_nodes": len(self.word_count_index),
-                "locus_types": {k: len(v) for k, v in self.locus_type_index.items()},
-                "uue_stages": {k: len(v) for k, v in self.uue_stage_index.items()},
-                "blueprints": {k: len(v) for k, v in self.blueprint_index.items()},
-                "total_relationships": sum(len(v) for v in self.relationship_index.values()),
-                "relationship_types": {k: len(v) for k, v in self.relationship_type_index.items()},
-                "last_updated": self.last_updated.isoformat()
-            }
-    
-    async def clear(self) -> None:
-        """Clear all indexes."""
-        async with self._lock:
-            self.locus_type_index.clear()
-            self.uue_stage_index.clear()
-            self.blueprint_index.clear()
-            self.locus_index.clear()
-            self.relationship_index.clear()
-            self.reverse_relationship_index.clear()
-            self.relationship_type_index.clear()
-            self.word_count_index.clear()
-            self.last_updated = datetime.utcnow()
+        self.logger = logging.getLogger(__name__)
 
 
 class MetadataIndexingService:
-    """
-    Service for managing metadata indexes for fast filtering.
-    """
+    """Service for managing metadata indexing operations."""
     
-    def __init__(self, vector_store: VectorStore):
-        self.vector_store = vector_store
-        self.index = MetadataIndex()
-        self.index_name = "blueprint-nodes"
-        self._initialized = False
+    def __init__(self):
+        self.indexer = MetadataIndexer()
+        self.logger = logging.getLogger(__name__)
     
-    async def initialize(self) -> None:
-        """Initialize the metadata indexing service."""
-        if self._initialized:
-            return
-        
+    def index_section_metadata(self, section: BlueprintSection) -> Dict[str, Any]:
+        """Index metadata for a single section."""
         try:
-            await self.rebuild_index()
-            self._initialized = True
-            logger.info("Metadata indexing service initialized successfully")
+            return self.indexer.create_section_metadata(section)
         except Exception as e:
-            logger.error(f"Failed to initialize metadata indexing service: {e}")
-            raise MetadataIndexingError(f"Initialization failed: {e}")
+            self.logger.error(f"Failed to index section metadata: {e}")
+            raise MetadataIndexingError(f"Section metadata indexing failed: {e}")
     
-    async def rebuild_index(self) -> None:
-        """
-        Rebuild the metadata index from the vector store.
-        
-        This should be called periodically or when significant changes occur.
-        """
+    def index_section_hierarchy(self, sections: List[BlueprintSection]) -> Dict[int, Dict[str, Any]]:
+        """Index metadata for a complete section hierarchy."""
         try:
-            # Clear existing index
-            await self.index.clear()
-            
-            # This is a simplified approach - in a production system,
-            # you'd want to implement pagination for large datasets
-            stats = await self.vector_store.get_stats(self.index_name)
-            total_vectors = stats.get("total_vector_count", 0)
-            
-            if total_vectors == 0:
-                logger.info("No vectors found in index, metadata index is empty")
-                return
-            
-            # For now, we'll use a placeholder approach since we don't have
-            # a direct way to iterate through all vectors in the abstract base class
-            # In a real implementation, this would be vector store specific
-            logger.info(f"Rebuilding metadata index for {total_vectors} vectors")
-            
-            # TODO: Implement vector store specific methods to iterate through all vectors
-            # For now, the index will be populated as new nodes are added
-            
-        except VectorStoreError as e:
-            logger.error(f"Failed to rebuild metadata index: {e}")
-            raise MetadataIndexingError(f"Index rebuild failed: {e}")
-    
-    async def add_node_to_index(self, node_id: str, metadata: Dict[str, Any]) -> None:
-        """Add a node to the metadata index."""
-        try:
-            await self.index.add_node(node_id, metadata)
-            logger.debug(f"Added node {node_id} to metadata index")
+            return self.indexer.create_section_hierarchy_metadata(sections)
         except Exception as e:
-            logger.error(f"Failed to add node {node_id} to metadata index: {e}")
-            raise MetadataIndexingError(f"Failed to add node to index: {e}")
+            self.logger.error(f"Failed to index section hierarchy: {e}")
+            raise MetadataIndexingError(f"Section hierarchy indexing failed: {e}")
     
-    async def remove_node_from_index(self, node_id: str) -> None:
-        """Remove a node from the metadata index."""
+    def update_section_metadata(self, section: BlueprintSection) -> Dict[str, Any]:
+        """Update metadata for an existing section."""
         try:
-            await self.index.remove_node(node_id)
-            logger.debug(f"Removed node {node_id} from metadata index")
+            metadata = self.indexer.create_section_metadata(section)
+            metadata["last_updated"] = datetime.now(timezone.utc).isoformat()
+            return metadata
         except Exception as e:
-            logger.error(f"Failed to remove node {node_id} from metadata index: {e}")
-            raise MetadataIndexingError(f"Failed to remove node from index: {e}")
+            self.logger.error(f"Failed to update section metadata: {e}")
+            raise MetadataIndexingError(f"Section metadata update failed: {e}")
     
-    async def get_filtered_node_ids(self, filters: Dict[str, Any]) -> Set[str]:
+    def create_section_metadata(
+        self, 
+        section: BlueprintSection,
+        additional_metadata: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """
-        Get node IDs that match the given filters using the metadata index.
-        
-        This is much faster than scanning all vectors for metadata matches.
-        """
-        try:
-            # Start with all nodes if no filters
-            if not filters:
-                return set(self.index.word_count_index.keys())
-            
-            # Get initial set from the most selective filter
-            result_sets = []
-            
-            # Filter by locus type
-            if "locus_type" in filters:
-                locus_type_nodes = await self.index.filter_by_locus_type(filters["locus_type"])
-                result_sets.append(locus_type_nodes)
-            
-            # Filter by UUE stage
-            if "uue_stage" in filters:
-                uue_stage_nodes = await self.index.filter_by_uue_stage(filters["uue_stage"])
-                result_sets.append(uue_stage_nodes)
-            
-            # Filter by blueprint ID
-            if "blueprint_id" in filters:
-                blueprint_nodes = await self.index.filter_by_blueprint(filters["blueprint_id"])
-                result_sets.append(blueprint_nodes)
-            
-            # Filter by locus ID
-            if "locus_id" in filters:
-                locus_nodes = await self.index.filter_by_locus(filters["locus_id"])
-                result_sets.append(locus_nodes)
-            
-            # Filter by word count
-            min_count = filters.get("min_word_count")
-            max_count = filters.get("max_word_count")
-            if min_count is not None or max_count is not None:
-                word_count_nodes = await self.index.filter_by_word_count(min_count, max_count)
-                result_sets.append(word_count_nodes)
-            
-            # Handle relationship filters
-            if "relationships.target_locus_id" in filters:
-                target_locus = filters["relationships.target_locus_id"]
-                related_nodes = await self.index.get_reverse_related_loci(target_locus)
-                if related_nodes:
-                    # Get node IDs that have relationships to the target locus
-                    nodes_with_relationships = set()
-                    for locus_id in related_nodes:
-                        locus_nodes = await self.index.filter_by_locus(locus_id)
-                        nodes_with_relationships.update(locus_nodes)
-                    result_sets.append(nodes_with_relationships)
-            
-            # Intersect all result sets
-            if result_sets:
-                result = result_sets[0]
-                for result_set in result_sets[1:]:
-                    result = result.intersection(result_set)
-                return result
-            else:
-                return set()
-            
-        except Exception as e:
-            logger.error(f"Failed to get filtered node IDs: {e}")
-            raise MetadataIndexingError(f"Filter operation failed: {e}")
-    
-    async def get_index_stats(self) -> Dict[str, Any]:
-        """Get statistics about the metadata index."""
-        try:
-            return await self.index.get_stats()
-        except Exception as e:
-            logger.error(f"Failed to get index stats: {e}")
-            raise MetadataIndexingError(f"Failed to get stats: {e}")
-    
-    async def find_related_loci_fast(self, locus_id: str, max_depth: int = 2) -> Dict[str, Any]:
-        """
-        Fast relationship traversal using the metadata index.
+        Create metadata for a blueprint section.
         
         Args:
-            locus_id: Source locus ID
-            max_depth: Maximum traversal depth
+            section: BlueprintSection object
+            additional_metadata: Additional metadata to include
             
         Returns:
-            Dictionary with related loci and their relationships
+            Dictionary containing section metadata
         """
         try:
-            visited = set()
-            related_loci = {}
-            
-            async def traverse(current_locus: str, depth: int):
-                if depth > max_depth or current_locus in visited:
-                    return
-                
-                visited.add(current_locus)
-                
-                # Get directly related loci
-                related = await self.index.get_related_loci(current_locus)
-                for related_locus in related:
-                    if related_locus not in related_loci:
-                        related_loci[related_locus] = {
-                            "depth": depth,
-                            "source": current_locus
-                        }
-                    
-                    # Recursively traverse if not at max depth
-                    if depth < max_depth:
-                        await traverse(related_locus, depth + 1)
-            
-            await traverse(locus_id, 1)
-            
-            return {
-                "source_locus": locus_id,
-                "related_loci": related_loci,
-                "total_found": len(related_loci),
-                "max_depth": max_depth
+            metadata = {
+                "section_id": section.id,
+                "section_title": section.title,
+                "section_description": section.description,
+                "blueprint_id": section.blueprint_id,
+                "parent_section_id": section.parent_section_id,
+                "section_depth": section.depth,
+                "section_order": section.order_index,
+                "section_difficulty": section.difficulty.value if section.difficulty else DifficultyLevel.BEGINNER.value,
+                "section_estimated_time": section.estimated_time_minutes,
+                "section_created_at": section.created_at.isoformat() if section.created_at else None,
+                "section_updated_at": section.updated_at.isoformat() if section.updated_at else None,
+                "metadata_type": "blueprint_section",
+                "indexed_at": datetime.now(timezone.utc).isoformat()
             }
             
+            if additional_metadata:
+                metadata.update(additional_metadata)
+            
+            return metadata
+            
         except Exception as e:
-            logger.error(f"Failed to find related loci: {e}")
-            raise MetadataIndexingError(f"Related loci search failed: {e}")
+            self.logger.error(f"Failed to create section metadata: {e}")
+            raise MetadataIndexingError(f"Section metadata creation failed: {e}")
+    
+    def create_section_hierarchy_metadata(
+        self, 
+        sections: List[BlueprintSection]
+    ) -> Dict[int, Dict[str, Any]]:
+        """
+        Create metadata for a complete section hierarchy.
+        
+        Args:
+            sections: List of BlueprintSection objects
+            
+        Returns:
+            Dictionary mapping section ID to metadata
+        """
+        try:
+            hierarchy_metadata = {}
+            
+            # Create section lookup map
+            section_map = {section.id: section for section in sections}
+            
+            for section in sections:
+                # Build section path
+                section_path = self._build_section_path(section, section_map)
+                
+                # Create enhanced metadata
+                metadata = self.create_section_metadata(section)
+                metadata.update({
+                    "section_path": section_path,
+                    "section_path_string": " > ".join(section_path),
+                    "has_children": any(s.parent_section_id == section.id for s in sections),
+                    "child_count": len([s for s in sections if s.parent_section_id == section.id]),
+                    "is_root": section.parent_section_id is None,
+                    "is_leaf": not any(s.parent_section_id == section.id for s in sections)
+                })
+                
+                hierarchy_metadata[section.id] = metadata
+            
+            return hierarchy_metadata
+            
+        except Exception as e:
+            self.logger.error(f"Failed to create section hierarchy metadata: {e}")
+            raise MetadataIndexingError(f"Section hierarchy metadata creation failed: {e}")
+    
+    def _build_section_path(self, section: BlueprintSection, section_map: Dict[int, BlueprintSection]) -> List[str]:
+        """
+        Build the full path from root to a section.
+        
+        Args:
+            section: The section to build path for
+            section_map: Map of section ID to section object
+            
+        Returns:
+            List of section titles from root to the target section
+        """
+        path = [section.title]
+        current = section
+        
+        while current.parent_section_id and current.parent_section_id in section_map:
+            current = section_map[current.parent_section_id]
+            path.insert(0, current.title)
+        
+        return path
+    
+    def create_text_node_section_metadata(
+        self, 
+        node: TextNode,
+        section: BlueprintSection,
+        section_path: List[str]
+    ) -> Dict[str, Any]:
+        """
+        Create metadata for a TextNode with section information.
+        
+        Args:
+            node: TextNode object
+            section: Associated BlueprintSection
+            section_path: Path from root to the section
+            
+        Returns:
+            Dictionary containing enhanced node metadata
+        """
+        try:
+            # Start with existing node metadata
+            metadata = node.metadata.copy()
+            
+            # Add section information
+            section_metadata = {
+                "section_id": section.id,
+                "section_title": section.title,
+                "section_depth": section.depth,
+                "section_path": section_path,
+                "section_path_string": " > ".join(section_path),
+                "parent_section_id": section.parent_section_id,
+                "blueprint_id": section.blueprint_id,
+                "section_difficulty": section.difficulty.value if section.difficulty else DifficultyLevel.BEGINNER.value,
+                "section_estimated_time": section.estimated_time_minutes,
+                "section_order": section.order_index,
+                "node_section_mapping": "explicit",
+                "metadata_type": "text_node_with_section"
+            }
+            
+            metadata.update(section_metadata)
+            return metadata
+            
+        except Exception as e:
+            self.logger.error(f"Failed to create text node section metadata: {e}")
+            raise MetadataIndexingError(f"Text node section metadata creation failed: {e}")
+    
+    def create_section_search_metadata(
+        self, 
+        section: BlueprintSection,
+        search_context: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """
+        Create metadata optimized for section-based search.
+        
+        Args:
+            section: BlueprintSection object
+            search_context: Additional search context
+            
+        Returns:
+            Dictionary containing search-optimized metadata
+        """
+        try:
+            metadata = self.create_section_metadata(section)
+            
+            # Add search-specific fields
+            search_metadata = {
+                "searchable_content": f"{section.title} {section.description or ''}",
+                "search_tags": [
+                    section.difficulty.value if section.difficulty else "beginner",
+                    f"depth_{section.depth}",
+                    f"blueprint_{section.blueprint_id}",
+                    "section"
+                ],
+                "search_priority": self._calculate_search_priority(section),
+                "content_type": "blueprint_section",
+                "search_indexed": True
+            }
+            
+            metadata.update(search_metadata)
+            
+            if search_context:
+                metadata.update(search_context)
+            
+            return metadata
+            
+        except Exception as e:
+            self.logger.error(f"Failed to create section search metadata: {e}")
+            raise MetadataIndexingError(f"Section search metadata creation failed: {e}")
+    
+    def _calculate_search_priority(self, section: BlueprintSection) -> float:
+        """
+        Calculate search priority for a section based on various factors.
+        
+        Args:
+            section: BlueprintSection object
+            
+        Returns:
+            Priority score (higher = more important)
+        """
+        priority = 1.0
+        
+        # Depth factor (deeper sections might be more specific)
+        if section.depth > 0:
+            priority += section.depth * 0.1
+        
+        # Difficulty factor (advanced content might be more valuable)
+        if section.difficulty == DifficultyLevel.ADVANCED:
+            priority += 0.5
+        elif section.difficulty == DifficultyLevel.INTERMEDIATE:
+            priority += 0.2
+        
+        # Time factor (longer sections might be more comprehensive)
+        if section.estimated_time_minutes:
+            priority += min(section.estimated_time_minutes / 60.0, 1.0) * 0.3
+        
+        return round(priority, 2)
+    
+    def merge_section_metadata(
+        self, 
+        base_metadata: Dict[str, Any],
+        section_metadata: Dict[str, Any],
+        merge_strategy: str = "override"
+    ) -> Dict[str, Any]:
+        """
+        Merge base metadata with section metadata.
+        
+        Args:
+            base_metadata: Base metadata dictionary
+            section_metadata: Section-specific metadata
+            merge_strategy: How to handle conflicts ("override", "merge", "preserve")
+            
+        Returns:
+            Merged metadata dictionary
+        """
+        try:
+            if merge_strategy == "override":
+                # Section metadata takes precedence
+                merged = base_metadata.copy()
+                merged.update(section_metadata)
+            elif merge_strategy == "merge":
+                # Merge arrays and combine other fields
+                merged = base_metadata.copy()
+                for key, value in section_metadata.items():
+                    if key in merged and isinstance(merged[key], list) and isinstance(value, list):
+                        merged[key] = merged[key] + value
+                    else:
+                        merged[key] = value
+            elif merge_strategy == "preserve":
+                # Base metadata takes precedence
+                merged = section_metadata.copy()
+                merged.update(base_metadata)
+            else:
+                raise ValueError(f"Unknown merge strategy: {merge_strategy}")
+            
+            return merged
+            
+        except Exception as e:
+            self.logger.error(f"Failed to merge section metadata: {e}")
+            raise MetadataIndexingError(f"Metadata merge failed: {e}")
+    
+    def validate_section_metadata(self, metadata: Dict[str, Any]) -> bool:
+        """
+        Validate section metadata for required fields and data types.
+        
+        Args:
+            metadata: Metadata dictionary to validate
+            
+        Returns:
+            True if valid, False otherwise
+        """
+        try:
+            required_fields = [
+                "section_id", "section_title", "blueprint_id", 
+                "section_depth", "metadata_type"
+            ]
+            
+            for field in required_fields:
+                if field not in metadata:
+                    self.logger.warning(f"Missing required field: {field}")
+                    return False
+            
+            # Validate data types
+            if not isinstance(metadata["section_id"], int):
+                self.logger.warning(f"Invalid section_id type: {type(metadata['section_id'])}")
+                return False
+            
+            if not isinstance(metadata["section_title"], str) or not metadata["section_title"].strip():
+                self.logger.warning("Invalid section_title")
+                return False
+            
+            if not isinstance(metadata["blueprint_id"], int):
+                self.logger.warning(f"Invalid blueprint_id type: {type(metadata['blueprint_id'])}")
+                return False
+            
+            if not isinstance(metadata["section_depth"], int) or metadata["section_depth"] < 0:
+                self.logger.warning(f"Invalid section_depth: {metadata['section_depth']}")
+                return False
+            
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Metadata validation failed: {e}")
+            return False

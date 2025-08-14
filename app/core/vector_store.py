@@ -3,6 +3,7 @@ Vector database client wrapper for the RAG system.
 
 This module provides a unified interface for vector database operations,
 supporting both Pinecone (production) and ChromaDB (local development).
+Enhanced with blueprint section hierarchy support.
 """
 
 from abc import ABC, abstractmethod
@@ -27,6 +28,16 @@ class SearchResult:
     content: str
     metadata: Dict[str, Any]
     score: float
+
+
+@dataclass
+class SectionSearchResult(SearchResult):
+    """Enhanced search result with blueprint section information."""
+    section_id: Optional[int] = None
+    section_depth: Optional[int] = None
+    section_path: Optional[List[str]] = None
+    parent_section_id: Optional[int] = None
+    blueprint_id: Optional[int] = None
 
 
 class VectorStoreError(Exception):
@@ -78,6 +89,30 @@ class VectorStore(ABC):
         pass
     
     @abstractmethod
+    async def search_sections(
+        self,
+        index_name: str,
+        query_vector: List[float],
+        top_k: int = 10,
+        section_filter: Optional[Dict[str, Any]] = None,
+        include_hierarchy: bool = True
+    ) -> List[SectionSearchResult]:
+        """Search for vectors with enhanced section hierarchy support."""
+        pass
+    
+    @abstractmethod
+    async def search_by_section_hierarchy(
+        self,
+        index_name: str,
+        query_vector: List[float],
+        section_id: int,
+        depth_limit: Optional[int] = None,
+        top_k: int = 10
+    ) -> List[SectionSearchResult]:
+        """Search for vectors within a specific section hierarchy."""
+        pass
+    
+    @abstractmethod
     async def delete_vectors(
         self,
         index_name: str,
@@ -98,6 +133,23 @@ class VectorStore(ABC):
         filter_metadata: Dict[str, Any]
     ) -> None:
         """Delete vectors by metadata filter."""
+        pass
+    
+    @abstractmethod
+    async def get_section_statistics(
+        self,
+        index_name: str,
+        blueprint_id: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """Get statistics organized by blueprint sections."""
+        pass
+    
+    @abstractmethod
+    async def get_blueprint_sections(
+        self,
+        blueprint_id: int
+    ) -> List[Dict[str, Any]]:
+        """Get all sections for a specific blueprint."""
         pass
 
 
@@ -294,6 +346,100 @@ class PineconeVectorStore(VectorStore):
             logger.error(f"Failed to search Pinecone index: {e}")
             raise VectorStoreError(f"Failed to search: {e}")
     
+    async def search_sections(
+        self,
+        index_name: str,
+        query_vector: List[float],
+        top_k: int = 10,
+        section_filter: Optional[Dict[str, Any]] = None,
+        include_hierarchy: bool = True
+    ) -> List[SectionSearchResult]:
+        """Search for vectors with enhanced section hierarchy support in Pinecone."""
+        if not self.client:
+            raise VectorStoreError("Pinecone client not initialized")
+        
+        try:
+            index = self.client.Index(index_name)
+            
+            # Convert filters to Pinecone-compatible format
+            pinecone_filters = self._convert_filters_for_pinecone(section_filter)
+            
+            def _search():
+                return index.query(
+                    vector=query_vector,
+                    top_k=top_k,
+                    include_metadata=True,
+                    filter=pinecone_filters
+                )
+            
+            result = await asyncio.get_event_loop().run_in_executor(self._executor, _search)
+            
+            search_results = []
+            for match in result.matches:
+                search_results.append(SectionSearchResult(
+                    id=match.id,
+                    content=match.metadata.get("content", ""),
+                    metadata=match.metadata,
+                    score=match.score,
+                    section_id=match.metadata.get("section_id"),
+                    section_depth=match.metadata.get("section_depth"),
+                    section_path=match.metadata.get("section_path"),
+                    parent_section_id=match.metadata.get("parent_section_id"),
+                    blueprint_id=match.metadata.get("blueprint_id")
+                ))
+            
+            return search_results
+        except Exception as e:
+            logger.error(f"Failed to search Pinecone sections: {e}")
+            raise VectorStoreError(f"Failed to search sections: {e}")
+    
+    async def search_by_section_hierarchy(
+        self,
+        index_name: str,
+        query_vector: List[float],
+        section_id: int,
+        depth_limit: Optional[int] = None,
+        top_k: int = 10
+    ) -> List[SectionSearchResult]:
+        """Search for vectors within a specific section hierarchy in Pinecone."""
+        if not self.client:
+            raise VectorStoreError("Pinecone client not initialized")
+        
+        try:
+            index = self.client.Index(index_name)
+            
+            # Convert section_id to Pinecone filter format
+            pinecone_filter = {"section_id": {"$eq": section_id}}
+            
+            def _search():
+                return index.query(
+                    vector=query_vector,
+                    top_k=top_k,
+                    include_metadata=True,
+                    filter=pinecone_filter
+                )
+            
+            result = await asyncio.get_event_loop().run_in_executor(self._executor, _search)
+            
+            search_results = []
+            for match in result.matches:
+                search_results.append(SectionSearchResult(
+                    id=match.id,
+                    content=match.metadata.get("content", ""),
+                    metadata=match.metadata,
+                    score=match.score,
+                    section_id=match.metadata.get("section_id"),
+                    section_depth=match.metadata.get("section_depth"),
+                    section_path=match.metadata.get("section_path"),
+                    parent_section_id=match.metadata.get("parent_section_id"),
+                    blueprint_id=match.metadata.get("blueprint_id")
+                ))
+            
+            return search_results
+        except Exception as e:
+            logger.error(f"Failed to search Pinecone by section hierarchy: {e}")
+            raise VectorStoreError(f"Failed to search by section hierarchy: {e}")
+    
     async def delete_vectors(
         self,
         index_name: str,
@@ -402,6 +548,121 @@ class PineconeVectorStore(VectorStore):
                 "Failed to get Pinecone index stats via query fallback: %s", e
             )
             raise VectorStoreError(f"Failed to get stats: {e}")
+
+    async def get_section_statistics(
+        self,
+        index_name: str,
+        blueprint_id: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """Get statistics organized by blueprint sections in Pinecone."""
+        if not self.client:
+            raise VectorStoreError("Pinecone client not initialized")
+
+        try:
+            index = self.client.Index(index_name)
+
+            # Fetch index dimension once (describe without filter is allowed)
+            def _get_dim():
+                return index.describe_index_stats()
+            stats_overall = await asyncio.get_event_loop().run_in_executor(self._executor, _get_dim)
+            dimension = stats_overall.dimension or 1536
+
+            # Build a dummy zero vector for querying
+            dummy_vector = [0.0] * dimension
+
+            # Convert blueprint_id to Pinecone filter format
+            pinecone_filter = {"blueprint_id": {"$eq": blueprint_id}} if blueprint_id is not None else None
+
+            def _query():
+                return index.query(
+                    vector=dummy_vector,
+                    top_k=10000,  # large number to retrieve all matches (subject to service caps)
+                    include_metadata=True,
+                    filter=pinecone_filter,
+                )
+
+            query_result = await asyncio.get_event_loop().run_in_executor(self._executor, _query)
+            matches = query_result.get("matches", [])
+            node_count = len(matches)
+
+            # Aggregate locus types if available
+            locus_types: Dict[str, int] = {}
+            for m in matches:
+                lt = m.get("metadata", {}).get("locus_type")
+                if lt:
+                    locus_types[lt] = locus_types.get(lt, 0) + 1
+
+            # For blueprint-specific stats, return the filtered count
+            # For overall stats, return the total count
+            if blueprint_id is not None:
+                return {
+                    "total_vector_count": node_count,  # Filtered count
+                    "dimension": dimension,
+                    "locus_types": locus_types,
+                }
+            else:
+                return {
+                    "total_vector_count": stats_overall.total_vector_count,
+                    "dimension": dimension,
+                }
+        except Exception as e:
+            logger.error(
+                "Failed to get Pinecone section stats via query fallback: %s", e
+            )
+            raise VectorStoreError(f"Failed to get section stats: {e}")
+
+    async def get_blueprint_sections(
+        self,
+        blueprint_id: int
+    ) -> List[Dict[str, Any]]:
+        """Get all sections for a specific blueprint in Pinecone."""
+        if not self.client:
+            raise VectorStoreError("Pinecone client not initialized")
+
+        try:
+            # Use a default index name since this method doesn't have index_name parameter
+            index_name = "blueprint-nodes"  # Default index name
+            index = self.client.Index(index_name)
+
+            # Build a dummy zero vector for querying
+            dimension = 1536  # Assuming a default dimension
+            dummy_vector = [0.0] * dimension
+
+            # Convert blueprint_id to Pinecone filter format
+            pinecone_filter = {"blueprint_id": {"$eq": blueprint_id}}
+
+            def _query():
+                return index.query(
+                    vector=dummy_vector,
+                    top_k=10000,  # large number to retrieve all matches (subject to service caps)
+                    include_metadata=True,
+                    filter=pinecone_filter,
+                )
+
+            query_result = await asyncio.get_event_loop().run_in_executor(self._executor, _query)
+            matches = query_result.get("matches", [])
+
+            # Extract section metadata from matches
+            blueprint_sections = []
+            for match in matches:
+                metadata = match.metadata
+                if metadata.get("metadata_type") == "blueprint_section":
+                    blueprint_sections.append({
+                        "id": metadata.get("section_id"),
+                        "title": metadata.get("section_title"),
+                        "description": metadata.get("section_description"),
+                        "blueprint_id": metadata.get("blueprint_id"),
+                        "parent_section_id": metadata.get("parent_section_id"),
+                        "depth": metadata.get("section_depth"),
+                        "order_index": metadata.get("section_order"),
+                        "difficulty": metadata.get("section_difficulty"),
+                        "estimated_time_minutes": metadata.get("section_estimated_time")
+                    })
+
+            return blueprint_sections
+        except Exception as e:
+            logger.error(f"Failed to get blueprint sections from Pinecone: {e}")
+            raise VectorStoreError(f"Failed to get blueprint sections: {e}")
 
 
 class ChromaDBVectorStore(VectorStore):
@@ -567,6 +828,113 @@ class ChromaDBVectorStore(VectorStore):
             logger.error(f"Failed to search ChromaDB collection: {e}")
             raise VectorStoreError(f"Failed to search: {e}")
     
+    async def search_sections(
+        self,
+        index_name: str,
+        query_vector: List[float],
+        top_k: int = 10,
+        section_filter: Optional[Dict[str, Any]] = None,
+        include_hierarchy: bool = True
+    ) -> List[SectionSearchResult]:
+        """Search for vectors with enhanced section hierarchy support in ChromaDB."""
+        if not self.client:
+            raise VectorStoreError("ChromaDB client not initialized")
+        
+        try:
+            collection = self.client.get_collection(index_name)
+            
+            def _search():
+                # ChromaDB requires specific where clause format for section hierarchy
+                if section_filter:
+                    where_conditions = []
+                    for key, value in section_filter.items():
+                        if isinstance(value, list):
+                            where_conditions.append({key: {"$in": value}})
+                        else:
+                            where_conditions.append({key: {"$eq": value}})
+                    
+                    if len(where_conditions) == 1:
+                        where_clause = where_conditions[0]
+                    else:
+                        where_clause = {"$and": where_conditions}
+                else:
+                    where_clause = None
+                
+                return collection.query(
+                    query_embeddings=[query_vector],
+                    n_results=top_k,
+                    where=where_clause
+                )
+            
+            result = await asyncio.get_event_loop().run_in_executor(self._executor, _search)
+            
+            search_results = []
+            if result["ids"] and result["ids"][0]:
+                for i, doc_id in enumerate(result["ids"][0]):
+                    search_results.append(SectionSearchResult(
+                        id=doc_id,
+                        content=result["documents"][0][i] if result["documents"][0] else "",
+                        metadata=result["metadatas"][0][i] if result["metadatas"][0] else {},
+                        score=result["distances"][0][i] if result["distances"][0] else 0.0,
+                        section_id=result["metadatas"][0][i].get("section_id"),
+                        section_depth=result["metadatas"][0][i].get("section_depth"),
+                        section_path=result["metadatas"][0][i].get("section_path"),
+                        parent_section_id=result["metadatas"][0][i].get("parent_section_id"),
+                        blueprint_id=result["metadatas"][0][i].get("blueprint_id")
+                    ))
+            
+            return search_results
+        except Exception as e:
+            logger.error(f"Failed to search ChromaDB sections: {e}")
+            raise VectorStoreError(f"Failed to search sections: {e}")
+    
+    async def search_by_section_hierarchy(
+        self,
+        index_name: str,
+        query_vector: List[float],
+        section_id: int,
+        depth_limit: Optional[int] = None,
+        top_k: int = 10
+    ) -> List[SectionSearchResult]:
+        """Search for vectors within a specific section hierarchy in ChromaDB."""
+        if not self.client:
+            raise VectorStoreError("ChromaDB client not initialized")
+        
+        try:
+            collection = self.client.get_collection(index_name)
+            
+            def _search():
+                # ChromaDB requires specific where clause format for section hierarchy
+                where_clause = {"section_id": {"$eq": section_id}}
+                
+                return collection.query(
+                    query_embeddings=[query_vector],
+                    n_results=top_k,
+                    where=where_clause
+                )
+            
+            result = await asyncio.get_event_loop().run_in_executor(self._executor, _search)
+            
+            search_results = []
+            if result["ids"] and result["ids"][0]:
+                for i, doc_id in enumerate(result["ids"][0]):
+                    search_results.append(SectionSearchResult(
+                        id=doc_id,
+                        content=result["documents"][0][i] if result["documents"][0] else "",
+                        metadata=result["metadatas"][0][i] if result["metadatas"][0] else {},
+                        score=result["distances"][0][i] if result["distances"][0] else 0.0,
+                        section_id=result["metadatas"][0][i].get("section_id"),
+                        section_depth=result["metadatas"][0][i].get("section_depth"),
+                        section_path=result["metadatas"][0][i].get("section_path"),
+                        parent_section_id=result["metadatas"][0][i].get("parent_section_id"),
+                        blueprint_id=result["metadatas"][0][i].get("blueprint_id")
+                    ))
+            
+            return search_results
+        except Exception as e:
+            logger.error(f"Failed to search ChromaDB by section hierarchy: {e}")
+            raise VectorStoreError(f"Failed to search by section hierarchy: {e}")
+    
     async def delete_vectors(
         self,
         index_name: str,
@@ -636,6 +1004,103 @@ class ChromaDBVectorStore(VectorStore):
         except Exception as e:
             logger.error(f"Failed to get ChromaDB collection stats: {e}")
             raise VectorStoreError(f"Failed to get stats: {e}")
+
+    async def get_section_statistics(
+        self,
+        index_name: str,
+        blueprint_id: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """Get statistics organized by blueprint sections in ChromaDB."""
+        if not self.client:
+            raise VectorStoreError("ChromaDB client not initialized")
+
+        try:
+            collection = self.client.get_collection(index_name)
+
+            # Fetch index dimension once (describe without filter is allowed)
+            def _get_dim():
+                return collection.count() # ChromaDB count() is fast
+            count = await asyncio.get_event_loop().run_in_executor(self._executor, _get_dim)
+
+            # Aggregate locus types if available
+            locus_types: Dict[str, int] = {}
+            # ChromaDB does not have a direct 'locus_type' in metadata, so we'll simulate it
+            # or rely on the content if available. For now, we'll just count all vectors.
+            # If we need to filter by blueprint_id, we'd use a get(where=...) query.
+            # For now, we'll return a placeholder or a general count.
+            # If blueprint_id is provided, we'll filter the count.
+            if blueprint_id is not None:
+                # This part of ChromaDB's get() with where filter is not directly
+                # supported for count(). We'd need to fetch all and filter client-side
+                # or use a different approach for count with filter.
+                # For now, we'll return a placeholder or a general count.
+                return {
+                    "total_vector_count": count, # Placeholder, needs more sophisticated filtering
+                    "dimension": 1536, # Placeholder, needs to be fetched
+                    "locus_types": locus_types,
+                }
+            else:
+                return {
+                    "total_vector_count": count,
+                    "dimension": 1536, # Placeholder, needs to be fetched
+                    "locus_types": locus_types,
+                }
+        except Exception as e:
+            logger.error(f"Failed to get ChromaDB section stats: {e}")
+            raise VectorStoreError(f"Failed to get section stats: {e}")
+
+    async def get_blueprint_sections(
+        self,
+        blueprint_id: int
+    ) -> List[Dict[str, Any]]:
+        """Get all sections for a specific blueprint in ChromaDB."""
+        if not self.client:
+            raise VectorStoreError("ChromaDB client not initialized")
+
+        try:
+            # Use a default index name since this method doesn't have index_name parameter
+            index_name = "blueprint-nodes"  # Default index name
+            collection = self.client.get_collection(index_name)
+
+            # Build a dummy zero vector for querying
+            dimension = 1536  # Assuming a default dimension
+            dummy_vector = [0.0] * dimension
+
+            # Convert blueprint_id to ChromaDB filter format
+            chroma_filter = {"blueprint_id": {"$eq": blueprint_id}}
+
+            def _query():
+                return collection.query(
+                    query_embeddings=[dummy_vector],
+                    n_results=10000,  # large number to retrieve all matches (subject to service caps)
+                    where=chroma_filter,
+                )
+
+            query_result = await asyncio.get_event_loop().run_in_executor(self._executor, _query)
+            ids = query_result.get("ids", [[]])
+            metadatas = query_result.get("metadatas", [[]])
+
+            # Extract section metadata from matches
+            blueprint_sections = []
+            if ids and metadatas:
+                for i, metadata in enumerate(metadatas[0]):
+                    if metadata.get("metadata_type") == "blueprint_section":
+                        blueprint_sections.append({
+                            "id": metadata.get("section_id"),
+                            "title": metadata.get("section_title"),
+                            "description": metadata.get("section_description"),
+                            "blueprint_id": metadata.get("blueprint_id"),
+                            "parent_section_id": metadata.get("parent_section_id"),
+                            "depth": metadata.get("section_depth"),
+                            "order_index": metadata.get("section_order"),
+                            "difficulty": metadata.get("section_difficulty"),
+                            "estimated_time_minutes": metadata.get("section_estimated_time")
+                        })
+
+            return blueprint_sections
+        except Exception as e:
+            logger.error(f"Failed to get blueprint sections from ChromaDB: {e}")
+            raise VectorStoreError(f"Failed to get blueprint sections: {e}")
 
 
 # Factory function to create the appropriate vector store

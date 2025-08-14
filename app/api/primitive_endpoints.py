@@ -5,7 +5,7 @@ These endpoints integrate the enhanced primitive generation, mastery criteria cr
 question generation, and Core API synchronization services.
 """
 
-from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
+from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, Path
 from typing import List, Dict, Any, Optional
 import logging
 
@@ -438,3 +438,154 @@ def _convert_primitive_to_dto(primitive) -> KnowledgePrimitiveDto:
         trackingIntensity=primitive.trackingIntensity,
         masteryCriteria=criteria_dtos
     )
+
+# Section-Aware Primitive Endpoints
+
+@router.post("/sections/{section_id}/generate", response_model=PrimitiveGenerationResponse)
+async def generate_section_primitives_endpoint(
+    section_id: str = Path(..., description="ID of the section to generate primitives for"),
+    request: PrimitiveGenerationRequest = ...,
+    background_tasks: BackgroundTasks = BackgroundTasks()
+) -> PrimitiveGenerationResponse:
+    """
+    Generate primitives and mastery criteria for a specific section.
+    
+    This endpoint extends the primitive generation functionality to be section-aware,
+    allowing generation of primitives for specific sections rather than entire blueprints.
+    """
+    try:
+        from app.services.blueprint_section_service import BlueprintSectionService
+        
+        # Get section service
+        section_service = BlueprintSectionService()
+        
+        # Validate section exists
+        section = await section_service.get_section(section_id)
+        if not section:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Section {section_id} not found"
+            )
+        
+        # Generate primitives for the section
+        primitives_result = await generate_primitives_with_criteria_from_source(
+            source_content=request.source_content,
+            source_type=request.source_type,
+            user_id=request.user_id,
+            section_id=section_id,
+            blueprint_id=str(section.blueprint_id)
+        )
+        
+        # Add background task for section content update
+        background_tasks.add_task(
+            section_service.update_section_content,
+            section_id=section_id,
+            content=request.source_content,
+            primitives=primitives_result.primitives
+        )
+        
+        return PrimitiveGenerationResponse(
+            primitives=primitives_result.primitives,
+            mastery_criteria=primitives_result.mastery_criteria,
+            total_primitives=len(primitives_result.primitives),
+            total_criteria=len(primitives_result.mastery_criteria),
+            section_id=section_id,
+            blueprint_id=str(section.blueprint_id),
+            generation_timestamp=primitives_result.generation_timestamp
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate section primitives: {str(e)}"
+        )
+
+@router.get("/sections/{section_id}/primitives", response_model=List[KnowledgePrimitiveDto])
+async def get_section_primitives_endpoint(
+    section_id: str = Path(..., description="ID of the section to get primitives from")
+) -> List[KnowledgePrimitiveDto]:
+    """
+    Get all primitives associated with a specific section.
+    
+    This endpoint retrieves all knowledge primitives that have been generated
+    or mapped to a particular section.
+    """
+    try:
+        from app.services.blueprint_section_service import BlueprintSectionService
+        
+        # Get section service
+        section_service = BlueprintSectionService()
+        
+        # Validate section exists
+        section = await section_service.get_section(section_id)
+        if not section:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Section {section_id} not found"
+            )
+        
+        # Get section primitives
+        section_primitives = await section_service.get_section_primitives(section_id)
+        
+        return section_primitives
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get section primitives: {str(e)}"
+        )
+
+@router.post("/sections/{section_id}/primitives/sync", response_model=SyncStatusResponse)
+async def sync_section_primitives_endpoint(
+    section_id: str = Path(..., description="ID of the section to sync primitives for")
+) -> SyncStatusResponse:
+    """
+    Synchronize primitives from a specific section with the Core API.
+    
+    This endpoint synchronizes all primitives and mastery criteria from a specific
+    section with the Core API system.
+    """
+    try:
+        from app.services.blueprint_section_service import BlueprintSectionService
+        from app.core.core_api_sync_service import core_api_sync_service
+        
+        # Get section service
+        section_service = BlueprintSectionService()
+        
+        # Validate section exists
+        section = await section_service.get_section(section_id)
+        if not section:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Section {section_id} not found"
+            )
+        
+        # Get section primitives
+        section_primitives = await section_service.get_section_primitives(section_id)
+        
+        # Sync with Core API
+        sync_result = await core_api_sync_service.sync_section_primitives(
+            section_primitives, section_id, str(section.blueprint_id)
+        )
+        
+        return SyncStatusResponse(
+            blueprint_id=str(section.blueprint_id),
+            section_id=section_id,
+            sync_success=sync_result["success"],
+            primitives_synced=sync_result["primitives_synced"],
+            criteria_synced=sync_result["criteria_synced"],
+            errors=sync_result.get("errors", []),
+            sync_timestamp=sync_result["sync_timestamp"]
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to sync section primitives: {str(e)}"
+        )

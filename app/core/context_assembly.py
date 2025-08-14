@@ -5,6 +5,7 @@ This module implements the multi-tier memory system and context assembly logic:
 - Tier 1: Conversational Buffer (last 5-10 messages)
 - Tier 2: Session State JSON (structured scratchpad)
 - Tier 3: Knowledge Base (vector database) and Cognitive Profile
+Enhanced with blueprint section hierarchy support.
 """
 
 import json
@@ -13,9 +14,13 @@ from typing import List, Dict, Any, Optional, Tuple
 from datetime import datetime, timedelta
 from dataclasses import dataclass, asdict
 from enum import Enum
+import logging
 
 from app.core.rag_search import RAGSearchService, RAGSearchRequest, RAGSearchResult
 from app.core.query_transformer import QueryTransformation, QueryIntent
+from app.models.blueprint_centric import BlueprintSection, DifficultyLevel, UueStage
+
+logger = logging.getLogger(__name__)
 
 
 class ContextTier(Enum):
@@ -23,7 +28,8 @@ class ContextTier(Enum):
     CONVERSATIONAL_BUFFER = "conversational_buffer"  # Tier 1
     SESSION_STATE = "session_state"                  # Tier 2
     KNOWLEDGE_BASE = "knowledge_base"                # Tier 3
-    COGNITIVE_PROFILE = "cognitive_profile"          # Tier 3
+    COGNITIVE_PROFILE = "cognitive_profile"          # Tier 3 - Blueprint sections
+    SECTION_HIERARCHY = "section_hierarchy"          # Tier 3 - Blueprint sections
 
 
 @dataclass
@@ -50,6 +56,10 @@ class SessionState:
     context_summary: str
     last_updated: datetime
     metadata: Dict[str, Any]
+    # Section-specific fields
+    current_section: Optional[Dict[str, Any]] = None
+    section_progress: Dict[int, float] = None  # section_id -> progress percentage
+    section_history: List[Dict[str, Any]] = None  # sections visited in this session
 
 
 @dataclass
@@ -68,6 +78,26 @@ class CognitiveProfile:
 
 
 @dataclass
+class SectionContext:
+    """Context information for a specific blueprint section."""
+    section_id: int
+    section_title: str
+    section_description: Optional[str]
+    section_depth: int
+    section_path: List[str]
+    parent_section_id: Optional[int]
+    difficulty: DifficultyLevel
+    estimated_time_minutes: Optional[int]
+    content_summary: str
+    key_concepts: List[str]
+    prerequisites: List[str]
+    learning_objectives: List[str]
+    user_progress: float  # 0.0 to 1.0
+    last_accessed: datetime
+    metadata: Dict[str, Any]
+
+
+@dataclass
 class AssembledContext:
     """Complete assembled context for RAG generation."""
     conversational_context: List[ConversationMessage]
@@ -78,6 +108,9 @@ class AssembledContext:
     total_tokens: int
     assembly_time_ms: float
     context_quality_score: float
+    # Section-specific context
+    section_context: Optional[SectionContext] = None
+    section_hierarchy: Optional[List[Dict[str, Any]]] = None
 
 
 class ContextAssembler:
@@ -209,6 +242,363 @@ class ContextAssembler:
             assembly_time_ms=assembly_time,
             context_quality_score=context_quality_score
         )
+    
+    async def assemble_section_context(
+        self,
+        user_id: str,
+        section_id: int,
+        blueprint_id: int,
+        conversation_history: Optional[List[Dict[str, Any]]] = None,
+        include_hierarchy: bool = True
+    ) -> SectionContext:
+        """
+        Assemble context for a specific blueprint section.
+        
+        Args:
+            user_id: User ID for filtering
+            section_id: ID of the target section
+            blueprint_id: ID of the blueprint
+            conversation_history: Recent conversation history
+            include_hierarchy: Whether to include section hierarchy information
+            
+        Returns:
+            SectionContext with assembled information
+        """
+        try:
+            start_time = time.time()
+            
+            # Get section information from vector store
+            sections = await self.search_service.vector_store.get_blueprint_sections(blueprint_id)
+            target_section = None
+            
+            for section in sections:
+                if section.get("id") == section_id:
+                    target_section = section
+                    break
+            
+            if not target_section:
+                raise ValueError(f"Section {section_id} not found in blueprint {blueprint_id}")
+            
+            # Build section path
+            section_path = self._build_section_path(sections, section_id)
+            
+            # Get section-specific content
+            section_content = await self._get_section_content(
+                user_id, section_id, blueprint_id, conversation_history
+            )
+            
+            # Calculate user progress (placeholder - would integrate with mastery tracking)
+            user_progress = await self._calculate_section_progress(user_id, section_id)
+            
+            # Create section context
+            section_context = SectionContext(
+                section_id=target_section["id"],
+                section_title=target_section["title"],
+                section_description=target_section.get("description"),
+                section_depth=target_section["depth"],
+                section_path=section_path,
+                parent_section_id=target_section.get("parent_section_id"),
+                difficulty=DifficultyLevel(target_section.get("difficulty", "BEGINNER")),
+                estimated_time_minutes=target_section.get("estimated_time_minutes"),
+                content_summary=section_content.get("summary", ""),
+                key_concepts=section_content.get("key_concepts", []),
+                prerequisites=section_content.get("prerequisites", []),
+                learning_objectives=section_content.get("learning_objectives", []),
+                user_progress=user_progress,
+                last_accessed=datetime.now(),
+                metadata=target_section.get("metadata", {})
+            )
+            
+            assembly_time = (time.time() - start_time) * 1000
+            logger.info(f"Section context assembled in {assembly_time:.2f}ms for section {section_id}")
+            
+            return section_context
+            
+        except Exception as e:
+            logger.error(f"Failed to assemble section context: {e}")
+            raise
+    
+    async def _get_section_content(
+        self,
+        user_id: str,
+        section_id: int,
+        blueprint_id: int,
+        conversation_history: Optional[List[Dict[str, Any]]] = None
+    ) -> Dict[str, Any]:
+        """
+        Get content and context for a specific section.
+        
+        Args:
+            user_id: User ID for filtering
+            section_id: Section ID
+            blueprint_id: Blueprint ID
+            conversation_history: Recent conversation history
+            
+        Returns:
+            Dictionary with section content information
+        """
+        try:
+            # Create search request for section-specific content
+            search_request = RAGSearchRequest(
+                query="",  # Empty query to get all section content
+                user_id=user_id,
+                top_k=20,
+                section_filter={"section_id": section_id, "blueprint_id": blueprint_id},
+                include_section_hierarchy=True
+            )
+            
+            # Perform section-specific search
+            search_response = await self.search_service.search(search_request)
+            
+            # Extract and organize content
+            content = {
+                "summary": "",
+                "key_concepts": [],
+                "prerequisites": [],
+                "learning_objectives": [],
+                "related_content": []
+            }
+            
+            if search_response.results:
+                # Build summary from top results
+                summaries = [result.content[:200] for result in search_response.results[:5]]
+                content["summary"] = " ".join(summaries)
+                
+                # Extract key concepts from metadata
+                for result in search_response.results:
+                    if result.metadata:
+                        if result.metadata.get("locus_type") == "key_term":
+                            content["key_concepts"].append(result.metadata.get("locus_title", ""))
+                        elif result.metadata.get("locus_type") == "foundational_concept":
+                            content["prerequisites"].append(result.metadata.get("locus_title", ""))
+                
+                # Add related content
+                content["related_content"] = [
+                    {
+                        "id": result.id,
+                        "content": result.content[:100],
+                        "type": result.metadata.get("locus_type", "unknown"),
+                        "relevance": result.score
+                    }
+                    for result in search_response.results
+                ]
+            
+            return content
+            
+        except Exception as e:
+            logger.error(f"Failed to get section content: {e}")
+            return {
+                "summary": "Content not available",
+                "key_concepts": [],
+                "prerequisites": [],
+                "learning_objectives": [],
+                "related_content": []
+            }
+    
+    async def _calculate_section_progress(self, user_id: str, section_id: int) -> float:
+        """
+        Calculate user progress for a specific section.
+        
+        Args:
+            user_id: User ID
+            section_id: Section ID
+            
+        Returns:
+            Progress as float between 0.0 and 1.0
+        """
+        try:
+            # This would integrate with mastery tracking service
+            # For now, return a placeholder value
+            # In practice, this would query user progress from the mastery tracking system
+            
+            # Placeholder implementation
+            import random
+            return round(random.uniform(0.0, 1.0), 2)
+            
+        except Exception as e:
+            logger.error(f"Failed to calculate section progress: {e}")
+            return 0.0
+    
+    def _build_section_path(self, sections: List[Dict[str, Any]], target_section_id: int) -> List[str]:
+        """
+        Build the path from root to a specific section.
+        
+        Args:
+            sections: List of section dictionaries
+            target_section_id: Target section ID
+            
+        Returns:
+            List of section titles from root to target
+        """
+        try:
+            # Find target section
+            target_section = None
+            for section in sections:
+                if section.get("id") == target_section_id:
+                    target_section = section
+                    break
+            
+            if not target_section:
+                return []
+            
+            # Build path recursively
+            path = [target_section["title"]]
+            current = target_section
+            
+            while current.get("parent_section_id"):
+                parent_id = current["parent_section_id"]
+                parent_section = None
+                
+                for section in sections:
+                    if section.get("id") == parent_id:
+                        parent_section = section
+                        break
+                
+                if parent_section:
+                    path.insert(0, parent_section["title"])
+                    current = parent_section
+                else:
+                    break
+            
+            return path
+            
+        except Exception as e:
+            logger.error(f"Failed to build section path: {e}")
+            return []
+    
+    async def assemble_hierarchical_context(
+        self,
+        user_id: str,
+        blueprint_id: int,
+        max_depth: int = 3
+    ) -> List[Dict[str, Any]]:
+        """
+        Assemble context for the entire blueprint hierarchy.
+        
+        Args:
+            user_id: User ID for filtering
+            blueprint_id: Blueprint ID
+            max_depth: Maximum depth to include
+            
+        Returns:
+            List of section contexts organized by hierarchy
+        """
+        try:
+            # Get all sections for the blueprint
+            sections = await self.search_service.vector_store.get_blueprint_sections(blueprint_id)
+            
+            if not sections:
+                return []
+            
+            # Organize sections by hierarchy
+            hierarchy = self._organize_sections_by_hierarchy(sections, max_depth)
+            
+            # Add progress and context information
+            for section_info in hierarchy:
+                section_id = section_info["id"]
+                section_info["user_progress"] = await self._calculate_section_progress(user_id, section_id)
+                section_info["content_summary"] = await self._get_section_summary(user_id, section_id, blueprint_id)
+            
+            return hierarchy
+            
+        except Exception as e:
+            logger.error(f"Failed to assemble hierarchical context: {e}")
+            return []
+    
+    def _organize_sections_by_hierarchy(
+        self, 
+        sections: List[Dict[str, Any]], 
+        max_depth: int
+    ) -> List[Dict[str, Any]]:
+        """
+        Organize sections into a hierarchical structure.
+        
+        Args:
+            sections: List of section dictionaries
+            max_depth: Maximum depth to include
+            
+        Returns:
+            List of sections organized by hierarchy
+        """
+        try:
+            # Create section map
+            section_map = {section["id"]: section for section in sections}
+            
+            # Find root sections (no parent)
+            root_sections = [s for s in sections if not s.get("parent_section_id")]
+            
+            # Build hierarchy recursively
+            hierarchy = []
+            for root_section in root_sections:
+                if root_section["depth"] <= max_depth:
+                    hierarchy.append(self._build_section_tree(root_section, section_map, max_depth))
+            
+            return hierarchy
+            
+        except Exception as e:
+            logger.error(f"Failed to organize sections by hierarchy: {e}")
+            return []
+    
+    def _build_section_tree(
+        self, 
+        section: Dict[str, Any], 
+        section_map: Dict[int, Dict[str, Any]], 
+        max_depth: int
+    ) -> Dict[str, Any]:
+        """
+        Build a tree structure for a section and its children.
+        
+        Args:
+            section: Section dictionary
+            section_map: Map of section ID to section
+            max_depth: Maximum depth to include
+            
+        Returns:
+            Section with children organized as a tree
+        """
+        try:
+            tree_section = section.copy()
+            
+            # Find children
+            children = [
+                s for s in section_map.values() 
+                if s.get("parent_section_id") == section["id"] and s["depth"] <= max_depth
+            ]
+            
+            if children:
+                tree_section["children"] = [
+                    self._build_section_tree(child, section_map, max_depth)
+                    for child in children
+                ]
+            else:
+                tree_section["children"] = []
+            
+            return tree_section
+            
+        except Exception as e:
+            logger.error(f"Failed to build section tree: {e}")
+            return section
+    
+    async def _get_section_summary(self, user_id: str, section_id: int, blueprint_id: int) -> str:
+        """
+        Get a brief summary for a section.
+        
+        Args:
+            user_id: User ID
+            section_id: Section ID
+            blueprint_id: Blueprint ID
+            
+        Returns:
+            Section summary string
+        """
+        try:
+            # Get section content and return a brief summary
+            content = await self._get_section_content(user_id, section_id, blueprint_id)
+            return content.get("summary", "No summary available")[:150] + "..."
+            
+        except Exception as e:
+            logger.error(f"Failed to get section summary: {e}")
+            return "Summary not available"
     
     def add_message_to_buffer(self, session_id: str, role: str, content: str, metadata: Dict[str, Any] = None) -> None:
         """Add a new message to the conversational buffer."""
