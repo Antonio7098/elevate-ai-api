@@ -1,0 +1,2835 @@
+================================================================================
+LANGGRAPH SEQUENTIAL GENERATION WORKFLOW - COMPREHENSIVE OUTPUT
+================================================================================
+Generated: 2025-08-16 08:05:33
+Workflow ID: seq_gen_20250816_070028
+Status: completed
+================================================================================
+
+📚 SOURCE CONTENT
+----------------------------------------
+Type: educational_text
+User Preferences: {'difficulty_level': 'intermediate', 'target_audience': 'high_school_students', 'include_examples': True, 'include_diagrams': False, 'focus_areas': ['process_steps', 'importance', 'applications']}
+
+Photosynthesis is the fundamental biological process by which plants, algae, and some bacteria convert light energy into chemical energy. This process is essential for life on Earth as it provides the primary source of energy for most ecosystems and produces oxygen as a byproduct.
+
+    The process occurs in specialized organelles called chloroplasts, which contain the green pigment chlorophyll. Chlorophyll is responsible for capturing light energy from the sun and converting it into chemical energy through a series of complex biochemical reactions.
+
+    The overall chemical equation for photosynthesis is:
+    6CO2 + 6H2O + light energy → C6H12O6 + 6O2
+
+    This equation represents the conversion of carbon dioxide and water into glucose (a simple sugar) and oxygen, using light energy as the driving force.
+
+    The process can be broken down into two main stages:
+
+    1. Light-Dependent Reactions (Light Reactions):
+       - Occur in the thylakoid membranes of chloroplasts
+       - Light energy is absorbed by chlorophyll and converted to chemical energy
+       - Water molecules are split, releasing oxygen as a byproduct
+       - ATP and NADPH are produced as energy carriers
+
+    2. Light-Independent Reactions (Calvin Cycle):
+       - Occur in the stroma of chloroplasts
+       - Carbon dioxide is fixed and converted into organic compounds
+       - ATP and NADPH from light reactions provide energy and reducing power
+       - Glucose and other carbohydrates are synthesized
+
+    Key factors that affect photosynthesis include:
+    - Light intensity and wavelength
+    - Carbon dioxide concentration
+    - Temperature
+    - Water availability
+    - Nutrient availability
+
+    The importance of photosynthesis extends beyond just plant growth:
+    - It's the primary source of oxygen in Earth's atmosphere
+    - It forms the base of most food chains
+    - It helps regulate Earth's climate by removing CO2 from the atmosphere
+    - It provides the energy source for cellular respiration in all living organisms
+
+    Understanding photosynthesis is crucial for:
+    - Agriculture and crop improvement
+    - Climate change mitigation
+    - Biofuel production
+    - Understanding ecosystem dynamics
+    - Developing sustainable energy solutions
+
+📋 GENERATED LEARNING BLUEPRINT
+----------------------------------------
+Title: Photosynthesis: Energy from Sunlight
+Source Type: educational_text
+
+📖 GENERATED SECTIONS
+----------------------------------------
+1. Light-Dependent Reactions (Light Reactions)
+   ID: section_1
+   Content: Occur in the thylakoid membranes of chloroplasts; Light energy is absorbed by chlorophyll and converted to chemical energy; Water molecules are split, releasing oxygen as a byproduct; ATP and NADPH are produced as energy carriers
+   Level: 1
+
+2. Light-Independent Reactions (Calvin Cycle)
+   ID: section_2
+   Content: Occur in the stroma of chloroplasts; Carbon dioxide is fixed and converted into organic compounds; ATP and NADPH from light reactions provide energy and reducing power; Glucose and other carbohydrates are synthesized
+   Level: 1
+
+🧠 GENERATED KNOWLEDGE PRIMITIVES
+----------------------------------------
+1. Photosynthesis is the fundamental biological process by which plants, algae, and some bacteria convert light energy into chemical energy.
+   ID: prop_1
+   Description: 
+   Section: section_1
+   Type: concept
+
+2. This process is essential for life on Earth as it provides the primary source of energy for most ecosystems and produces oxygen as a byproduct.
+   ID: prop_2
+   Description: 
+   Section: section_1
+   Type: concept
+
+3. The process occurs in specialized organelles called chloroplasts, which contain the green pigment chlorophyll.
+   ID: prop_3
+   Description: 
+   Section: section_1
+   Type: concept
+
+4. Chlorophyll is responsible for capturing light energy from the sun and converting it into chemical energy through a series of complex biochemical reactions.
+   ID: prop_4
+   Description: 
+   Section: section_1
+   Type: concept
+
+5. The overall chemical equation for photosynthesis is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2
+   ID: prop_5
+   Description: 
+   Section: section_1
+   Type: concept
+
+6. This equation represents the conversion of carbon dioxide and water into glucose (a simple sugar) and oxygen, using light energy as the driving force.
+   ID: prop_6
+   Description: 
+   Section: section_1
+   Type: concept
+
+7. The process can be broken down into two main stages:
+   ID: prop_7
+   Description: 
+   Section: section_1
+   Type: concept
+
+8. Light-Dependent Reactions (Light Reactions): Occur in the thylakoid membranes of chloroplasts
+   ID: prop_8
+   Description: 
+   Section: section_1
+   Type: concept
+
+9. Light energy is absorbed by chlorophyll and converted to chemical energy
+   ID: prop_9
+   Description: 
+   Section: section_1
+   Type: concept
+
+10. Water molecules are split, releasing oxygen as a byproduct
+   ID: prop_10
+   Description: 
+   Section: section_1
+   Type: concept
+
+11. ATP and NADPH are produced as energy carriers
+   ID: prop_11
+   Description: 
+   Section: section_1
+   Type: concept
+
+12. Light-Independent Reactions (Calvin Cycle): Occur in the stroma of chloroplasts
+   ID: prop_12
+   Description: 
+   Section: section_1
+   Type: concept
+
+13. Carbon dioxide is fixed and converted into organic compounds
+   ID: prop_13
+   Description: 
+   Section: section_1
+   Type: concept
+
+14. ATP and NADPH from light reactions provide energy and reducing power
+   ID: prop_14
+   Description: 
+   Section: section_1
+   Type: concept
+
+15. Glucose and other carbohydrates are synthesized
+   ID: prop_15
+   Description: 
+   Section: section_1
+   Type: concept
+
+16. Key factors that affect photosynthesis include: Light intensity and wavelength, Carbon dioxide concentration, Temperature, Water availability, Nutrient availability
+   ID: prop_16
+   Description: 
+   Section: section_1
+   Type: concept
+
+17. The importance of photosynthesis extends beyond just plant growth:
+   ID: prop_17
+   Description: 
+   Section: section_1
+   Type: concept
+
+18. It's the primary source of oxygen in Earth's atmosphere
+   ID: prop_18
+   Description: 
+   Section: section_1
+   Type: concept
+
+19. It forms the base of most food chains
+   ID: prop_19
+   Description: 
+   Section: section_1
+   Type: concept
+
+20. It helps regulate Earth's climate by removing CO2 from the atmosphere
+   ID: prop_20
+   Description: 
+   Section: section_1
+   Type: concept
+
+21. It provides the energy source for cellular respiration in all living organisms
+   ID: prop_21
+   Description: 
+   Section: section_1
+   Type: concept
+
+22. Understanding photosynthesis is crucial for: Agriculture and crop improvement, Climate change mitigation, Biofuel production, Understanding ecosystem dynamics, Developing sustainable energy solutions
+   ID: prop_22
+   Description: 
+   Section: section_1
+   Type: concept
+
+23. Photosynthesis is the fundamental biological process by which plants, algae, and some bacteria convert light energy into chemical energy.
+   ID: prop_1
+   Description: 
+   Section: section_2
+   Type: concept
+
+24. This process is essential for life on Earth as it provides the primary source of energy for most ecosystems and produces oxygen as a byproduct.
+   ID: prop_2
+   Description: 
+   Section: section_2
+   Type: concept
+
+25. The process occurs in specialized organelles called chloroplasts, which contain the green pigment chlorophyll.
+   ID: prop_3
+   Description: 
+   Section: section_2
+   Type: concept
+
+26. Chlorophyll is responsible for capturing light energy from the sun and converting it into chemical energy through a series of complex biochemical reactions.
+   ID: prop_4
+   Description: 
+   Section: section_2
+   Type: concept
+
+27. The overall chemical equation for photosynthesis is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2
+   ID: prop_5
+   Description: 
+   Section: section_2
+   Type: concept
+
+28. This equation represents the conversion of carbon dioxide and water into glucose (a simple sugar) and oxygen, using light energy as the driving force.
+   ID: prop_6
+   Description: 
+   Section: section_2
+   Type: concept
+
+29. The process can be broken down into two main stages:
+   ID: prop_7
+   Description: 
+   Section: section_2
+   Type: concept
+
+30. Light-Dependent Reactions (Light Reactions): Occur in the thylakoid membranes of chloroplasts
+   ID: prop_8
+   Description: 
+   Section: section_2
+   Type: concept
+
+31. Light energy is absorbed by chlorophyll and converted to chemical energy
+   ID: prop_9
+   Description: 
+   Section: section_2
+   Type: concept
+
+32. Water molecules are split, releasing oxygen as a byproduct
+   ID: prop_10
+   Description: 
+   Section: section_2
+   Type: concept
+
+33. ATP and NADPH are produced as energy carriers
+   ID: prop_11
+   Description: 
+   Section: section_2
+   Type: concept
+
+34. Light-Independent Reactions (Calvin Cycle): Occur in the stroma of chloroplasts
+   ID: prop_12
+   Description: 
+   Section: section_2
+   Type: concept
+
+35. Carbon dioxide is fixed and converted into organic compounds
+   ID: prop_13
+   Description: 
+   Section: section_2
+   Type: concept
+
+36. ATP and NADPH from light reactions provide energy and reducing power
+   ID: prop_14
+   Description: 
+   Section: section_2
+   Type: concept
+
+37. Glucose and other carbohydrates are synthesized
+   ID: prop_15
+   Description: 
+   Section: section_2
+   Type: concept
+
+38. Key factors that affect photosynthesis include: Light intensity and wavelength, Carbon dioxide concentration, Temperature, Water availability, Nutrient availability
+   ID: prop_16
+   Description: 
+   Section: section_2
+   Type: concept
+
+39. The importance of photosynthesis extends beyond just plant growth:
+   ID: prop_17
+   Description: 
+   Section: section_2
+   Type: concept
+
+40. It's the primary source of oxygen in Earth's atmosphere
+   ID: prop_18
+   Description: 
+   Section: section_2
+   Type: concept
+
+41. It forms the base of most food chains
+   ID: prop_19
+   Description: 
+   Section: section_2
+   Type: concept
+
+42. It helps regulate Earth's climate by removing CO2 from the atmosphere
+   ID: prop_20
+   Description: 
+   Section: section_2
+   Type: concept
+
+43. It provides the energy source for cellular respiration in all living organisms
+   ID: prop_21
+   Description: 
+   Section: section_2
+   Type: concept
+
+44. Understanding photosynthesis is crucial for: Agriculture and crop improvement, Climate change mitigation, Biofuel production, Understanding ecosystem dynamics, Developing sustainable energy solutions
+   ID: prop_22
+   Description: 
+   Section: section_2
+   Type: concept
+
+🎯 GENERATED MASTERY CRITERIA
+----------------------------------------
+1. Master Photosynthesis is the fundamental biological process by which plants, algae, and some bacteria convert light energy into chemical energy.
+   ID: criteria_prop_1
+   Description: Demonstrate understanding of Photosynthesis is the fundamental biological process by which plants, algae, and some bacteria convert light energy into chemical energy.
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+2. Master This process is essential for life on Earth as it provides the primary source of energy for most ecosystems and produces oxygen as a byproduct.
+   ID: criteria_prop_2
+   Description: Demonstrate understanding of This process is essential for life on Earth as it provides the primary source of energy for most ecosystems and produces oxygen as a byproduct.
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+3. Master The process occurs in specialized organelles called chloroplasts, which contain the green pigment chlorophyll.
+   ID: criteria_prop_3
+   Description: Demonstrate understanding of The process occurs in specialized organelles called chloroplasts, which contain the green pigment chlorophyll.
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+4. Master Chlorophyll is responsible for capturing light energy from the sun and converting it into chemical energy through a series of complex biochemical reactions.
+   ID: criteria_prop_4
+   Description: Demonstrate understanding of Chlorophyll is responsible for capturing light energy from the sun and converting it into chemical energy through a series of complex biochemical reactions.
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+5. Master The overall chemical equation for photosynthesis is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2
+   ID: criteria_prop_5
+   Description: Demonstrate understanding of The overall chemical equation for photosynthesis is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+6. Master This equation represents the conversion of carbon dioxide and water into glucose (a simple sugar) and oxygen, using light energy as the driving force.
+   ID: criteria_prop_6
+   Description: Demonstrate understanding of This equation represents the conversion of carbon dioxide and water into glucose (a simple sugar) and oxygen, using light energy as the driving force.
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+7. Master The process can be broken down into two main stages:
+   ID: criteria_prop_7
+   Description: Demonstrate understanding of The process can be broken down into two main stages:
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+8. Master Light-Dependent Reactions (Light Reactions): Occur in the thylakoid membranes of chloroplasts
+   ID: criteria_prop_8
+   Description: Demonstrate understanding of Light-Dependent Reactions (Light Reactions): Occur in the thylakoid membranes of chloroplasts
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+9. Master Light energy is absorbed by chlorophyll and converted to chemical energy
+   ID: criteria_prop_9
+   Description: Demonstrate understanding of Light energy is absorbed by chlorophyll and converted to chemical energy
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+10. Master Water molecules are split, releasing oxygen as a byproduct
+   ID: criteria_prop_10
+   Description: Demonstrate understanding of Water molecules are split, releasing oxygen as a byproduct
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+11. Master ATP and NADPH are produced as energy carriers
+   ID: criteria_prop_11
+   Description: Demonstrate understanding of ATP and NADPH are produced as energy carriers
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+12. Master Light-Independent Reactions (Calvin Cycle): Occur in the stroma of chloroplasts
+   ID: criteria_prop_12
+   Description: Demonstrate understanding of Light-Independent Reactions (Calvin Cycle): Occur in the stroma of chloroplasts
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+13. Master Carbon dioxide is fixed and converted into organic compounds
+   ID: criteria_prop_13
+   Description: Demonstrate understanding of Carbon dioxide is fixed and converted into organic compounds
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+14. Master ATP and NADPH from light reactions provide energy and reducing power
+   ID: criteria_prop_14
+   Description: Demonstrate understanding of ATP and NADPH from light reactions provide energy and reducing power
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+15. Master Glucose and other carbohydrates are synthesized
+   ID: criteria_prop_15
+   Description: Demonstrate understanding of Glucose and other carbohydrates are synthesized
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+16. Master Key factors that affect photosynthesis include: Light intensity and wavelength, Carbon dioxide concentration, Temperature, Water availability, Nutrient availability
+   ID: criteria_prop_16
+   Description: Demonstrate understanding of Key factors that affect photosynthesis include: Light intensity and wavelength, Carbon dioxide concentration, Temperature, Water availability, Nutrient availability
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+17. Master The importance of photosynthesis extends beyond just plant growth:
+   ID: criteria_prop_17
+   Description: Demonstrate understanding of The importance of photosynthesis extends beyond just plant growth:
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+18. Master It's the primary source of oxygen in Earth's atmosphere
+   ID: criteria_prop_18
+   Description: Demonstrate understanding of It's the primary source of oxygen in Earth's atmosphere
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+19. Master It forms the base of most food chains
+   ID: criteria_prop_19
+   Description: Demonstrate understanding of It forms the base of most food chains
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+20. Master It helps regulate Earth's climate by removing CO2 from the atmosphere
+   ID: criteria_prop_20
+   Description: Demonstrate understanding of It helps regulate Earth's climate by removing CO2 from the atmosphere
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+21. Master It provides the energy source for cellular respiration in all living organisms
+   ID: criteria_prop_21
+   Description: Demonstrate understanding of It provides the energy source for cellular respiration in all living organisms
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+22. Master Understanding photosynthesis is crucial for: Agriculture and crop improvement, Climate change mitigation, Biofuel production, Understanding ecosystem dynamics, Developing sustainable energy solutions
+   ID: criteria_prop_22
+   Description: Demonstrate understanding of Understanding photosynthesis is crucial for: Agriculture and crop improvement, Climate change mitigation, Biofuel production, Understanding ecosystem dynamics, Developing sustainable energy solutions
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+23. Master Photosynthesis is the fundamental biological process by which plants, algae, and some bacteria convert light energy into chemical energy.
+   ID: criteria_prop_1
+   Description: Demonstrate understanding of Photosynthesis is the fundamental biological process by which plants, algae, and some bacteria convert light energy into chemical energy.
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+24. Master This process is essential for life on Earth as it provides the primary source of energy for most ecosystems and produces oxygen as a byproduct.
+   ID: criteria_prop_2
+   Description: Demonstrate understanding of This process is essential for life on Earth as it provides the primary source of energy for most ecosystems and produces oxygen as a byproduct.
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+25. Master The process occurs in specialized organelles called chloroplasts, which contain the green pigment chlorophyll.
+   ID: criteria_prop_3
+   Description: Demonstrate understanding of The process occurs in specialized organelles called chloroplasts, which contain the green pigment chlorophyll.
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+26. Master Chlorophyll is responsible for capturing light energy from the sun and converting it into chemical energy through a series of complex biochemical reactions.
+   ID: criteria_prop_4
+   Description: Demonstrate understanding of Chlorophyll is responsible for capturing light energy from the sun and converting it into chemical energy through a series of complex biochemical reactions.
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+27. Master The overall chemical equation for photosynthesis is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2
+   ID: criteria_prop_5
+   Description: Demonstrate understanding of The overall chemical equation for photosynthesis is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+28. Master This equation represents the conversion of carbon dioxide and water into glucose (a simple sugar) and oxygen, using light energy as the driving force.
+   ID: criteria_prop_6
+   Description: Demonstrate understanding of This equation represents the conversion of carbon dioxide and water into glucose (a simple sugar) and oxygen, using light energy as the driving force.
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+29. Master The process can be broken down into two main stages:
+   ID: criteria_prop_7
+   Description: Demonstrate understanding of The process can be broken down into two main stages:
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+30. Master Light-Dependent Reactions (Light Reactions): Occur in the thylakoid membranes of chloroplasts
+   ID: criteria_prop_8
+   Description: Demonstrate understanding of Light-Dependent Reactions (Light Reactions): Occur in the thylakoid membranes of chloroplasts
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+31. Master Light energy is absorbed by chlorophyll and converted to chemical energy
+   ID: criteria_prop_9
+   Description: Demonstrate understanding of Light energy is absorbed by chlorophyll and converted to chemical energy
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+32. Master Water molecules are split, releasing oxygen as a byproduct
+   ID: criteria_prop_10
+   Description: Demonstrate understanding of Water molecules are split, releasing oxygen as a byproduct
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+33. Master ATP and NADPH are produced as energy carriers
+   ID: criteria_prop_11
+   Description: Demonstrate understanding of ATP and NADPH are produced as energy carriers
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+34. Master Light-Independent Reactions (Calvin Cycle): Occur in the stroma of chloroplasts
+   ID: criteria_prop_12
+   Description: Demonstrate understanding of Light-Independent Reactions (Calvin Cycle): Occur in the stroma of chloroplasts
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+35. Master Carbon dioxide is fixed and converted into organic compounds
+   ID: criteria_prop_13
+   Description: Demonstrate understanding of Carbon dioxide is fixed and converted into organic compounds
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+36. Master ATP and NADPH from light reactions provide energy and reducing power
+   ID: criteria_prop_14
+   Description: Demonstrate understanding of ATP and NADPH from light reactions provide energy and reducing power
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+37. Master Glucose and other carbohydrates are synthesized
+   ID: criteria_prop_15
+   Description: Demonstrate understanding of Glucose and other carbohydrates are synthesized
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+38. Master Key factors that affect photosynthesis include: Light intensity and wavelength, Carbon dioxide concentration, Temperature, Water availability, Nutrient availability
+   ID: criteria_prop_16
+   Description: Demonstrate understanding of Key factors that affect photosynthesis include: Light intensity and wavelength, Carbon dioxide concentration, Temperature, Water availability, Nutrient availability
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+39. Master The importance of photosynthesis extends beyond just plant growth:
+   ID: criteria_prop_17
+   Description: Demonstrate understanding of The importance of photosynthesis extends beyond just plant growth:
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+40. Master It's the primary source of oxygen in Earth's atmosphere
+   ID: criteria_prop_18
+   Description: Demonstrate understanding of It's the primary source of oxygen in Earth's atmosphere
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+41. Master It forms the base of most food chains
+   ID: criteria_prop_19
+   Description: Demonstrate understanding of It forms the base of most food chains
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+42. Master It helps regulate Earth's climate by removing CO2 from the atmosphere
+   ID: criteria_prop_20
+   Description: Demonstrate understanding of It helps regulate Earth's climate by removing CO2 from the atmosphere
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+43. Master It provides the energy source for cellular respiration in all living organisms
+   ID: criteria_prop_21
+   Description: Demonstrate understanding of It provides the energy source for cellular respiration in all living organisms
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+44. Master Understanding photosynthesis is crucial for: Agriculture and crop improvement, Climate change mitigation, Biofuel production, Understanding ecosystem dynamics, Developing sustainable energy solutions
+   ID: criteria_prop_22
+   Description: Demonstrate understanding of Understanding photosynthesis is crucial for: Agriculture and crop improvement, Climate change mitigation, Biofuel production, Understanding ecosystem dynamics, Developing sustainable energy solutions
+   UUE Stage: understand
+   Difficulty: beginner
+   Success Criteria:
+     1. Can explain the concept clearly
+     2. Can provide examples
+     3. Can apply in different contexts
+
+❓ GENERATED ASSESSMENT QUESTIONS
+----------------------------------------
+1. Question about Master Photosynthesis is the fundamental biological process by which plants, algae, and some bacteria convert light energy into chemical energy.
+   ID: q_criteria_prop_1_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_1
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Photosynthesis is the fundamental biological process by which plants, algae, and some bacteria convert light energy into chemical energy.
+
+2. Question about Master Photosynthesis is the fundamental biological process by which plants, algae, and some bacteria convert light energy into chemical energy.
+   ID: q_criteria_prop_1_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_1
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Photosynthesis is the fundamental biological process by which plants, algae, and some bacteria convert light energy into chemical energy.
+
+3. Question about Master Photosynthesis is the fundamental biological process by which plants, algae, and some bacteria convert light energy into chemical energy.
+   ID: q_criteria_prop_1_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_1
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Photosynthesis is the fundamental biological process by which plants, algae, and some bacteria convert light energy into chemical energy.
+
+4. Question about Master This process is essential for life on Earth as it provides the primary source of energy for most ecosystems and produces oxygen as a byproduct.
+   ID: q_criteria_prop_2_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_2
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master This process is essential for life on Earth as it provides the primary source of energy for most ecosystems and produces oxygen as a byproduct.
+
+5. Question about Master This process is essential for life on Earth as it provides the primary source of energy for most ecosystems and produces oxygen as a byproduct.
+   ID: q_criteria_prop_2_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_2
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master This process is essential for life on Earth as it provides the primary source of energy for most ecosystems and produces oxygen as a byproduct.
+
+6. Question about Master This process is essential for life on Earth as it provides the primary source of energy for most ecosystems and produces oxygen as a byproduct.
+   ID: q_criteria_prop_2_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_2
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master This process is essential for life on Earth as it provides the primary source of energy for most ecosystems and produces oxygen as a byproduct.
+
+7. Question about Master The process occurs in specialized organelles called chloroplasts, which contain the green pigment chlorophyll.
+   ID: q_criteria_prop_3_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_3
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master The process occurs in specialized organelles called chloroplasts, which contain the green pigment chlorophyll.
+
+8. Question about Master The process occurs in specialized organelles called chloroplasts, which contain the green pigment chlorophyll.
+   ID: q_criteria_prop_3_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_3
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master The process occurs in specialized organelles called chloroplasts, which contain the green pigment chlorophyll.
+
+9. Question about Master The process occurs in specialized organelles called chloroplasts, which contain the green pigment chlorophyll.
+   ID: q_criteria_prop_3_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_3
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master The process occurs in specialized organelles called chloroplasts, which contain the green pigment chlorophyll.
+
+10. Question about Master Chlorophyll is responsible for capturing light energy from the sun and converting it into chemical energy through a series of complex biochemical reactions.
+   ID: q_criteria_prop_4_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_4
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Chlorophyll is responsible for capturing light energy from the sun and converting it into chemical energy through a series of complex biochemical reactions.
+
+11. Question about Master Chlorophyll is responsible for capturing light energy from the sun and converting it into chemical energy through a series of complex biochemical reactions.
+   ID: q_criteria_prop_4_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_4
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Chlorophyll is responsible for capturing light energy from the sun and converting it into chemical energy through a series of complex biochemical reactions.
+
+12. Question about Master Chlorophyll is responsible for capturing light energy from the sun and converting it into chemical energy through a series of complex biochemical reactions.
+   ID: q_criteria_prop_4_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_4
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Chlorophyll is responsible for capturing light energy from the sun and converting it into chemical energy through a series of complex biochemical reactions.
+
+13. Question about Master The overall chemical equation for photosynthesis is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2
+   ID: q_criteria_prop_5_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_5
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master The overall chemical equation for photosynthesis is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2
+
+14. Question about Master The overall chemical equation for photosynthesis is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2
+   ID: q_criteria_prop_5_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_5
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master The overall chemical equation for photosynthesis is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2
+
+15. Question about Master The overall chemical equation for photosynthesis is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2
+   ID: q_criteria_prop_5_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_5
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master The overall chemical equation for photosynthesis is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2
+
+16. Question about Master This equation represents the conversion of carbon dioxide and water into glucose (a simple sugar) and oxygen, using light energy as the driving force.
+   ID: q_criteria_prop_6_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_6
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master This equation represents the conversion of carbon dioxide and water into glucose (a simple sugar) and oxygen, using light energy as the driving force.
+
+17. Question about Master This equation represents the conversion of carbon dioxide and water into glucose (a simple sugar) and oxygen, using light energy as the driving force.
+   ID: q_criteria_prop_6_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_6
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master This equation represents the conversion of carbon dioxide and water into glucose (a simple sugar) and oxygen, using light energy as the driving force.
+
+18. Question about Master This equation represents the conversion of carbon dioxide and water into glucose (a simple sugar) and oxygen, using light energy as the driving force.
+   ID: q_criteria_prop_6_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_6
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master This equation represents the conversion of carbon dioxide and water into glucose (a simple sugar) and oxygen, using light energy as the driving force.
+
+19. Question about Master The process can be broken down into two main stages:
+   ID: q_criteria_prop_7_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_7
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master The process can be broken down into two main stages:
+
+20. Question about Master The process can be broken down into two main stages:
+   ID: q_criteria_prop_7_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_7
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master The process can be broken down into two main stages:
+
+21. Question about Master The process can be broken down into two main stages:
+   ID: q_criteria_prop_7_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_7
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master The process can be broken down into two main stages:
+
+22. Question about Master Light-Dependent Reactions (Light Reactions): Occur in the thylakoid membranes of chloroplasts
+   ID: q_criteria_prop_8_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_8
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Light-Dependent Reactions (Light Reactions): Occur in the thylakoid membranes of chloroplasts
+
+23. Question about Master Light-Dependent Reactions (Light Reactions): Occur in the thylakoid membranes of chloroplasts
+   ID: q_criteria_prop_8_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_8
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Light-Dependent Reactions (Light Reactions): Occur in the thylakoid membranes of chloroplasts
+
+24. Question about Master Light-Dependent Reactions (Light Reactions): Occur in the thylakoid membranes of chloroplasts
+   ID: q_criteria_prop_8_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_8
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Light-Dependent Reactions (Light Reactions): Occur in the thylakoid membranes of chloroplasts
+
+25. Question about Master Light energy is absorbed by chlorophyll and converted to chemical energy
+   ID: q_criteria_prop_9_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_9
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Light energy is absorbed by chlorophyll and converted to chemical energy
+
+26. Question about Master Light energy is absorbed by chlorophyll and converted to chemical energy
+   ID: q_criteria_prop_9_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_9
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Light energy is absorbed by chlorophyll and converted to chemical energy
+
+27. Question about Master Light energy is absorbed by chlorophyll and converted to chemical energy
+   ID: q_criteria_prop_9_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_9
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Light energy is absorbed by chlorophyll and converted to chemical energy
+
+28. Question about Master Water molecules are split, releasing oxygen as a byproduct
+   ID: q_criteria_prop_10_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_10
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Water molecules are split, releasing oxygen as a byproduct
+
+29. Question about Master Water molecules are split, releasing oxygen as a byproduct
+   ID: q_criteria_prop_10_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_10
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Water molecules are split, releasing oxygen as a byproduct
+
+30. Question about Master Water molecules are split, releasing oxygen as a byproduct
+   ID: q_criteria_prop_10_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_10
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Water molecules are split, releasing oxygen as a byproduct
+
+31. Question about Master ATP and NADPH are produced as energy carriers
+   ID: q_criteria_prop_11_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_11
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master ATP and NADPH are produced as energy carriers
+
+32. Question about Master ATP and NADPH are produced as energy carriers
+   ID: q_criteria_prop_11_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_11
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master ATP and NADPH are produced as energy carriers
+
+33. Question about Master ATP and NADPH are produced as energy carriers
+   ID: q_criteria_prop_11_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_11
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master ATP and NADPH are produced as energy carriers
+
+34. Question about Master Light-Independent Reactions (Calvin Cycle): Occur in the stroma of chloroplasts
+   ID: q_criteria_prop_12_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_12
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Light-Independent Reactions (Calvin Cycle): Occur in the stroma of chloroplasts
+
+35. Question about Master Light-Independent Reactions (Calvin Cycle): Occur in the stroma of chloroplasts
+   ID: q_criteria_prop_12_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_12
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Light-Independent Reactions (Calvin Cycle): Occur in the stroma of chloroplasts
+
+36. Question about Master Light-Independent Reactions (Calvin Cycle): Occur in the stroma of chloroplasts
+   ID: q_criteria_prop_12_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_12
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Light-Independent Reactions (Calvin Cycle): Occur in the stroma of chloroplasts
+
+37. Question about Master Carbon dioxide is fixed and converted into organic compounds
+   ID: q_criteria_prop_13_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_13
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Carbon dioxide is fixed and converted into organic compounds
+
+38. Question about Master Carbon dioxide is fixed and converted into organic compounds
+   ID: q_criteria_prop_13_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_13
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Carbon dioxide is fixed and converted into organic compounds
+
+39. Question about Master Carbon dioxide is fixed and converted into organic compounds
+   ID: q_criteria_prop_13_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_13
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Carbon dioxide is fixed and converted into organic compounds
+
+40. Question about Master ATP and NADPH from light reactions provide energy and reducing power
+   ID: q_criteria_prop_14_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_14
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master ATP and NADPH from light reactions provide energy and reducing power
+
+41. Question about Master ATP and NADPH from light reactions provide energy and reducing power
+   ID: q_criteria_prop_14_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_14
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master ATP and NADPH from light reactions provide energy and reducing power
+
+42. Question about Master ATP and NADPH from light reactions provide energy and reducing power
+   ID: q_criteria_prop_14_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_14
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master ATP and NADPH from light reactions provide energy and reducing power
+
+43. Question about Master Glucose and other carbohydrates are synthesized
+   ID: q_criteria_prop_15_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_15
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Glucose and other carbohydrates are synthesized
+
+44. Question about Master Glucose and other carbohydrates are synthesized
+   ID: q_criteria_prop_15_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_15
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Glucose and other carbohydrates are synthesized
+
+45. Question about Master Glucose and other carbohydrates are synthesized
+   ID: q_criteria_prop_15_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_15
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Glucose and other carbohydrates are synthesized
+
+46. Question about Master Key factors that affect photosynthesis include: Light intensity and wavelength, Carbon dioxide concentration, Temperature, Water availability, Nutrient availability
+   ID: q_criteria_prop_16_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_16
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Key factors that affect photosynthesis include: Light intensity and wavelength, Carbon dioxide concentration, Temperature, Water availability, Nutrient availability
+
+47. Question about Master Key factors that affect photosynthesis include: Light intensity and wavelength, Carbon dioxide concentration, Temperature, Water availability, Nutrient availability
+   ID: q_criteria_prop_16_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_16
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Key factors that affect photosynthesis include: Light intensity and wavelength, Carbon dioxide concentration, Temperature, Water availability, Nutrient availability
+
+48. Question about Master Key factors that affect photosynthesis include: Light intensity and wavelength, Carbon dioxide concentration, Temperature, Water availability, Nutrient availability
+   ID: q_criteria_prop_16_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_16
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Key factors that affect photosynthesis include: Light intensity and wavelength, Carbon dioxide concentration, Temperature, Water availability, Nutrient availability
+
+49. Question about Master The importance of photosynthesis extends beyond just plant growth:
+   ID: q_criteria_prop_17_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_17
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master The importance of photosynthesis extends beyond just plant growth:
+
+50. Question about Master The importance of photosynthesis extends beyond just plant growth:
+   ID: q_criteria_prop_17_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_17
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master The importance of photosynthesis extends beyond just plant growth:
+
+51. Question about Master The importance of photosynthesis extends beyond just plant growth:
+   ID: q_criteria_prop_17_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_17
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master The importance of photosynthesis extends beyond just plant growth:
+
+52. Question about Master It's the primary source of oxygen in Earth's atmosphere
+   ID: q_criteria_prop_18_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_18
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master It's the primary source of oxygen in Earth's atmosphere
+
+53. Question about Master It's the primary source of oxygen in Earth's atmosphere
+   ID: q_criteria_prop_18_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_18
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master It's the primary source of oxygen in Earth's atmosphere
+
+54. Question about Master It's the primary source of oxygen in Earth's atmosphere
+   ID: q_criteria_prop_18_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_18
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master It's the primary source of oxygen in Earth's atmosphere
+
+55. Question about Master It forms the base of most food chains
+   ID: q_criteria_prop_19_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_19
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master It forms the base of most food chains
+
+56. Question about Master It forms the base of most food chains
+   ID: q_criteria_prop_19_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_19
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master It forms the base of most food chains
+
+57. Question about Master It forms the base of most food chains
+   ID: q_criteria_prop_19_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_19
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master It forms the base of most food chains
+
+58. Question about Master It helps regulate Earth's climate by removing CO2 from the atmosphere
+   ID: q_criteria_prop_20_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_20
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master It helps regulate Earth's climate by removing CO2 from the atmosphere
+
+59. Question about Master It helps regulate Earth's climate by removing CO2 from the atmosphere
+   ID: q_criteria_prop_20_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_20
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master It helps regulate Earth's climate by removing CO2 from the atmosphere
+
+60. Question about Master It helps regulate Earth's climate by removing CO2 from the atmosphere
+   ID: q_criteria_prop_20_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_20
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master It helps regulate Earth's climate by removing CO2 from the atmosphere
+
+61. Question about Master It provides the energy source for cellular respiration in all living organisms
+   ID: q_criteria_prop_21_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_21
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master It provides the energy source for cellular respiration in all living organisms
+
+62. Question about Master It provides the energy source for cellular respiration in all living organisms
+   ID: q_criteria_prop_21_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_21
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master It provides the energy source for cellular respiration in all living organisms
+
+63. Question about Master It provides the energy source for cellular respiration in all living organisms
+   ID: q_criteria_prop_21_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_21
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master It provides the energy source for cellular respiration in all living organisms
+
+64. Question about Master Understanding photosynthesis is crucial for: Agriculture and crop improvement, Climate change mitigation, Biofuel production, Understanding ecosystem dynamics, Developing sustainable energy solutions
+   ID: q_criteria_prop_22_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_22
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Understanding photosynthesis is crucial for: Agriculture and crop improvement, Climate change mitigation, Biofuel production, Understanding ecosystem dynamics, Developing sustainable energy solutions
+
+65. Question about Master Understanding photosynthesis is crucial for: Agriculture and crop improvement, Climate change mitigation, Biofuel production, Understanding ecosystem dynamics, Developing sustainable energy solutions
+   ID: q_criteria_prop_22_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_22
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Understanding photosynthesis is crucial for: Agriculture and crop improvement, Climate change mitigation, Biofuel production, Understanding ecosystem dynamics, Developing sustainable energy solutions
+
+66. Question about Master Understanding photosynthesis is crucial for: Agriculture and crop improvement, Climate change mitigation, Biofuel production, Understanding ecosystem dynamics, Developing sustainable energy solutions
+   ID: q_criteria_prop_22_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_22
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Understanding photosynthesis is crucial for: Agriculture and crop improvement, Climate change mitigation, Biofuel production, Understanding ecosystem dynamics, Developing sustainable energy solutions
+
+67. Question about Master Photosynthesis is the fundamental biological process by which plants, algae, and some bacteria convert light energy into chemical energy.
+   ID: q_criteria_prop_1_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_1
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Photosynthesis is the fundamental biological process by which plants, algae, and some bacteria convert light energy into chemical energy.
+
+68. Question about Master Photosynthesis is the fundamental biological process by which plants, algae, and some bacteria convert light energy into chemical energy.
+   ID: q_criteria_prop_1_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_1
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Photosynthesis is the fundamental biological process by which plants, algae, and some bacteria convert light energy into chemical energy.
+
+69. Question about Master Photosynthesis is the fundamental biological process by which plants, algae, and some bacteria convert light energy into chemical energy.
+   ID: q_criteria_prop_1_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_1
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Photosynthesis is the fundamental biological process by which plants, algae, and some bacteria convert light energy into chemical energy.
+
+70. Question about Master This process is essential for life on Earth as it provides the primary source of energy for most ecosystems and produces oxygen as a byproduct.
+   ID: q_criteria_prop_2_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_2
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master This process is essential for life on Earth as it provides the primary source of energy for most ecosystems and produces oxygen as a byproduct.
+
+71. Question about Master This process is essential for life on Earth as it provides the primary source of energy for most ecosystems and produces oxygen as a byproduct.
+   ID: q_criteria_prop_2_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_2
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master This process is essential for life on Earth as it provides the primary source of energy for most ecosystems and produces oxygen as a byproduct.
+
+72. Question about Master This process is essential for life on Earth as it provides the primary source of energy for most ecosystems and produces oxygen as a byproduct.
+   ID: q_criteria_prop_2_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_2
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master This process is essential for life on Earth as it provides the primary source of energy for most ecosystems and produces oxygen as a byproduct.
+
+73. Question about Master The process occurs in specialized organelles called chloroplasts, which contain the green pigment chlorophyll.
+   ID: q_criteria_prop_3_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_3
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master The process occurs in specialized organelles called chloroplasts, which contain the green pigment chlorophyll.
+
+74. Question about Master The process occurs in specialized organelles called chloroplasts, which contain the green pigment chlorophyll.
+   ID: q_criteria_prop_3_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_3
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master The process occurs in specialized organelles called chloroplasts, which contain the green pigment chlorophyll.
+
+75. Question about Master The process occurs in specialized organelles called chloroplasts, which contain the green pigment chlorophyll.
+   ID: q_criteria_prop_3_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_3
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master The process occurs in specialized organelles called chloroplasts, which contain the green pigment chlorophyll.
+
+76. Question about Master Chlorophyll is responsible for capturing light energy from the sun and converting it into chemical energy through a series of complex biochemical reactions.
+   ID: q_criteria_prop_4_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_4
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Chlorophyll is responsible for capturing light energy from the sun and converting it into chemical energy through a series of complex biochemical reactions.
+
+77. Question about Master Chlorophyll is responsible for capturing light energy from the sun and converting it into chemical energy through a series of complex biochemical reactions.
+   ID: q_criteria_prop_4_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_4
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Chlorophyll is responsible for capturing light energy from the sun and converting it into chemical energy through a series of complex biochemical reactions.
+
+78. Question about Master Chlorophyll is responsible for capturing light energy from the sun and converting it into chemical energy through a series of complex biochemical reactions.
+   ID: q_criteria_prop_4_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_4
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Chlorophyll is responsible for capturing light energy from the sun and converting it into chemical energy through a series of complex biochemical reactions.
+
+79. Question about Master The overall chemical equation for photosynthesis is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2
+   ID: q_criteria_prop_5_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_5
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master The overall chemical equation for photosynthesis is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2
+
+80. Question about Master The overall chemical equation for photosynthesis is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2
+   ID: q_criteria_prop_5_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_5
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master The overall chemical equation for photosynthesis is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2
+
+81. Question about Master The overall chemical equation for photosynthesis is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2
+   ID: q_criteria_prop_5_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_5
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master The overall chemical equation for photosynthesis is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2
+
+82. Question about Master This equation represents the conversion of carbon dioxide and water into glucose (a simple sugar) and oxygen, using light energy as the driving force.
+   ID: q_criteria_prop_6_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_6
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master This equation represents the conversion of carbon dioxide and water into glucose (a simple sugar) and oxygen, using light energy as the driving force.
+
+83. Question about Master This equation represents the conversion of carbon dioxide and water into glucose (a simple sugar) and oxygen, using light energy as the driving force.
+   ID: q_criteria_prop_6_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_6
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master This equation represents the conversion of carbon dioxide and water into glucose (a simple sugar) and oxygen, using light energy as the driving force.
+
+84. Question about Master This equation represents the conversion of carbon dioxide and water into glucose (a simple sugar) and oxygen, using light energy as the driving force.
+   ID: q_criteria_prop_6_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_6
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master This equation represents the conversion of carbon dioxide and water into glucose (a simple sugar) and oxygen, using light energy as the driving force.
+
+85. Question about Master The process can be broken down into two main stages:
+   ID: q_criteria_prop_7_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_7
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master The process can be broken down into two main stages:
+
+86. Question about Master The process can be broken down into two main stages:
+   ID: q_criteria_prop_7_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_7
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master The process can be broken down into two main stages:
+
+87. Question about Master The process can be broken down into two main stages:
+   ID: q_criteria_prop_7_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_7
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master The process can be broken down into two main stages:
+
+88. Question about Master Light-Dependent Reactions (Light Reactions): Occur in the thylakoid membranes of chloroplasts
+   ID: q_criteria_prop_8_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_8
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Light-Dependent Reactions (Light Reactions): Occur in the thylakoid membranes of chloroplasts
+
+89. Question about Master Light-Dependent Reactions (Light Reactions): Occur in the thylakoid membranes of chloroplasts
+   ID: q_criteria_prop_8_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_8
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Light-Dependent Reactions (Light Reactions): Occur in the thylakoid membranes of chloroplasts
+
+90. Question about Master Light-Dependent Reactions (Light Reactions): Occur in the thylakoid membranes of chloroplasts
+   ID: q_criteria_prop_8_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_8
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Light-Dependent Reactions (Light Reactions): Occur in the thylakoid membranes of chloroplasts
+
+91. Question about Master Light energy is absorbed by chlorophyll and converted to chemical energy
+   ID: q_criteria_prop_9_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_9
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Light energy is absorbed by chlorophyll and converted to chemical energy
+
+92. Question about Master Light energy is absorbed by chlorophyll and converted to chemical energy
+   ID: q_criteria_prop_9_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_9
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Light energy is absorbed by chlorophyll and converted to chemical energy
+
+93. Question about Master Light energy is absorbed by chlorophyll and converted to chemical energy
+   ID: q_criteria_prop_9_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_9
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Light energy is absorbed by chlorophyll and converted to chemical energy
+
+94. Question about Master Water molecules are split, releasing oxygen as a byproduct
+   ID: q_criteria_prop_10_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_10
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Water molecules are split, releasing oxygen as a byproduct
+
+95. Question about Master Water molecules are split, releasing oxygen as a byproduct
+   ID: q_criteria_prop_10_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_10
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Water molecules are split, releasing oxygen as a byproduct
+
+96. Question about Master Water molecules are split, releasing oxygen as a byproduct
+   ID: q_criteria_prop_10_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_10
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Water molecules are split, releasing oxygen as a byproduct
+
+97. Question about Master ATP and NADPH are produced as energy carriers
+   ID: q_criteria_prop_11_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_11
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master ATP and NADPH are produced as energy carriers
+
+98. Question about Master ATP and NADPH are produced as energy carriers
+   ID: q_criteria_prop_11_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_11
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master ATP and NADPH are produced as energy carriers
+
+99. Question about Master ATP and NADPH are produced as energy carriers
+   ID: q_criteria_prop_11_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_11
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master ATP and NADPH are produced as energy carriers
+
+100. Question about Master Light-Independent Reactions (Calvin Cycle): Occur in the stroma of chloroplasts
+   ID: q_criteria_prop_12_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_12
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Light-Independent Reactions (Calvin Cycle): Occur in the stroma of chloroplasts
+
+101. Question about Master Light-Independent Reactions (Calvin Cycle): Occur in the stroma of chloroplasts
+   ID: q_criteria_prop_12_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_12
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Light-Independent Reactions (Calvin Cycle): Occur in the stroma of chloroplasts
+
+102. Question about Master Light-Independent Reactions (Calvin Cycle): Occur in the stroma of chloroplasts
+   ID: q_criteria_prop_12_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_12
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Light-Independent Reactions (Calvin Cycle): Occur in the stroma of chloroplasts
+
+103. Question about Master Carbon dioxide is fixed and converted into organic compounds
+   ID: q_criteria_prop_13_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_13
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Carbon dioxide is fixed and converted into organic compounds
+
+104. Question about Master Carbon dioxide is fixed and converted into organic compounds
+   ID: q_criteria_prop_13_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_13
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Carbon dioxide is fixed and converted into organic compounds
+
+105. Question about Master Carbon dioxide is fixed and converted into organic compounds
+   ID: q_criteria_prop_13_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_13
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Carbon dioxide is fixed and converted into organic compounds
+
+106. Question about Master ATP and NADPH from light reactions provide energy and reducing power
+   ID: q_criteria_prop_14_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_14
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master ATP and NADPH from light reactions provide energy and reducing power
+
+107. Question about Master ATP and NADPH from light reactions provide energy and reducing power
+   ID: q_criteria_prop_14_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_14
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master ATP and NADPH from light reactions provide energy and reducing power
+
+108. Question about Master ATP and NADPH from light reactions provide energy and reducing power
+   ID: q_criteria_prop_14_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_14
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master ATP and NADPH from light reactions provide energy and reducing power
+
+109. Question about Master Glucose and other carbohydrates are synthesized
+   ID: q_criteria_prop_15_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_15
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Glucose and other carbohydrates are synthesized
+
+110. Question about Master Glucose and other carbohydrates are synthesized
+   ID: q_criteria_prop_15_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_15
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Glucose and other carbohydrates are synthesized
+
+111. Question about Master Glucose and other carbohydrates are synthesized
+   ID: q_criteria_prop_15_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_15
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Glucose and other carbohydrates are synthesized
+
+112. Question about Master Key factors that affect photosynthesis include: Light intensity and wavelength, Carbon dioxide concentration, Temperature, Water availability, Nutrient availability
+   ID: q_criteria_prop_16_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_16
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Key factors that affect photosynthesis include: Light intensity and wavelength, Carbon dioxide concentration, Temperature, Water availability, Nutrient availability
+
+113. Question about Master Key factors that affect photosynthesis include: Light intensity and wavelength, Carbon dioxide concentration, Temperature, Water availability, Nutrient availability
+   ID: q_criteria_prop_16_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_16
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Key factors that affect photosynthesis include: Light intensity and wavelength, Carbon dioxide concentration, Temperature, Water availability, Nutrient availability
+
+114. Question about Master Key factors that affect photosynthesis include: Light intensity and wavelength, Carbon dioxide concentration, Temperature, Water availability, Nutrient availability
+   ID: q_criteria_prop_16_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_16
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Key factors that affect photosynthesis include: Light intensity and wavelength, Carbon dioxide concentration, Temperature, Water availability, Nutrient availability
+
+115. Question about Master The importance of photosynthesis extends beyond just plant growth:
+   ID: q_criteria_prop_17_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_17
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master The importance of photosynthesis extends beyond just plant growth:
+
+116. Question about Master The importance of photosynthesis extends beyond just plant growth:
+   ID: q_criteria_prop_17_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_17
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master The importance of photosynthesis extends beyond just plant growth:
+
+117. Question about Master The importance of photosynthesis extends beyond just plant growth:
+   ID: q_criteria_prop_17_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_17
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master The importance of photosynthesis extends beyond just plant growth:
+
+118. Question about Master It's the primary source of oxygen in Earth's atmosphere
+   ID: q_criteria_prop_18_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_18
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master It's the primary source of oxygen in Earth's atmosphere
+
+119. Question about Master It's the primary source of oxygen in Earth's atmosphere
+   ID: q_criteria_prop_18_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_18
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master It's the primary source of oxygen in Earth's atmosphere
+
+120. Question about Master It's the primary source of oxygen in Earth's atmosphere
+   ID: q_criteria_prop_18_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_18
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master It's the primary source of oxygen in Earth's atmosphere
+
+121. Question about Master It forms the base of most food chains
+   ID: q_criteria_prop_19_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_19
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master It forms the base of most food chains
+
+122. Question about Master It forms the base of most food chains
+   ID: q_criteria_prop_19_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_19
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master It forms the base of most food chains
+
+123. Question about Master It forms the base of most food chains
+   ID: q_criteria_prop_19_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_19
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master It forms the base of most food chains
+
+124. Question about Master It helps regulate Earth's climate by removing CO2 from the atmosphere
+   ID: q_criteria_prop_20_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_20
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master It helps regulate Earth's climate by removing CO2 from the atmosphere
+
+125. Question about Master It helps regulate Earth's climate by removing CO2 from the atmosphere
+   ID: q_criteria_prop_20_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_20
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master It helps regulate Earth's climate by removing CO2 from the atmosphere
+
+126. Question about Master It helps regulate Earth's climate by removing CO2 from the atmosphere
+   ID: q_criteria_prop_20_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_20
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master It helps regulate Earth's climate by removing CO2 from the atmosphere
+
+127. Question about Master It provides the energy source for cellular respiration in all living organisms
+   ID: q_criteria_prop_21_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_21
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master It provides the energy source for cellular respiration in all living organisms
+
+128. Question about Master It provides the energy source for cellular respiration in all living organisms
+   ID: q_criteria_prop_21_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_21
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master It provides the energy source for cellular respiration in all living organisms
+
+129. Question about Master It provides the energy source for cellular respiration in all living organisms
+   ID: q_criteria_prop_21_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_21
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master It provides the energy source for cellular respiration in all living organisms
+
+130. Question about Master Understanding photosynthesis is crucial for: Agriculture and crop improvement, Climate change mitigation, Biofuel production, Understanding ecosystem dynamics, Developing sustainable energy solutions
+   ID: q_criteria_prop_22_1
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_22
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Understanding photosynthesis is crucial for: Agriculture and crop improvement, Climate change mitigation, Biofuel production, Understanding ecosystem dynamics, Developing sustainable energy solutions
+
+131. Question about Master Understanding photosynthesis is crucial for: Agriculture and crop improvement, Climate change mitigation, Biofuel production, Understanding ecosystem dynamics, Developing sustainable energy solutions
+   ID: q_criteria_prop_22_2
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_22
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Understanding photosynthesis is crucial for: Agriculture and crop improvement, Climate change mitigation, Biofuel production, Understanding ecosystem dynamics, Developing sustainable energy solutions
+
+132. Question about Master Understanding photosynthesis is crucial for: Agriculture and crop improvement, Climate change mitigation, Biofuel production, Understanding ecosystem dynamics, Developing sustainable energy solutions
+   ID: q_criteria_prop_22_3
+   Type: multiple_choice
+   Difficulty: beginner
+   Criterion: criteria_prop_22
+   Options:
+     A. Option A
+     B. Option B
+     C. Option C
+     D. Option D
+   Correct Answer: 0
+   Explanation: Explanation for question about Master Understanding photosynthesis is crucial for: Agriculture and crop improvement, Climate change mitigation, Biofuel production, Understanding ecosystem dynamics, Developing sustainable energy solutions
+
+📝 GENERATED STUDY NOTES
+----------------------------------------
+1. Summary: Light-Dependent Reactions (Light Reactions)
+   ID: note_section_section_1
+   Type: section_summary
+   Content: Comprehensive summary of Light-Dependent Reactions (Light Reactions)
+   Related Content: {'section_id': 'section_1', 'primitives': [{'primitive_id': 'prop_1', 'title': 'Photosynthesis is the fundamental biological process by which plants, algae, and some bacteria convert light energy into chemical energy.', 'description': '', 'section_id': 'section_1', 'primitive_type': 'concept'}, {'primitive_id': 'prop_2', 'title': 'This process is essential for life on Earth as it provides the primary source of energy for most ecosystems and produces oxygen as a byproduct.', 'description': '', 'section_id': 'section_1', 'primitive_type': 'concept'}, {'primitive_id': 'prop_3', 'title': 'The process occurs in specialized organelles called chloroplasts, which contain the green pigment chlorophyll.', 'description': '', 'section_id': 'section_1', 'primitive_type': 'concept'}, {'primitive_id': 'prop_4', 'title': 'Chlorophyll is responsible for capturing light energy from the sun and converting it into chemical energy through a series of complex biochemical reactions.', 'description': '', 'section_id': 'section_1', 'primitive_type': 'concept'}, {'primitive_id': 'prop_5', 'title': 'The overall chemical equation for photosynthesis is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2', 'description': '', 'section_id': 'section_1', 'primitive_type': 'concept'}, {'primitive_id': 'prop_6', 'title': 'This equation represents the conversion of carbon dioxide and water into glucose (a simple sugar) and oxygen, using light energy as the driving force.', 'description': '', 'section_id': 'section_1', 'primitive_type': 'concept'}, {'primitive_id': 'prop_7', 'title': 'The process can be broken down into two main stages:', 'description': '', 'section_id': 'section_1', 'primitive_type': 'concept'}, {'primitive_id': 'prop_8', 'title': 'Light-Dependent Reactions (Light Reactions): Occur in the thylakoid membranes of chloroplasts', 'description': '', 'section_id': 'section_1', 'primitive_type': 'concept'}, {'primitive_id': 'prop_9', 'title': 'Light energy is absorbed by chlorophyll and converted to chemical energy', 'description': '', 'section_id': 'section_1', 'primitive_type': 'concept'}, {'primitive_id': 'prop_10', 'title': 'Water molecules are split, releasing oxygen as a byproduct', 'description': '', 'section_id': 'section_1', 'primitive_type': 'concept'}, {'primitive_id': 'prop_11', 'title': 'ATP and NADPH are produced as energy carriers', 'description': '', 'section_id': 'section_1', 'primitive_type': 'concept'}, {'primitive_id': 'prop_12', 'title': 'Light-Independent Reactions (Calvin Cycle): Occur in the stroma of chloroplasts', 'description': '', 'section_id': 'section_1', 'primitive_type': 'concept'}, {'primitive_id': 'prop_13', 'title': 'Carbon dioxide is fixed and converted into organic compounds', 'description': '', 'section_id': 'section_1', 'primitive_type': 'concept'}, {'primitive_id': 'prop_14', 'title': 'ATP and NADPH from light reactions provide energy and reducing power', 'description': '', 'section_id': 'section_1', 'primitive_type': 'concept'}, {'primitive_id': 'prop_15', 'title': 'Glucose and other carbohydrates are synthesized', 'description': '', 'section_id': 'section_1', 'primitive_type': 'concept'}, {'primitive_id': 'prop_16', 'title': 'Key factors that affect photosynthesis include: Light intensity and wavelength, Carbon dioxide concentration, Temperature, Water availability, Nutrient availability', 'description': '', 'section_id': 'section_1', 'primitive_type': 'concept'}, {'primitive_id': 'prop_17', 'title': 'The importance of photosynthesis extends beyond just plant growth:', 'description': '', 'section_id': 'section_1', 'primitive_type': 'concept'}, {'primitive_id': 'prop_18', 'title': "It's the primary source of oxygen in Earth's atmosphere", 'description': '', 'section_id': 'section_1', 'primitive_type': 'concept'}, {'primitive_id': 'prop_19', 'title': 'It forms the base of most food chains', 'description': '', 'section_id': 'section_1', 'primitive_type': 'concept'}, {'primitive_id': 'prop_20', 'title': "It helps regulate Earth's climate by removing CO2 from the atmosphere", 'description': '', 'section_id': 'section_1', 'primitive_type': 'concept'}, {'primitive_id': 'prop_21', 'title': 'It provides the energy source for cellular respiration in all living organisms', 'description': '', 'section_id': 'section_1', 'primitive_type': 'concept'}, {'primitive_id': 'prop_22', 'title': 'Understanding photosynthesis is crucial for: Agriculture and crop improvement, Climate change mitigation, Biofuel production, Understanding ecosystem dynamics, Developing sustainable energy solutions', 'description': '', 'section_id': 'section_1', 'primitive_type': 'concept'}]}
+
+2. Summary: Light-Independent Reactions (Calvin Cycle)
+   ID: note_section_section_2
+   Type: section_summary
+   Content: Comprehensive summary of Light-Independent Reactions (Calvin Cycle)
+   Related Content: {'section_id': 'section_2', 'primitives': [{'primitive_id': 'prop_1', 'title': 'Photosynthesis is the fundamental biological process by which plants, algae, and some bacteria convert light energy into chemical energy.', 'description': '', 'section_id': 'section_2', 'primitive_type': 'concept'}, {'primitive_id': 'prop_2', 'title': 'This process is essential for life on Earth as it provides the primary source of energy for most ecosystems and produces oxygen as a byproduct.', 'description': '', 'section_id': 'section_2', 'primitive_type': 'concept'}, {'primitive_id': 'prop_3', 'title': 'The process occurs in specialized organelles called chloroplasts, which contain the green pigment chlorophyll.', 'description': '', 'section_id': 'section_2', 'primitive_type': 'concept'}, {'primitive_id': 'prop_4', 'title': 'Chlorophyll is responsible for capturing light energy from the sun and converting it into chemical energy through a series of complex biochemical reactions.', 'description': '', 'section_id': 'section_2', 'primitive_type': 'concept'}, {'primitive_id': 'prop_5', 'title': 'The overall chemical equation for photosynthesis is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2', 'description': '', 'section_id': 'section_2', 'primitive_type': 'concept'}, {'primitive_id': 'prop_6', 'title': 'This equation represents the conversion of carbon dioxide and water into glucose (a simple sugar) and oxygen, using light energy as the driving force.', 'description': '', 'section_id': 'section_2', 'primitive_type': 'concept'}, {'primitive_id': 'prop_7', 'title': 'The process can be broken down into two main stages:', 'description': '', 'section_id': 'section_2', 'primitive_type': 'concept'}, {'primitive_id': 'prop_8', 'title': 'Light-Dependent Reactions (Light Reactions): Occur in the thylakoid membranes of chloroplasts', 'description': '', 'section_id': 'section_2', 'primitive_type': 'concept'}, {'primitive_id': 'prop_9', 'title': 'Light energy is absorbed by chlorophyll and converted to chemical energy', 'description': '', 'section_id': 'section_2', 'primitive_type': 'concept'}, {'primitive_id': 'prop_10', 'title': 'Water molecules are split, releasing oxygen as a byproduct', 'description': '', 'section_id': 'section_2', 'primitive_type': 'concept'}, {'primitive_id': 'prop_11', 'title': 'ATP and NADPH are produced as energy carriers', 'description': '', 'section_id': 'section_2', 'primitive_type': 'concept'}, {'primitive_id': 'prop_12', 'title': 'Light-Independent Reactions (Calvin Cycle): Occur in the stroma of chloroplasts', 'description': '', 'section_id': 'section_2', 'primitive_type': 'concept'}, {'primitive_id': 'prop_13', 'title': 'Carbon dioxide is fixed and converted into organic compounds', 'description': '', 'section_id': 'section_2', 'primitive_type': 'concept'}, {'primitive_id': 'prop_14', 'title': 'ATP and NADPH from light reactions provide energy and reducing power', 'description': '', 'section_id': 'section_2', 'primitive_type': 'concept'}, {'primitive_id': 'prop_15', 'title': 'Glucose and other carbohydrates are synthesized', 'description': '', 'section_id': 'section_2', 'primitive_type': 'concept'}, {'primitive_id': 'prop_16', 'title': 'Key factors that affect photosynthesis include: Light intensity and wavelength, Carbon dioxide concentration, Temperature, Water availability, Nutrient availability', 'description': '', 'section_id': 'section_2', 'primitive_type': 'concept'}, {'primitive_id': 'prop_17', 'title': 'The importance of photosynthesis extends beyond just plant growth:', 'description': '', 'section_id': 'section_2', 'primitive_type': 'concept'}, {'primitive_id': 'prop_18', 'title': "It's the primary source of oxygen in Earth's atmosphere", 'description': '', 'section_id': 'section_2', 'primitive_type': 'concept'}, {'primitive_id': 'prop_19', 'title': 'It forms the base of most food chains', 'description': '', 'section_id': 'section_2', 'primitive_type': 'concept'}, {'primitive_id': 'prop_20', 'title': "It helps regulate Earth's climate by removing CO2 from the atmosphere", 'description': '', 'section_id': 'section_2', 'primitive_type': 'concept'}, {'primitive_id': 'prop_21', 'title': 'It provides the energy source for cellular respiration in all living organisms', 'description': '', 'section_id': 'section_2', 'primitive_type': 'concept'}, {'primitive_id': 'prop_22', 'title': 'Understanding photosynthesis is crucial for: Agriculture and crop improvement, Climate change mitigation, Biofuel production, Understanding ecosystem dynamics, Developing sustainable energy solutions', 'description': '', 'section_id': 'section_2', 'primitive_type': 'concept'}]}
+
+3. Mastery Guide: Master Photosynthesis is the fundamental biological process by which plants, algae, and some bacteria convert light energy into chemical energy.
+   ID: note_criterion_criteria_prop_1
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master Photosynthesis is the fundamental biological process by which plants, algae, and some bacteria convert light energy into chemical energy.
+   Related Content: {'criterion_id': 'criteria_prop_1', 'primitive_id': 'prop_1'}
+
+4. Mastery Guide: Master This process is essential for life on Earth as it provides the primary source of energy for most ecosystems and produces oxygen as a byproduct.
+   ID: note_criterion_criteria_prop_2
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master This process is essential for life on Earth as it provides the primary source of energy for most ecosystems and produces oxygen as a byproduct.
+   Related Content: {'criterion_id': 'criteria_prop_2', 'primitive_id': 'prop_2'}
+
+5. Mastery Guide: Master The process occurs in specialized organelles called chloroplasts, which contain the green pigment chlorophyll.
+   ID: note_criterion_criteria_prop_3
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master The process occurs in specialized organelles called chloroplasts, which contain the green pigment chlorophyll.
+   Related Content: {'criterion_id': 'criteria_prop_3', 'primitive_id': 'prop_3'}
+
+6. Mastery Guide: Master Chlorophyll is responsible for capturing light energy from the sun and converting it into chemical energy through a series of complex biochemical reactions.
+   ID: note_criterion_criteria_prop_4
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master Chlorophyll is responsible for capturing light energy from the sun and converting it into chemical energy through a series of complex biochemical reactions.
+   Related Content: {'criterion_id': 'criteria_prop_4', 'primitive_id': 'prop_4'}
+
+7. Mastery Guide: Master The overall chemical equation for photosynthesis is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2
+   ID: note_criterion_criteria_prop_5
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master The overall chemical equation for photosynthesis is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2
+   Related Content: {'criterion_id': 'criteria_prop_5', 'primitive_id': 'prop_5'}
+
+8. Mastery Guide: Master This equation represents the conversion of carbon dioxide and water into glucose (a simple sugar) and oxygen, using light energy as the driving force.
+   ID: note_criterion_criteria_prop_6
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master This equation represents the conversion of carbon dioxide and water into glucose (a simple sugar) and oxygen, using light energy as the driving force.
+   Related Content: {'criterion_id': 'criteria_prop_6', 'primitive_id': 'prop_6'}
+
+9. Mastery Guide: Master The process can be broken down into two main stages:
+   ID: note_criterion_criteria_prop_7
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master The process can be broken down into two main stages:
+   Related Content: {'criterion_id': 'criteria_prop_7', 'primitive_id': 'prop_7'}
+
+10. Mastery Guide: Master Light-Dependent Reactions (Light Reactions): Occur in the thylakoid membranes of chloroplasts
+   ID: note_criterion_criteria_prop_8
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master Light-Dependent Reactions (Light Reactions): Occur in the thylakoid membranes of chloroplasts
+   Related Content: {'criterion_id': 'criteria_prop_8', 'primitive_id': 'prop_8'}
+
+11. Mastery Guide: Master Light energy is absorbed by chlorophyll and converted to chemical energy
+   ID: note_criterion_criteria_prop_9
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master Light energy is absorbed by chlorophyll and converted to chemical energy
+   Related Content: {'criterion_id': 'criteria_prop_9', 'primitive_id': 'prop_9'}
+
+12. Mastery Guide: Master Water molecules are split, releasing oxygen as a byproduct
+   ID: note_criterion_criteria_prop_10
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master Water molecules are split, releasing oxygen as a byproduct
+   Related Content: {'criterion_id': 'criteria_prop_10', 'primitive_id': 'prop_10'}
+
+13. Mastery Guide: Master ATP and NADPH are produced as energy carriers
+   ID: note_criterion_criteria_prop_11
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master ATP and NADPH are produced as energy carriers
+   Related Content: {'criterion_id': 'criteria_prop_11', 'primitive_id': 'prop_11'}
+
+14. Mastery Guide: Master Light-Independent Reactions (Calvin Cycle): Occur in the stroma of chloroplasts
+   ID: note_criterion_criteria_prop_12
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master Light-Independent Reactions (Calvin Cycle): Occur in the stroma of chloroplasts
+   Related Content: {'criterion_id': 'criteria_prop_12', 'primitive_id': 'prop_12'}
+
+15. Mastery Guide: Master Carbon dioxide is fixed and converted into organic compounds
+   ID: note_criterion_criteria_prop_13
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master Carbon dioxide is fixed and converted into organic compounds
+   Related Content: {'criterion_id': 'criteria_prop_13', 'primitive_id': 'prop_13'}
+
+16. Mastery Guide: Master ATP and NADPH from light reactions provide energy and reducing power
+   ID: note_criterion_criteria_prop_14
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master ATP and NADPH from light reactions provide energy and reducing power
+   Related Content: {'criterion_id': 'criteria_prop_14', 'primitive_id': 'prop_14'}
+
+17. Mastery Guide: Master Glucose and other carbohydrates are synthesized
+   ID: note_criterion_criteria_prop_15
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master Glucose and other carbohydrates are synthesized
+   Related Content: {'criterion_id': 'criteria_prop_15', 'primitive_id': 'prop_15'}
+
+18. Mastery Guide: Master Key factors that affect photosynthesis include: Light intensity and wavelength, Carbon dioxide concentration, Temperature, Water availability, Nutrient availability
+   ID: note_criterion_criteria_prop_16
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master Key factors that affect photosynthesis include: Light intensity and wavelength, Carbon dioxide concentration, Temperature, Water availability, Nutrient availability
+   Related Content: {'criterion_id': 'criteria_prop_16', 'primitive_id': 'prop_16'}
+
+19. Mastery Guide: Master The importance of photosynthesis extends beyond just plant growth:
+   ID: note_criterion_criteria_prop_17
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master The importance of photosynthesis extends beyond just plant growth:
+   Related Content: {'criterion_id': 'criteria_prop_17', 'primitive_id': 'prop_17'}
+
+20. Mastery Guide: Master It's the primary source of oxygen in Earth's atmosphere
+   ID: note_criterion_criteria_prop_18
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master It's the primary source of oxygen in Earth's atmosphere
+   Related Content: {'criterion_id': 'criteria_prop_18', 'primitive_id': 'prop_18'}
+
+21. Mastery Guide: Master It forms the base of most food chains
+   ID: note_criterion_criteria_prop_19
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master It forms the base of most food chains
+   Related Content: {'criterion_id': 'criteria_prop_19', 'primitive_id': 'prop_19'}
+
+22. Mastery Guide: Master It helps regulate Earth's climate by removing CO2 from the atmosphere
+   ID: note_criterion_criteria_prop_20
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master It helps regulate Earth's climate by removing CO2 from the atmosphere
+   Related Content: {'criterion_id': 'criteria_prop_20', 'primitive_id': 'prop_20'}
+
+23. Mastery Guide: Master It provides the energy source for cellular respiration in all living organisms
+   ID: note_criterion_criteria_prop_21
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master It provides the energy source for cellular respiration in all living organisms
+   Related Content: {'criterion_id': 'criteria_prop_21', 'primitive_id': 'prop_21'}
+
+24. Mastery Guide: Master Understanding photosynthesis is crucial for: Agriculture and crop improvement, Climate change mitigation, Biofuel production, Understanding ecosystem dynamics, Developing sustainable energy solutions
+   ID: note_criterion_criteria_prop_22
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master Understanding photosynthesis is crucial for: Agriculture and crop improvement, Climate change mitigation, Biofuel production, Understanding ecosystem dynamics, Developing sustainable energy solutions
+   Related Content: {'criterion_id': 'criteria_prop_22', 'primitive_id': 'prop_22'}
+
+25. Mastery Guide: Master Photosynthesis is the fundamental biological process by which plants, algae, and some bacteria convert light energy into chemical energy.
+   ID: note_criterion_criteria_prop_1
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master Photosynthesis is the fundamental biological process by which plants, algae, and some bacteria convert light energy into chemical energy.
+   Related Content: {'criterion_id': 'criteria_prop_1', 'primitive_id': 'prop_1'}
+
+26. Mastery Guide: Master This process is essential for life on Earth as it provides the primary source of energy for most ecosystems and produces oxygen as a byproduct.
+   ID: note_criterion_criteria_prop_2
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master This process is essential for life on Earth as it provides the primary source of energy for most ecosystems and produces oxygen as a byproduct.
+   Related Content: {'criterion_id': 'criteria_prop_2', 'primitive_id': 'prop_2'}
+
+27. Mastery Guide: Master The process occurs in specialized organelles called chloroplasts, which contain the green pigment chlorophyll.
+   ID: note_criterion_criteria_prop_3
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master The process occurs in specialized organelles called chloroplasts, which contain the green pigment chlorophyll.
+   Related Content: {'criterion_id': 'criteria_prop_3', 'primitive_id': 'prop_3'}
+
+28. Mastery Guide: Master Chlorophyll is responsible for capturing light energy from the sun and converting it into chemical energy through a series of complex biochemical reactions.
+   ID: note_criterion_criteria_prop_4
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master Chlorophyll is responsible for capturing light energy from the sun and converting it into chemical energy through a series of complex biochemical reactions.
+   Related Content: {'criterion_id': 'criteria_prop_4', 'primitive_id': 'prop_4'}
+
+29. Mastery Guide: Master The overall chemical equation for photosynthesis is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2
+   ID: note_criterion_criteria_prop_5
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master The overall chemical equation for photosynthesis is: 6CO2 + 6H2O + light energy → C6H12O6 + 6O2
+   Related Content: {'criterion_id': 'criteria_prop_5', 'primitive_id': 'prop_5'}
+
+30. Mastery Guide: Master This equation represents the conversion of carbon dioxide and water into glucose (a simple sugar) and oxygen, using light energy as the driving force.
+   ID: note_criterion_criteria_prop_6
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master This equation represents the conversion of carbon dioxide and water into glucose (a simple sugar) and oxygen, using light energy as the driving force.
+   Related Content: {'criterion_id': 'criteria_prop_6', 'primitive_id': 'prop_6'}
+
+31. Mastery Guide: Master The process can be broken down into two main stages:
+   ID: note_criterion_criteria_prop_7
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master The process can be broken down into two main stages:
+   Related Content: {'criterion_id': 'criteria_prop_7', 'primitive_id': 'prop_7'}
+
+32. Mastery Guide: Master Light-Dependent Reactions (Light Reactions): Occur in the thylakoid membranes of chloroplasts
+   ID: note_criterion_criteria_prop_8
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master Light-Dependent Reactions (Light Reactions): Occur in the thylakoid membranes of chloroplasts
+   Related Content: {'criterion_id': 'criteria_prop_8', 'primitive_id': 'prop_8'}
+
+33. Mastery Guide: Master Light energy is absorbed by chlorophyll and converted to chemical energy
+   ID: note_criterion_criteria_prop_9
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master Light energy is absorbed by chlorophyll and converted to chemical energy
+   Related Content: {'criterion_id': 'criteria_prop_9', 'primitive_id': 'prop_9'}
+
+34. Mastery Guide: Master Water molecules are split, releasing oxygen as a byproduct
+   ID: note_criterion_criteria_prop_10
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master Water molecules are split, releasing oxygen as a byproduct
+   Related Content: {'criterion_id': 'criteria_prop_10', 'primitive_id': 'prop_10'}
+
+35. Mastery Guide: Master ATP and NADPH are produced as energy carriers
+   ID: note_criterion_criteria_prop_11
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master ATP and NADPH are produced as energy carriers
+   Related Content: {'criterion_id': 'criteria_prop_11', 'primitive_id': 'prop_11'}
+
+36. Mastery Guide: Master Light-Independent Reactions (Calvin Cycle): Occur in the stroma of chloroplasts
+   ID: note_criterion_criteria_prop_12
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master Light-Independent Reactions (Calvin Cycle): Occur in the stroma of chloroplasts
+   Related Content: {'criterion_id': 'criteria_prop_12', 'primitive_id': 'prop_12'}
+
+37. Mastery Guide: Master Carbon dioxide is fixed and converted into organic compounds
+   ID: note_criterion_criteria_prop_13
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master Carbon dioxide is fixed and converted into organic compounds
+   Related Content: {'criterion_id': 'criteria_prop_13', 'primitive_id': 'prop_13'}
+
+38. Mastery Guide: Master ATP and NADPH from light reactions provide energy and reducing power
+   ID: note_criterion_criteria_prop_14
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master ATP and NADPH from light reactions provide energy and reducing power
+   Related Content: {'criterion_id': 'criteria_prop_14', 'primitive_id': 'prop_14'}
+
+39. Mastery Guide: Master Glucose and other carbohydrates are synthesized
+   ID: note_criterion_criteria_prop_15
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master Glucose and other carbohydrates are synthesized
+   Related Content: {'criterion_id': 'criteria_prop_15', 'primitive_id': 'prop_15'}
+
+40. Mastery Guide: Master Key factors that affect photosynthesis include: Light intensity and wavelength, Carbon dioxide concentration, Temperature, Water availability, Nutrient availability
+   ID: note_criterion_criteria_prop_16
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master Key factors that affect photosynthesis include: Light intensity and wavelength, Carbon dioxide concentration, Temperature, Water availability, Nutrient availability
+   Related Content: {'criterion_id': 'criteria_prop_16', 'primitive_id': 'prop_16'}
+
+41. Mastery Guide: Master The importance of photosynthesis extends beyond just plant growth:
+   ID: note_criterion_criteria_prop_17
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master The importance of photosynthesis extends beyond just plant growth:
+   Related Content: {'criterion_id': 'criteria_prop_17', 'primitive_id': 'prop_17'}
+
+42. Mastery Guide: Master It's the primary source of oxygen in Earth's atmosphere
+   ID: note_criterion_criteria_prop_18
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master It's the primary source of oxygen in Earth's atmosphere
+   Related Content: {'criterion_id': 'criteria_prop_18', 'primitive_id': 'prop_18'}
+
+43. Mastery Guide: Master It forms the base of most food chains
+   ID: note_criterion_criteria_prop_19
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master It forms the base of most food chains
+   Related Content: {'criterion_id': 'criteria_prop_19', 'primitive_id': 'prop_19'}
+
+44. Mastery Guide: Master It helps regulate Earth's climate by removing CO2 from the atmosphere
+   ID: note_criterion_criteria_prop_20
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master It helps regulate Earth's climate by removing CO2 from the atmosphere
+   Related Content: {'criterion_id': 'criteria_prop_20', 'primitive_id': 'prop_20'}
+
+45. Mastery Guide: Master It provides the energy source for cellular respiration in all living organisms
+   ID: note_criterion_criteria_prop_21
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master It provides the energy source for cellular respiration in all living organisms
+   Related Content: {'criterion_id': 'criteria_prop_21', 'primitive_id': 'prop_21'}
+
+46. Mastery Guide: Master Understanding photosynthesis is crucial for: Agriculture and crop improvement, Climate change mitigation, Biofuel production, Understanding ecosystem dynamics, Developing sustainable energy solutions
+   ID: note_criterion_criteria_prop_22
+   Type: mastery_guide
+   Content: N/A
+   Description: Detailed guide to master Master Understanding photosynthesis is crucial for: Agriculture and crop improvement, Climate change mitigation, Biofuel production, Understanding ecosystem dynamics, Developing sustainable energy solutions
+   Related Content: {'criterion_id': 'criteria_prop_22', 'primitive_id': 'prop_22'}
+
+📊 WORKFLOW METADATA
+----------------------------------------
+workflow_type: sequential_generation
+version: 1.0
+completed_at: 2025-08-16T07:05:31.740778
+total_sections: 2
+total_primitives: 44
+total_criteria: 44
+total_questions: 132
+total_notes: 46
+
+================================================================================
+END OF COMPREHENSIVE OUTPUT
+================================================================================

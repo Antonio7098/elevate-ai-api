@@ -7,6 +7,99 @@ responses based on the user's knowledge base.
 
 from typing import Dict, Any, List
 from app.api.schemas import ChatMessageRequest, ChatMessageResponse
+import uuid
+from datetime import datetime
+
+
+class ChatService:
+    """Service for managing chat sessions and conversations."""
+    
+    def __init__(self):
+        self.sessions = {}
+        self.conversations = {}
+    
+    async def create_chat_session(
+        self, 
+        user_id: str, 
+        session_type: str, 
+        context: str = ""
+    ) -> Dict[str, Any]:
+        """Create a new chat session."""
+        session_id = str(uuid.uuid4())
+        session = {
+            "session_id": session_id,
+            "user_id": user_id,
+            "session_type": session_type,
+            "context": context,
+            "created_at": datetime.utcnow().isoformat(),
+            "status": "active"
+        }
+        self.sessions[session_id] = session
+        self.conversations[session_id] = []
+        return session
+    
+    async def send_message(
+        self, 
+        session_id: str, 
+        message: str, 
+        message_type: str = "user"
+    ) -> Dict[str, Any]:
+        """Send a message in a chat session."""
+        if session_id not in self.sessions:
+            raise ValueError(f"Session {session_id} not found")
+        
+        message_id = str(uuid.uuid4())
+        message_data = {
+            "message_id": message_id,
+            "session_id": session_id,
+            "content": message,
+            "message_type": message_type,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+        self.conversations[session_id].append(message_data)
+        
+        # For now, return a simple response
+        response = {
+            "message_id": message_id,
+            "response": f"Message received: {message[:50]}...",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+        return response
+    
+    async def get_conversation_history(
+        self, 
+        session_id: str, 
+        limit: int = 10
+    ) -> List[Dict[str, Any]]:
+        """Get conversation history for a session."""
+        if session_id not in self.conversations:
+            return []
+        
+        return self.conversations[session_id][-limit:]
+    
+    async def get_session_info(self, session_id: str) -> Dict[str, Any]:
+        """Get information about a chat session."""
+        if session_id not in self.sessions:
+            raise ValueError(f"Session {session_id} not found")
+        
+        return self.sessions[session_id]
+    
+    async def get_session_summary(self, session_id: str) -> Dict[str, Any]:
+        """Get a summary of a chat session."""
+        if session_id not in self.sessions:
+            raise ValueError(f"Session {session_id} not found")
+        
+        messages = self.conversations.get(session_id, [])
+        summary = {
+            "session_id": session_id,
+            "total_messages": len(messages),
+            "summary": f"Session with {len(messages)} messages",
+            "last_activity": messages[-1]["timestamp"] if messages else None
+        }
+        
+        return summary
 
 
 async def process_chat_message(request: ChatMessageRequest) -> ChatMessageResponse:

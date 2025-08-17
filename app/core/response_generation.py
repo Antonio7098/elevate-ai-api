@@ -1047,3 +1047,79 @@ class PromptTemplate:
             'query_intent': 'General inquiry'
         }
         return {var: defaults.get(var, '') for var in self.optional_variables}
+
+
+class ResponseGenerationService:
+    """Service for generating responses using LLM services."""
+    
+    def __init__(self, llm_service):
+        self.llm_service = llm_service
+    
+    async def generate_response(
+        self, 
+        query: str, 
+        context: str = "", 
+        response_type: str = "explanation"
+    ) -> str:
+        """Generate a response based on query and context."""
+        try:
+            prompt = f"""
+            Context: {context}
+            
+            Question: {query}
+            
+            Please provide a {response_type} response. Be clear, accurate, and helpful.
+            """
+            
+            response = await self.llm_service.call_llm(prompt)
+            return response
+            
+        except Exception as e:
+            return f"Error generating response: {str(e)}"
+    
+    async def optimize_response(
+        self, 
+        response: str, 
+        optimization_type: str = "clarity", 
+        target_audience: str = "general"
+    ) -> str:
+        """Optimize a response for specific criteria."""
+        try:
+            prompt = f"""
+            Please optimize the following response for {optimization_type} 
+            and make it suitable for {target_audience} audience:
+            
+            {response}
+            
+            Optimized response:
+            """
+            
+            optimized = await self.llm_service.call_llm(prompt)
+            return optimized
+            
+        except Exception as e:
+            return f"Error optimizing response: {str(e)}"
+    
+    async def validate_response(
+        self, 
+        response: str, 
+        query: str, 
+        context: str = ""
+    ) -> bool:
+        """Validate if a response is appropriate for the query."""
+        try:
+            prompt = f"""
+            Validate if this response is appropriate for the given query:
+            
+            Query: {query}
+            Context: {context}
+            Response: {response}
+            
+            Answer with 'VALID' or 'INVALID' and a brief reason:
+            """
+            
+            validation = await self.llm_service.call_llm(prompt)
+            return "VALID" in validation.upper()
+            
+        except Exception as e:
+            return False

@@ -47,10 +47,20 @@ class GeminiService:
             # Generate response
             response = model_instance.generate_content(prompt)
             
-            if not response.text:
-                raise Exception("Gemini returned empty response")
+            # Handle different response structures safely
+            if hasattr(response, 'text') and response.text:
+                return response.text
+            elif hasattr(response, 'parts') and response.parts:
+                # Extract text from parts
+                text_parts = []
+                for part in response.parts:
+                    if hasattr(part, 'text') and part.text:
+                        text_parts.append(part.text)
+                if text_parts:
+                    return " ".join(text_parts)
             
-            return response.text
+            # If we can't extract text, raise an exception
+            raise Exception("Gemini returned empty or invalid response structure")
             
         except Exception as e:
             print(f"Gemini API call failed: {e}. Falling back to OpenRouter...")

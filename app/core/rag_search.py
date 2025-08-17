@@ -211,7 +211,7 @@ class RAGSearchService:
                 embedding_time_ms=transform_time,
                 reranking_time_ms=rerank_time,
                 filters_applied=search_params.get('metadata_filters', {}),
-                created_at=datetime.utcnow().isoformat()
+                created_at=datetime.now(timezone.utc).isoformat()
             )
             print(f"[DEBUG] === RAGSearchService.search COMPLETED ===")
             return response

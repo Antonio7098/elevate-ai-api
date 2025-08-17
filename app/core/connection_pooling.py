@@ -4,7 +4,7 @@ import asyncio
 import aiohttp
 import logging
 from typing import Dict, Any, Optional, List
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from contextlib import asynccontextmanager
 import json
 
@@ -46,7 +46,7 @@ class ConnectionPoolManager:
         
         # Resource monitoring
         self.active_connections = {}
-        self.last_health_check = datetime.utcnow()
+        self.last_health_check = datetime.now(timezone.utc)
         self.health_check_interval = timedelta(minutes=5)
     
     async def get_session(self, service_name: str = "default") -> aiohttp.ClientSession:

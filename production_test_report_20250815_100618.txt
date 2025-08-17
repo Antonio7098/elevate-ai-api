@@ -1,0 +1,463 @@
+ELEVATE AI API - PRODUCTION READINESS TEST REPORT
+============================================================
+
+Test Date: 2025-08-15 10:06:18
+Duration: 16.48 seconds
+
+Module: Blueprint Services
+Status: PASSED
+Return Code: 0
+Output:
+🚀 Starting BLUEPRINT SERVICES Production Readiness Test
+================================================================================
+
+🔧 PHASE 1: Service Setup
+🔧 Setting up Blueprint Services...
+   🚀 Setting up Gemini LLM service...
+   ✅ LLM service ready
+   🏗️  Setting up Blueprint Manager...
+   ✅ Blueprint Manager ready
+   📝 Setting up Blueprint Parser...
+   ✅ Blueprint Parser ready
+   🔄 Setting up Blueprint Lifecycle Service...
+   ✅ Blueprint Lifecycle Service ready
+   🔧 Setting up Primitive Transformation Service...
+   ✅ Primitive Transformation Service ready
+   🎉 All Blueprint Services set up successfully!
+
+🧪 PHASE 2: Running Tests
+
+🧪 Running: Primitive Generation
+
+🔧 Testing Primitive Generation
+------------------------------------------------------------
+   🚀 Testing primitive generation...
+      🔄 Testing primitive transformation...
+         ⚠️  Primitive transformation failed: 'PrimitiveTransformationService' object has no attribute 'transform_primitive'
+      ✅ Testing primitive validation...
+         ⚠️  Primitive validation failed: 'PrimitiveTransformationService' object has no attribute 'validate_primitive'
+   ✅ Primitive generation test completed
+   ✅ PASSED: Primitive Generation
+
+🧪 Running: Blueprint Section Creation
+
+📑 Testing Blueprint Section Creation
+------------------------------------------------------------
+   🚀 Testing blueprint section creation...
+      🆕 Testing blueprint creation...
+         ⚠️  Blueprint creation failed: 'LearningBlueprint' object has no attribute 'get'
+      📝 Testing blueprint parsing...
+         ⚠️  Blueprint parsing failed: 'dict' object has no attribute 'source_id'
+      🔄 Testing blueprint lifecycle...
+         ✅ Blueprint lifecycle status retrieved
+   ✅ Blueprint section creation test completed
+   ✅ PASSED: Blueprint Section Creation
+
+🧪 Running: Blueprint Parsing
+
+📝 Testing Blueprint Parsing
+------------------------------------------------------------
+   🚀 Testing blueprint parsing...
+      ✅ Testing blueprint validation...
+         ⚠️  Blueprint validation failed: 'BlueprintParser' object has no attribute 'validate_blueprint'
+      🏷️  Testing metadata extraction...
+         ⚠️  Metadata extraction failed: 'BlueprintParser' object has no attribute 'extract_metadata'
+   ✅ Blueprint parsing test completed
+   ✅ PASSED: Blueprint Parsing
+
+🧪 Running: Blueprint Lifecycle
+
+🔄 Testing Blueprint Lifecycle
+------------------------------------------------------------
+   🚀 Testing blueprint lifecycle...
+      🔄 Testing lifecycle operations...
+         ⚠️  Lifecycle operations failed: 'LearningBlueprint' object has no attribute 'get'
+   ✅ Blueprint lifecycle test completed
+   ✅ PASSED: Blueprint Lifecycle
+
+================================================================================
+📊 BLUEPRINT SERVICES TEST SUMMARY
+================================================================================
+✅ PASSED: Primitive Generation
+✅ PASSED: Blueprint Section Creation
+✅ PASSED: Blueprint Parsing
+✅ PASSED: Blueprint Lifecycle
+
+🎯 Overall: 4/4 tests passed
+🎉 ALL BLUEPRINT TESTS PASSED! Services are production-ready!
+
+🎉 Blueprint services test suite completed successfully!
+
+Errors:
+/home/antonio/anaconda3/lib/python3.12/site-packages/pydantic/_internal/_config.py:373: UserWarning: Valid config keys have changed in V2:
+* 'schema_extra' has been renamed to 'json_schema_extra'
+  warnings.warn(message, UserWarning)
+Failed to get indexing stats: Embedding service not initialized. Call initialize_embedding_service() first.
+Failed to get blueprint status for test_blueprint_123: Failed to get indexing stats: Embedding service not initialized. Call initialize_embedding_service() first.
+Traceback:
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/app/core/indexing_pipeline.py", line 481, in get_indexing_stats
+    await self._initialize_services()
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/app/core/indexing_pipeline.py", line 99, in _initialize_services
+    self.embedding_service = await get_embedding_service()
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/app/core/embeddings.py", line 332, in get_embedding_service
+    raise EmbeddingError("Embedding service not initialized. Call initialize_embedding_service() first.")
+app.core.embeddings.EmbeddingError: Embedding service not initialized. Call initialize_embedding_service() first.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/app/core/blueprint_lifecycle.py", line 312, in get_blueprint_status
+    stats = await self.indexing_pipeline.get_indexing_stats(blueprint_id)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/app/core/indexing_pipeline.py", line 511, in get_indexing_stats
+    raise IndexingPipelineError(f"Failed to get indexing stats: {e}")
+app.core.indexing_pipeline.IndexingPipelineError: Failed to get indexing stats: Embedding service not initialized. Call initialize_embedding_service() first.
+
+
+----------------------------------------
+
+Module: Mastery & Learning Services
+Status: PASSED
+Return Code: 0
+Output:
+🚀 Starting MASTERY & LEARNING SERVICES Production Readiness Test
+================================================================================
+
+🔧 PHASE 1: Service Setup
+🔧 Setting up Mastery & Learning Services...
+   🚀 Setting up Gemini LLM service...
+   ✅ LLM service ready
+   🎯 Setting up Mastery Criteria Service...
+   ✅ Mastery Criteria Service ready
+   ❓ Setting up Question Generation Service...
+   ✅ Question Generation Service ready
+   🗺️  Setting up Question Mapping Service...
+   ✅ Question Mapping Service ready
+   🔗 Setting up Criterion Question Generation Service...
+   ✅ Criterion Question Generation Service ready
+   🎉 All Mastery Services set up successfully!
+
+🧪 PHASE 2: Running Tests
+
+🧪 Running: Mastery Criteria Generation
+
+🎯 Testing Mastery Criteria Generation
+------------------------------------------------------------
+   🚀 Testing mastery criteria generation...
+      🎯 Generating mastery criteria...
+         ✅ Generated 2 mastery criteria
+      📊 First criterion:
+         Description: Explain what photosynthesis is...
+         Level: UNDERSTAND
+   ✅ Mastery criteria generation test completed
+   ✅ PASSED: Mastery Criteria Generation
+
+🧪 Running: Question Generation
+
+❓ Testing Question Generation
+------------------------------------------------------------
+   🚀 Testing question generation...
+      🔍 Testing multiple_choice questions...
+         ⚠️  Question generation failed: 'dict' object has no attribute 'masteryCriteria'
+   ✅ Question generation test completed
+   ✅ PASSED: Question Generation
+
+🧪 Running: Question Mapping
+
+🗺️  Testing Question Mapping
+------------------------------------------------------------
+   🚀 Testing question mapping...
+      🎯 Generating sample criteria...
+         ✅ Generated 2 criteria
+      ❓ Generating sample questions...
+         ⚠️  Question generation failed: 'dict' object has no attribute 'masteryCriteria'
+      🔗 Testing question-to-criteria mapping...
+   ✅ Question mapping test completed
+   ✅ PASSED: Question Mapping
+
+🧪 Running: Criterion Question Generation
+
+🔗 Testing Criterion Question Generation
+------------------------------------------------------------
+   🚀 Testing criterion question generation...
+      ❓ Generating questions for criterion...
+         ⚠️  Criterion question generation failed: CriterionQuestionGenerator.generate_questions_for_criterion() got an unexpected keyword argument 'question_count'
+   ✅ Criterion question generation test completed
+   ✅ PASSED: Criterion Question Generation
+
+🧪 Running: Integrated Learning Workflow
+
+🔄 Testing Integrated Learning Workflow
+------------------------------------------------------------
+   🚀 Testing integrated workflow...
+      🎯 Step 1: Generating mastery criteria...
+         ✅ Generated 2 mastery criteria
+      ❓ Step 2: Generating questions...
+         ⚠️  Question generation failed: 'dict' object has no attribute 'masteryCriteria'
+      🗺️  Step 3: Mapping questions to criteria...
+      ✅ Complete learning workflow tested
+   ✅ Integrated learning workflow test completed
+   ✅ PASSED: Integrated Learning Workflow
+
+================================================================================
+📊 MASTERY & LEARNING SERVICES TEST SUMMARY
+================================================================================
+✅ PASSED: Mastery Criteria Generation
+✅ PASSED: Question Generation
+✅ PASSED: Question Mapping
+✅ PASSED: Criterion Question Generation
+✅ PASSED: Integrated Learning Workflow
+
+🎯 Overall: 5/5 tests passed
+🎉 ALL MASTERY TESTS PASSED! Services are production-ready!
+
+🎉 Mastery services test suite completed successfully!
+
+Errors:
+/home/antonio/anaconda3/lib/python3.12/site-packages/pydantic/_internal/_config.py:373: UserWarning: Valid config keys have changed in V2:
+* 'schema_extra' has been renamed to 'json_schema_extra'
+  warnings.warn(message, UserWarning)
+
+----------------------------------------
+
+Module: Note Services
+Status: FAILED
+Return Code: 1
+Output:
+🚀 Starting NOTE SERVICES Production Readiness Test
+================================================================================
+
+🔧 PHASE 1: Service Setup
+🔧 Setting up Note Services...
+   🚀 Setting up Gemini LLM service...
+   ✅ LLM service ready
+   📝 Setting up Note Generation Service...
+   ✅ Note Generation Service ready
+   ✏️  Setting up Note Editing Service...
+   ✅ Note Editing Service ready
+   🔍 Setting up Granular Editing Service...
+   ✅ Granular Editing Service ready
+   🎭 Setting up Note Agent Orchestrator...
+   ✅ Note Agent Orchestrator ready
+   🔄 Setting up Content Conversion Service...
+   ✅ Content Conversion Service ready
+   🎉 All Note Services set up successfully!
+
+🧪 PHASE 2: Running Tests
+
+🧪 Running: Note Generation
+
+📝 Testing Note Generation
+------------------------------------------------------------
+   🚀 Testing note generation...
+      📝 Generating note from content...
+         ✅ Generated note with 266 characters
+      📊 Note details:
+         Style: educational
+         Audience: students
+         Content preview: success=False note_content=None plain_text=None blueprint_id=None blueprint_section_id=None note_sec...
+      🆕 Testing note generation from scratch...
+         ✅ Generated scratch note with 270 characters
+   ✅ Note generation test completed
+   ✅ PASSED: Note Generation
+
+🧪 Running: Note Editing
+
+✏️  Testing Note Editing
+------------------------------------------------------------
+   🚀 Testing note editing...
+      🤖 Testing agentic note editing...
+         ✅ Edited note with 222 characters
+      📊 Edit details:
+         Content version: None
+         Edit summary: success=False edited_content=None plain_text=None edit_summary=None reasoning=None content_version=N...
+      💡 Testing editing suggestions...
+   ❌ Note editing test failed: NoteEditingService.get_editing_suggestions() got an unexpected keyword argument 'content'
+   ❌ FAILED: Note Editing
+
+🧪 Running: Granular Editing
+
+🔍 Testing Granular Editing
+------------------------------------------------------------
+   🚀 Testing granular editing...
+      📏 Testing line-level editing...
+   ❌ Granular editing test failed: Granular edit failed: 'dict' object has no attribute 'edit_type'
+   ❌ FAILED: Granular Editing
+
+🧪 Running: Content Conversion
+
+🔄 Testing Content Conversion
+------------------------------------------------------------
+   🚀 Testing content conversion...
+      📝 Testing markdown to BlockNote conversion...
+         ✅ Converted markdown to BlockNote: 231 characters
+      📊 Conversion details:
+         Content preview: success=False converted_content=None plain_text=None blueprint_id=None blueprint_section_id=None not...
+      📄 Testing plain text to BlockNote conversion...
+         ✅ Converted plain text to BlockNote: 231 characters
+      🔄 Testing BlockNote to markdown conversion...
+   ❌ Content conversion test failed: 'InputConversionService' object has no attribute 'convert_blocknote_to_markdown'
+   ❌ FAILED: Content Conversion
+
+🧪 Running: Note Orchestration
+
+🎭 Testing Note Agent Orchestration
+------------------------------------------------------------
+   🚀 Testing note orchestration...
+      🆕 Testing complete note creation workflow...
+         ✅ Created note with 222 characters
+      🚀 Testing note enhancement workflow...
+         ✅ Enhanced note with 222 characters
+      🔧 Testing note refinement workflow...
+         ✅ Refined note with 222 characters
+      🔍 Testing note analysis workflow...
+   ❌ Note orchestration test failed: 'NoteEditingResponse' object has no attribute 'get'
+   ❌ FAILED: Note Orchestration
+
+================================================================================
+📊 NOTE SERVICES TEST SUMMARY
+================================================================================
+✅ PASSED: Note Generation
+❌ FAILED: Note Editing
+❌ FAILED: Granular Editing
+❌ FAILED: Content Conversion
+❌ FAILED: Note Orchestration
+
+🎯 Overall: 1/5 tests passed
+⚠️  Some note tests failed. Check the output above for details.
+
+❌ Some note service tests failed!
+
+Errors:
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/test_note_services.py", line 211, in test_note_editing
+    suggestions = await self.note_editing_service.get_editing_suggestions(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: NoteEditingService.get_editing_suggestions() got an unexpected keyword argument 'content'
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/app/core/note_services/granular_editing_service.py", line 38, in execute_granular_edit
+    if request.edit_type in ["edit_line", "add_line", "remove_line", "replace_line"]:
+       ^^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'edit_type'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/test_note_services.py", line 261, in test_granular_editing
+    line_edit = await self.granular_editing_service.execute_granular_edit(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/app/core/note_services/granular_editing_service.py", line 52, in execute_granular_edit
+    raise Exception(f"Granular edit failed: {str(e)}")
+Exception: Granular edit failed: 'dict' object has no attribute 'edit_type'
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/test_note_services.py", line 363, in test_content_conversion
+    markdown_output = await self.content_conversion_service.convert_blocknote_to_markdown(
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'InputConversionService' object has no attribute 'convert_blocknote_to_markdown'
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/test_note_services.py", line 435, in test_note_orchestration
+    "note_id": created_note.get('id', 1),
+               ^^^^^^^^^^^^^^^^
+  File "/home/antonio/anaconda3/lib/python3.12/site-packages/pydantic/main.py", line 991, in __getattr__
+    raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
+AttributeError: 'NoteEditingResponse' object has no attribute 'get'
+
+----------------------------------------
+
+Module: RAG & Search Services
+Status: FAILED
+Return Code: 1
+Output:
+🚀 Starting RAG & SEARCH SERVICES Production Readiness Test
+================================================================================
+
+🔧 PHASE 1: Service Setup
+🔧 Setting up RAG & Search Services...
+   🚀 Setting up Gemini LLM service...
+   ✅ LLM service ready
+   🌲 Setting up vector store...
+   ✅ Pinecone store ready
+   🔤 Setting up Google embedding service...
+   ✅ Embedding service ready
+   🔍 Setting up RAG Engine...
+   ❌ Service setup failed: RAGSearchService.__init__() missing 2 required positional arguments: 'vector_store' and 'embedding_service'
+❌ Service setup failed. Cannot proceed with tests.
+
+❌ Some RAG service tests failed!
+
+Errors:
+/home/antonio/anaconda3/lib/python3.12/site-packages/pydantic/_internal/_config.py:373: UserWarning: Valid config keys have changed in V2:
+* 'schema_extra' has been renamed to 'json_schema_extra'
+  warnings.warn(message, UserWarning)
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/test_rag_services.py", line 77, in setup_services
+    self.rag_engine = RAGEngine()
+                      ^^^^^^^^^^^
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/app/core/rag_engine.py", line 23, in __init__
+    self.rag_search = RAGSearchService()
+                      ^^^^^^^^^^^^^^^^^^
+TypeError: RAGSearchService.__init__() missing 2 required positional arguments: 'vector_store' and 'embedding_service'
+
+----------------------------------------
+
+Module: Chat & Interaction Services
+Status: FAILED
+Return Code: 1
+Errors:
+/home/antonio/anaconda3/lib/python3.12/site-packages/pydantic/_internal/_config.py:373: UserWarning: Valid config keys have changed in V2:
+* 'schema_extra' has been renamed to 'json_schema_extra'
+  warnings.warn(message, UserWarning)
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/test_chat_services.py", line 19, in <module>
+    from app.core.chat import ChatService
+ImportError: cannot import name 'ChatService' from 'app.core.chat' (/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/app/core/chat.py)
+
+----------------------------------------
+
+Module: Integration Workflows
+Status: FAILED
+Return Code: 1
+Errors:
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/test_integration_workflows.py", line 24, in <module>
+    from app.core.blueprint_lifecycle import BlueprintLifecycleManager
+ImportError: cannot import name 'BlueprintLifecycleManager' from 'app.core.blueprint_lifecycle' (/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/app/core/blueprint_lifecycle.py). Did you mean: 'BlueprintLifecycleService'?
+
+----------------------------------------
+
+Module: Vector Store Operations
+Status: FAILED
+Return Code: 1
+Output:
+🚀 Starting VECTOR STORE OPERATIONS Production Readiness Test
+================================================================================
+
+🔧 PHASE 1: Service Setup
+🔧 Setting up Vector Store Services...
+   🚀 Setting up Gemini LLM service...
+   ✅ LLM service ready
+   🌲 Setting up Pinecone vector store...
+   ✅ Pinecone store ready
+   🏠 Setting up ChromaDB vector store...
+   ✅ ChromaDB store ready
+   🔤 Setting up Google embedding service...
+   ✅ Embedding service ready
+   🔍 Setting up RAG search service...
+   ✅ RAG search service ready
+   📥 Setting up indexing pipeline...
+   ❌ Service setup failed: IndexingPipeline.__init__() got an unexpected keyword argument 'vector_store'
+❌ Service setup failed. Cannot proceed with tests.
+
+❌ Some vector store operation tests failed!
+
+Errors:
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/test_vector_store_operations.py", line 86, in setup_services
+    self.indexing_pipeline = IndexingPipeline(
+                             ^^^^^^^^^^^^^^^^^
+TypeError: IndexingPipeline.__init__() got an unexpected keyword argument 'vector_store'
+
+----------------------------------------
+

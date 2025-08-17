@@ -15,7 +15,7 @@ from app.core.query_transformer import QueryTransformer
 from app.core.rag_search import RAGSearchService
 from app.core.context_assembly import ContextAssembler
 from app.core.response_generation import ResponseGenerator
-from app.api.endpoints import chat_endpoint
+# from app.api.endpoints import chat_endpoint  # Temporarily disabled due to import issues
 
 
 class TestSampleConversations:

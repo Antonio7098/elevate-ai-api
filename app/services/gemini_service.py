@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 class GeminiConfig:
     """Configuration for Gemini API service."""
     api_key: str
-    model_name: str = "gemini-2.5-flash"
+    model_name: str = "gemini-2.5-flash"  # Most stable and cost-effective model
     temperature: float = 0.7
     max_tokens: int = 1000
     top_p: float = 0.9
@@ -85,21 +85,19 @@ class GeminiService:
                 # Return mock response for testing
                 return await self._generate_mock_response(prompt)
             
-            # Generate response using Gemini API
-            generation_config = genai.types.GenerationConfig(
-                temperature=temperature,
-                max_output_tokens=max_tokens,
-                top_p=self.config.top_p,
-                top_k=self.config.top_k
-            )
-            
+            # Generate response using Gemini API (modern syntax for v0.3.1+)
             # Run the API call in a thread to avoid blocking
             loop = asyncio.get_event_loop()
             response = await loop.run_in_executor(
                 None,
                 lambda: self.model.generate_content(
                     prompt,
-                    generation_config=generation_config
+                    generation_config={
+                        "temperature": temperature,
+                        "max_output_tokens": max_tokens,
+                        "top_p": self.config.top_p,
+                        "top_k": self.config.top_k
+                    }
                 )
             )
             

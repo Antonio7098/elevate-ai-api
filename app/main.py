@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 load_dotenv()  # Load environment variables from .env file
 
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -10,12 +11,32 @@ from app.api.blueprint_lifecycle_endpoints import lifecycle_router
 from app.core.indexing import evaluate_answer
 from app.core.services import initialize_services, shutdown_services
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan event handler for FastAPI application."""
+    # Startup
+    try:
+        await initialize_services()
+        print("✅ Services initialized successfully")
+    except Exception as e:
+        print(f"❌ Failed to initialize services: {e}")
+    
+    yield
+    
+    # Shutdown
+    try:
+        await shutdown_services()
+        print("✅ Services shutdown successfully")
+    except Exception as e:
+        print(f"❌ Failed to shutdown services: {e}")
+
 # Initialize FastAPI app
 app = FastAPI(
     title="Elevate AI API",
     description="AI-powered learning co-pilot API",
     version="0.1.0",
-    debug=settings.debug
+    debug=settings.debug,
+    lifespan=lifespan
 )
 
 # Add CORS middleware
@@ -91,19 +112,19 @@ app.include_router(
 )
 
 # Startup and shutdown events
-@app.on_event("startup")
-async def startup_event():
-    """Initialize services on application startup."""
-    try:
-        await initialize_services()
-    except Exception as e:
-        print(f"Failed to initialize services: {e}")
-        # Don't raise here to allow the app to start for development
+# @app.on_event("startup")
+# async def startup_event():
+#     """Initialize services on application startup."""
+#     try:
+#         await initialize_services()
+#     except Exception as e:
+#         print(f"Failed to initialize services: {e}")
+#         # Don't raise here to allow the app to start for development
 
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Shutdown services on application shutdown."""
-    await shutdown_services()
+# @app.on_event("shutdown")
+# async def shutdown_event():
+#     """Shutdown services on application shutdown."""
+#     await shutdown_services()
 
 # Add health endpoints without authentication
 @app.get("/api/health", include_in_schema=False)

@@ -1,0 +1,704 @@
+{
+  "session_id": "complete_test_1755271493",
+  "start_time": "2025-08-15T16:24:53.158801",
+  "steps_completed": [
+    "session_started",
+    "blueprint_and_sections_generated"
+  ],
+  "errors": [
+    "Workflow error: 'Section' object has no attribute 'get'"
+  ],
+  "total_time": 37.56620526313782,
+  "source_content": "\n        Python Basics\n        \n        Python is a high-level programming language known for its simplicity and readability.\n        \n        Key concepts:\n        - Variables store data values\n        - Functions are reusable code blocks\n        - Loops repeat code execution\n        - Lists store multiple items\n        ",
+  "source_type": "textbook",
+  "generated_content": {
+    "session_start": {
+      "source_content": "\n        Python Basics\n        \n        Python is a high-level programming language known for its simplicity and readability.\n        \n        Key concepts:\n        - Variables store data values\n        - Functions are reusable code blocks\n        - Loops repeat code execution\n        - Lists store multiple items\n        ",
+      "source_type": "textbook",
+      "user_preferences": {
+        "difficulty_level": "beginner",
+        "target_audience": "students",
+        "max_sections": 3,
+        "max_primitives_per_section": 3,
+        "max_mastery_criteria_per_primitive": 3,
+        "max_questions_per_criterion": 5
+      },
+      "analysis_timestamp": "2025-08-15T15:24:53.159056",
+      "blueprint": {
+        "source_id": "3c076235-0aee-4ef1-bc0c-8f0b7f845ce9",
+        "source_title": "Introduction to Python Programming",
+        "source_type": "textbook",
+        "source_summary": {
+          "core_thesis_or_main_argument": "Python is a simple, readable high-level language with key concepts including variables, functions, loops, and lists.",
+          "inferred_purpose": "To provide a basic introduction to Python programming and its fundamental concepts."
+        },
+        "content": null,
+        "blueprint_json": null,
+        "sections": [
+          {
+            "section_id": "section_1",
+            "section_name": "Python Basics",
+            "description": "Python is a high-level programming language known for its simplicity and readability.",
+            "parent_section_id": null
+          },
+          {
+            "section_id": "section_2",
+            "section_name": "Key concepts",
+            "description": "- Variables store data values\n- Functions are reusable code blocks\n- Loops repeat code execution\n- Lists store multiple items",
+            "parent_section_id": null
+          }
+        ],
+        "tags": [],
+        "knowledge_primitives": {
+          "key_propositions_and_facts": [
+            {
+              "id": "prop_1",
+              "statement": "Python is a high-level programming language known for its simplicity and readability.",
+              "supporting_evidence": [],
+              "sections": [
+                "section_1"
+              ],
+              "mastery_criteria": []
+            },
+            {
+              "id": "prop_2",
+              "statement": "Variables store data values",
+              "supporting_evidence": [],
+              "sections": [
+                "section_1"
+              ],
+              "mastery_criteria": []
+            },
+            {
+              "id": "prop_3",
+              "statement": "Functions are reusable code blocks",
+              "supporting_evidence": [],
+              "sections": [
+                "section_1"
+              ],
+              "mastery_criteria": []
+            },
+            {
+              "id": "prop_4",
+              "statement": "Loops repeat code execution",
+              "supporting_evidence": [],
+              "sections": [
+                "section_1"
+              ],
+              "mastery_criteria": []
+            },
+            {
+              "id": "prop_5",
+              "statement": "Lists store multiple items",
+              "supporting_evidence": [],
+              "sections": [
+                "section_1"
+              ],
+              "mastery_criteria": []
+            },
+            {
+              "id": "prop_1",
+              "statement": "Python is a high-level programming language known for its simplicity and readability.",
+              "supporting_evidence": [],
+              "sections": [
+                "section_2"
+              ],
+              "mastery_criteria": []
+            },
+            {
+              "id": "prop_2",
+              "statement": "Variables store data values",
+              "supporting_evidence": [],
+              "sections": [
+                "section_2"
+              ],
+              "mastery_criteria": []
+            },
+            {
+              "id": "prop_3",
+              "statement": "Functions are reusable code blocks",
+              "supporting_evidence": [],
+              "sections": [
+                "section_2"
+              ],
+              "mastery_criteria": []
+            },
+            {
+              "id": "prop_4",
+              "statement": "Loops repeat code execution",
+              "supporting_evidence": [],
+              "sections": [
+                "section_2"
+              ],
+              "mastery_criteria": []
+            },
+            {
+              "id": "prop_5",
+              "statement": "Lists store multiple items",
+              "supporting_evidence": [],
+              "sections": [
+                "section_2"
+              ],
+              "mastery_criteria": []
+            }
+          ],
+          "key_entities_and_definitions": [
+            {
+              "id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+              "entity": "Variables",
+              "definition": "store data values",
+              "category": "Concept",
+              "sections": [
+                "section_1"
+              ],
+              "mastery_criteria": []
+            },
+            {
+              "id": "a1b2c3d4-e5f6-7890-1234-567890abcdeg",
+              "entity": "Functions",
+              "definition": "are reusable code blocks",
+              "category": "Concept",
+              "sections": [
+                "section_1"
+              ],
+              "mastery_criteria": []
+            },
+            {
+              "id": "a1b2c3d4-e5f6-7890-1234-567890abcdeh",
+              "entity": "Loops",
+              "definition": "repeat code execution",
+              "category": "Concept",
+              "sections": [
+                "section_1"
+              ],
+              "mastery_criteria": []
+            },
+            {
+              "id": "a1b2c3d4-e5f6-7890-1234-567890abcdei",
+              "entity": "Lists",
+              "definition": "store multiple items",
+              "category": "Concept",
+              "sections": [
+                "section_1"
+              ],
+              "mastery_criteria": []
+            },
+            {
+              "id": "unique_id_1",
+              "entity": "Variables",
+              "definition": "store data values",
+              "category": "Concept",
+              "sections": [
+                "section_2"
+              ],
+              "mastery_criteria": []
+            },
+            {
+              "id": "unique_id_2",
+              "entity": "Functions",
+              "definition": "are reusable code blocks",
+              "category": "Concept",
+              "sections": [
+                "section_2"
+              ],
+              "mastery_criteria": []
+            },
+            {
+              "id": "unique_id_3",
+              "entity": "Loops",
+              "definition": "repeat code execution",
+              "category": "Concept",
+              "sections": [
+                "section_2"
+              ],
+              "mastery_criteria": []
+            },
+            {
+              "id": "unique_id_4",
+              "entity": "Lists",
+              "definition": "store multiple items",
+              "category": "Concept",
+              "sections": [
+                "section_2"
+              ],
+              "mastery_criteria": []
+            }
+          ],
+          "described_processes_and_steps": [
+            {
+              "id": "process_1",
+              "process_name": "Storing data values",
+              "steps": [
+                "Variables store data values"
+              ],
+              "sections": [
+                "section_1"
+              ],
+              "mastery_criteria": []
+            },
+            {
+              "id": "process_2",
+              "process_name": "Repeating code execution",
+              "steps": [
+                "Loops repeat code execution"
+              ],
+              "sections": [
+                "section_1"
+              ],
+              "mastery_criteria": []
+            },
+            {
+              "id": "process_3",
+              "process_name": "Storing multiple items",
+              "steps": [
+                "Lists store multiple items"
+              ],
+              "sections": [
+                "section_1"
+              ],
+              "mastery_criteria": []
+            },
+            {
+              "id": "process_1",
+              "process_name": "Storing data values",
+              "steps": [
+                "Variables store data values"
+              ],
+              "sections": [
+                "section_2"
+              ],
+              "mastery_criteria": []
+            },
+            {
+              "id": "process_2",
+              "process_name": "Repeating code execution",
+              "steps": [
+                "Loops repeat code execution"
+              ],
+              "sections": [
+                "section_2"
+              ],
+              "mastery_criteria": []
+            },
+            {
+              "id": "process_3",
+              "process_name": "Storing multiple items",
+              "steps": [
+                "Lists store multiple items"
+              ],
+              "sections": [
+                "section_2"
+              ],
+              "mastery_criteria": []
+            }
+          ],
+          "identified_relationships": [
+            {
+              "id": "rel_1",
+              "relationship_type": "part-of",
+              "source_primitive_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+              "target_primitive_id": "process_1",
+              "description": "Variables store data values",
+              "sections": [
+                "section_1"
+              ]
+            },
+            {
+              "id": "rel_2",
+              "relationship_type": "part-of",
+              "source_primitive_id": "a1b2c3d4-e5f6-7890-1234-567890abcdeh",
+              "target_primitive_id": "process_2",
+              "description": "Loops repeat code execution",
+              "sections": [
+                "section_1"
+              ]
+            },
+            {
+              "id": "rel_3",
+              "relationship_type": "part-of",
+              "source_primitive_id": "a1b2c3d4-e5f6-7890-1234-567890abcdei",
+              "target_primitive_id": "process_3",
+              "description": "Lists store multiple items",
+              "sections": [
+                "section_1"
+              ]
+            },
+            {
+              "id": "rel_4",
+              "relationship_type": "part-of",
+              "source_primitive_id": "unique_id_1",
+              "target_primitive_id": "process_1",
+              "description": "Variables store data values",
+              "sections": [
+                "section_2"
+              ]
+            },
+            {
+              "id": "rel_5",
+              "relationship_type": "part-of",
+              "source_primitive_id": "unique_id_3",
+              "target_primitive_id": "process_2",
+              "description": "Loops repeat code execution",
+              "sections": [
+                "section_2"
+              ]
+            },
+            {
+              "id": "rel_6",
+              "relationship_type": "part-of",
+              "source_primitive_id": "unique_id_4",
+              "target_primitive_id": "process_3",
+              "description": "Lists store multiple items",
+              "sections": [
+                "section_2"
+              ]
+            }
+          ],
+          "implicit_and_open_questions": []
+        }
+      },
+      "sections": [
+        "section_id='section_1' section_name='Python Basics' description='Python is a high-level programming language known for its simplicity and readability.' parent_section_id=None",
+        "section_id='section_2' section_name='Key concepts' description='- Variables store data values\\n- Functions are reusable code blocks\\n- Loops repeat code execution\\n- Lists store multiple items' parent_section_id=None"
+      ]
+    },
+    "blueprint": {
+      "source_id": "3c076235-0aee-4ef1-bc0c-8f0b7f845ce9",
+      "source_title": "Introduction to Python Programming",
+      "source_type": "textbook",
+      "source_summary": {
+        "core_thesis_or_main_argument": "Python is a simple, readable high-level language with key concepts including variables, functions, loops, and lists.",
+        "inferred_purpose": "To provide a basic introduction to Python programming and its fundamental concepts."
+      },
+      "content": null,
+      "blueprint_json": null,
+      "sections": [
+        {
+          "section_id": "section_1",
+          "section_name": "Python Basics",
+          "description": "Python is a high-level programming language known for its simplicity and readability.",
+          "parent_section_id": null
+        },
+        {
+          "section_id": "section_2",
+          "section_name": "Key concepts",
+          "description": "- Variables store data values\n- Functions are reusable code blocks\n- Loops repeat code execution\n- Lists store multiple items",
+          "parent_section_id": null
+        }
+      ],
+      "tags": [],
+      "knowledge_primitives": {
+        "key_propositions_and_facts": [
+          {
+            "id": "prop_1",
+            "statement": "Python is a high-level programming language known for its simplicity and readability.",
+            "supporting_evidence": [],
+            "sections": [
+              "section_1"
+            ],
+            "mastery_criteria": []
+          },
+          {
+            "id": "prop_2",
+            "statement": "Variables store data values",
+            "supporting_evidence": [],
+            "sections": [
+              "section_1"
+            ],
+            "mastery_criteria": []
+          },
+          {
+            "id": "prop_3",
+            "statement": "Functions are reusable code blocks",
+            "supporting_evidence": [],
+            "sections": [
+              "section_1"
+            ],
+            "mastery_criteria": []
+          },
+          {
+            "id": "prop_4",
+            "statement": "Loops repeat code execution",
+            "supporting_evidence": [],
+            "sections": [
+              "section_1"
+            ],
+            "mastery_criteria": []
+          },
+          {
+            "id": "prop_5",
+            "statement": "Lists store multiple items",
+            "supporting_evidence": [],
+            "sections": [
+              "section_1"
+            ],
+            "mastery_criteria": []
+          },
+          {
+            "id": "prop_1",
+            "statement": "Python is a high-level programming language known for its simplicity and readability.",
+            "supporting_evidence": [],
+            "sections": [
+              "section_2"
+            ],
+            "mastery_criteria": []
+          },
+          {
+            "id": "prop_2",
+            "statement": "Variables store data values",
+            "supporting_evidence": [],
+            "sections": [
+              "section_2"
+            ],
+            "mastery_criteria": []
+          },
+          {
+            "id": "prop_3",
+            "statement": "Functions are reusable code blocks",
+            "supporting_evidence": [],
+            "sections": [
+              "section_2"
+            ],
+            "mastery_criteria": []
+          },
+          {
+            "id": "prop_4",
+            "statement": "Loops repeat code execution",
+            "supporting_evidence": [],
+            "sections": [
+              "section_2"
+            ],
+            "mastery_criteria": []
+          },
+          {
+            "id": "prop_5",
+            "statement": "Lists store multiple items",
+            "supporting_evidence": [],
+            "sections": [
+              "section_2"
+            ],
+            "mastery_criteria": []
+          }
+        ],
+        "key_entities_and_definitions": [
+          {
+            "id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+            "entity": "Variables",
+            "definition": "store data values",
+            "category": "Concept",
+            "sections": [
+              "section_1"
+            ],
+            "mastery_criteria": []
+          },
+          {
+            "id": "a1b2c3d4-e5f6-7890-1234-567890abcdeg",
+            "entity": "Functions",
+            "definition": "are reusable code blocks",
+            "category": "Concept",
+            "sections": [
+              "section_1"
+            ],
+            "mastery_criteria": []
+          },
+          {
+            "id": "a1b2c3d4-e5f6-7890-1234-567890abcdeh",
+            "entity": "Loops",
+            "definition": "repeat code execution",
+            "category": "Concept",
+            "sections": [
+              "section_1"
+            ],
+            "mastery_criteria": []
+          },
+          {
+            "id": "a1b2c3d4-e5f6-7890-1234-567890abcdei",
+            "entity": "Lists",
+            "definition": "store multiple items",
+            "category": "Concept",
+            "sections": [
+              "section_1"
+            ],
+            "mastery_criteria": []
+          },
+          {
+            "id": "unique_id_1",
+            "entity": "Variables",
+            "definition": "store data values",
+            "category": "Concept",
+            "sections": [
+              "section_2"
+            ],
+            "mastery_criteria": []
+          },
+          {
+            "id": "unique_id_2",
+            "entity": "Functions",
+            "definition": "are reusable code blocks",
+            "category": "Concept",
+            "sections": [
+              "section_2"
+            ],
+            "mastery_criteria": []
+          },
+          {
+            "id": "unique_id_3",
+            "entity": "Loops",
+            "definition": "repeat code execution",
+            "category": "Concept",
+            "sections": [
+              "section_2"
+            ],
+            "mastery_criteria": []
+          },
+          {
+            "id": "unique_id_4",
+            "entity": "Lists",
+            "definition": "store multiple items",
+            "category": "Concept",
+            "sections": [
+              "section_2"
+            ],
+            "mastery_criteria": []
+          }
+        ],
+        "described_processes_and_steps": [
+          {
+            "id": "process_1",
+            "process_name": "Storing data values",
+            "steps": [
+              "Variables store data values"
+            ],
+            "sections": [
+              "section_1"
+            ],
+            "mastery_criteria": []
+          },
+          {
+            "id": "process_2",
+            "process_name": "Repeating code execution",
+            "steps": [
+              "Loops repeat code execution"
+            ],
+            "sections": [
+              "section_1"
+            ],
+            "mastery_criteria": []
+          },
+          {
+            "id": "process_3",
+            "process_name": "Storing multiple items",
+            "steps": [
+              "Lists store multiple items"
+            ],
+            "sections": [
+              "section_1"
+            ],
+            "mastery_criteria": []
+          },
+          {
+            "id": "process_1",
+            "process_name": "Storing data values",
+            "steps": [
+              "Variables store data values"
+            ],
+            "sections": [
+              "section_2"
+            ],
+            "mastery_criteria": []
+          },
+          {
+            "id": "process_2",
+            "process_name": "Repeating code execution",
+            "steps": [
+              "Loops repeat code execution"
+            ],
+            "sections": [
+              "section_2"
+            ],
+            "mastery_criteria": []
+          },
+          {
+            "id": "process_3",
+            "process_name": "Storing multiple items",
+            "steps": [
+              "Lists store multiple items"
+            ],
+            "sections": [
+              "section_2"
+            ],
+            "mastery_criteria": []
+          }
+        ],
+        "identified_relationships": [
+          {
+            "id": "rel_1",
+            "relationship_type": "part-of",
+            "source_primitive_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+            "target_primitive_id": "process_1",
+            "description": "Variables store data values",
+            "sections": [
+              "section_1"
+            ]
+          },
+          {
+            "id": "rel_2",
+            "relationship_type": "part-of",
+            "source_primitive_id": "a1b2c3d4-e5f6-7890-1234-567890abcdeh",
+            "target_primitive_id": "process_2",
+            "description": "Loops repeat code execution",
+            "sections": [
+              "section_1"
+            ]
+          },
+          {
+            "id": "rel_3",
+            "relationship_type": "part-of",
+            "source_primitive_id": "a1b2c3d4-e5f6-7890-1234-567890abcdei",
+            "target_primitive_id": "process_3",
+            "description": "Lists store multiple items",
+            "sections": [
+              "section_1"
+            ]
+          },
+          {
+            "id": "rel_4",
+            "relationship_type": "part-of",
+            "source_primitive_id": "unique_id_1",
+            "target_primitive_id": "process_1",
+            "description": "Variables store data values",
+            "sections": [
+              "section_2"
+            ]
+          },
+          {
+            "id": "rel_5",
+            "relationship_type": "part-of",
+            "source_primitive_id": "unique_id_3",
+            "target_primitive_id": "process_2",
+            "description": "Loops repeat code execution",
+            "sections": [
+              "section_2"
+            ]
+          },
+          {
+            "id": "rel_6",
+            "relationship_type": "part-of",
+            "source_primitive_id": "unique_id_4",
+            "target_primitive_id": "process_3",
+            "description": "Lists store multiple items",
+            "sections": [
+              "section_2"
+            ]
+          }
+        ],
+        "implicit_and_open_questions": []
+      }
+    },
+    "sections": [
+      "section_id='section_1' section_name='Python Basics' description='Python is a high-level programming language known for its simplicity and readability.' parent_section_id=None",
+      "section_id='section_2' section_name='Key concepts' description='- Variables store data values\\n- Functions are reusable code blocks\\n- Loops repeat code execution\\n- Lists store multiple items' parent_section_id=None"
+    ]
+  },
+  "end_time": "2025-08-15T16:25:30.725036"
+}

@@ -17,10 +17,16 @@ class RAGEngine:
     Integrates with our existing RAG Search and Note Creation Agent systems.
     """
     
-    def __init__(self):
+    def __init__(self, vector_store=None, embedding_service=None):
         """Initialize the RAG engine with required services."""
         self.llm_service = create_llm_service()
-        self.rag_search = RAGSearchService()
+        
+        # Initialize RAG search service if dependencies are provided
+        if vector_store and embedding_service:
+            self.rag_search = RAGSearchService(vector_store, embedding_service)
+        else:
+            self.rag_search = None
+            
         self.note_orchestrator = NoteAgentOrchestrator(self.llm_service)
         
         # In-memory storage for test contexts
@@ -46,6 +52,14 @@ class RAGEngine:
             Concatenated context string
         """
         try:
+            # If no RAG search service available, use mock context
+            if not self.rag_search:
+                mock_nodes = self._create_mock_context(query, max_results)
+                context_parts = [n.content for n in mock_nodes]
+                context_text = "\n\n".join(context_parts)
+                self._last_sources = []
+                return context_text
+            
             context_parts: List[str] = []
             collected_sources: List[str] = []
 

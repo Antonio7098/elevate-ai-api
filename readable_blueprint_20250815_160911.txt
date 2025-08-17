@@ -1,0 +1,102 @@
+================================================================================
+SEQUENTIAL GENERATION WORKFLOW - READABLE BLUEPRINT
+================================================================================
+
+TEST INFORMATION
+----------------------------------------
+Session ID: content_test_1755270270
+Start Time: 2025-08-15T16:04:30.117499
+End Time: 2025-08-15T16:05:53.964056
+Total Execution Time: 83.84653282165527 seconds
+Steps Completed: session_started, blueprint_generated, sections_attempted
+Errors: 0
+
+SOURCE CONTENT
+----------------------------------------
+Type: textbook
+Length: 323 characters
+
+
+        Python Basics
+        
+        Python is a high-level programming language known for its simplicity and readability.
+        
+        Key concepts:
+        - Variables store data values
+        - Functions are reusable code blocks
+        - Loops repeat code execution
+        - Lists store multiple items
+        
+
+GENERATED CONTENT
+----------------------------------------
+Session Start Content:
+  Source Content: 
+        Python Basics
+        
+        Python is a high-level programming language known for its si...
+  Source Type: textbook
+  User Preferences: {'difficulty_level': 'beginner', 'target_audience': 'students', 'max_sections': 3, 'max_primitives_per_section': 3}
+  Analysis Timestamp: 2025-08-15T15:04:30.117847
+
+Generated Blueprint:
+  Title: N/A
+  Description: N/A
+  Type: N/A
+  Status: N/A
+  ID: N/A
+  Author ID: N/A
+  Created At: N/A
+  Updated At: N/A
+  Version: N/A
+  Is Public: N/A
+  Tags: []
+  Metadata: N/A
+
+  Blueprint Sections (2):
+    Section 1:
+      ID: N/A
+      Title: N/A
+      Description: Python is a high-level programming language known for its simplicity and readability.
+      Blueprint ID: N/A
+      Parent Section ID: None
+      Depth: N/A
+      Order Index: N/A
+      Difficulty: N/A
+      Estimated Time: N/A minutes
+      User ID: N/A
+      Created At: N/A
+      Updated At: N/A
+
+    Section 2:
+      ID: N/A
+      Title: N/A
+      Description: - Variables store data values
+- Functions are reusable code blocks
+- Loops repeat code execution
+- Lists store multiple items
+      Blueprint ID: N/A
+      Parent Section ID: None
+      Depth: N/A
+      Order Index: N/A
+      Difficulty: N/A
+      Estimated Time: N/A minutes
+      User ID: N/A
+      Created At: N/A
+      Updated At: N/A
+
+Current Content State:
+  Keys available: ['source_content', 'source_type', 'user_preferences', 'analysis_timestamp', 'blueprint', 'sections']
+  source_content: 
+        Python Basics
+        
+        Python is a high-level programming language known for its si...
+  source_type: textbook...
+  user_preferences: {'difficulty_level': 'beginner', 'target_audience': 'students', 'max_sections': 3, 'max_primitives_p...
+  analysis_timestamp: 2025-08-15T15:04:30.117847...
+  blueprint: N/A - N/A...
+  sections: 2 items
+
+================================================================================
+END OF READABLE BLUEPRINT
+================================================================================

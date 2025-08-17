@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Dict, List, Optional, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_serializer
 from enum import Enum
 
 
@@ -33,10 +33,9 @@ class Blueprint(BaseModel):
     author_id: Optional[str] = Field(None, description="ID of the author")
     is_public: bool = Field(default=False, description="Whether the blueprint is public")
     
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
+    @field_serializer('created_at', 'updated_at')
+    def serialize_datetime(self, dt: datetime) -> str:
+        return dt.isoformat() if dt else None
 
 
 class BlueprintCreateRequest(BaseModel):

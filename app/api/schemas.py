@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, ConfigDict, field_validator
 from typing import Optional, List, Dict, Any, Literal
 
 
@@ -967,8 +967,8 @@ class SectionPrimitivesRequest(BaseModel):
     include_criteria: bool = Field(True, description="Include mastery criteria")
     include_relationships: bool = Field(False, description="Include primitive relationships")
     
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "section_id": "section-123",
                 "include_metadata": True,
@@ -976,6 +976,7 @@ class SectionPrimitivesRequest(BaseModel):
                 "include_relationships": False
             }
         }
+    )
 
 class SectionPrimitivesResponse(BaseModel):
     """Response model for section-specific primitive operations."""
@@ -988,8 +989,8 @@ class SectionPrimitivesResponse(BaseModel):
     section_info: Dict[str, Any] = Field(..., description="Section metadata")
     extraction_timestamp: str = Field(..., description="When primitives were extracted")
     
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "section_id": "section-123",
                 "blueprint_id": "blueprint-456",
@@ -1005,6 +1006,7 @@ class SectionPrimitivesResponse(BaseModel):
                 "extraction_timestamp": "2025-08-13T14:45:00Z"
             }
         }
+    )
 
 class SectionSearchRequest(BaseModel):
     """Request model for section-specific search operations."""
@@ -1013,8 +1015,8 @@ class SectionSearchRequest(BaseModel):
     limit: int = Field(10, description="Maximum number of results to return")
     filters: Optional[Dict[str, Any]] = Field(None, description="Additional search filters")
     
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "query": "machine learning algorithms",
                 "search_type": "semantic",
@@ -1025,6 +1027,7 @@ class SectionSearchRequest(BaseModel):
                 }
             }
         }
+    )
 
 class SectionSearchResponse(BaseModel):
     """Response model for section-specific search operations."""
@@ -1035,8 +1038,8 @@ class SectionSearchResponse(BaseModel):
     section_context: Dict[str, Any] = Field(..., description="Section context for search")
     search_metadata: Dict[str, Any] = Field(default_factory=dict, description="Search metadata")
     
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "query": "machine learning algorithms",
                 "results": [],
@@ -1053,3 +1056,4 @@ class SectionSearchResponse(BaseModel):
                 }
             }
         }
+    )

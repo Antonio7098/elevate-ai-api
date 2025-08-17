@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException, status, Path, Query, StreamingResponse
+from fastapi import APIRouter, HTTPException, status, Path, Query
+from fastapi.responses import StreamingResponse
 from app.api.schemas import (
     DeconstructRequest,
     DeconstructResponse,
@@ -63,6 +64,12 @@ import json
 import time
 
 router = APIRouter()
+
+# Import orchestrator router for sequential generation workflow
+from app.api.orchestrator_endpoints import router as orchestrator_router
+
+# Include orchestrator routes
+router.include_router(orchestrator_router)
 
 
 @router.post("/deconstruct", response_model=DeconstructResponse)

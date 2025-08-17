@@ -5,9 +5,9 @@ This module defines the data structures used for storing and retrieving
 text content with rich metadata for the RAG system.
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_serializer
 from typing import Dict, Any, Optional, List
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 
 
@@ -58,16 +58,15 @@ class TextNode(BaseModel):
     embedding_model: Optional[str] = Field(None, description="Model used for embedding")
     
     # Timestamps
-    created_at: datetime = Field(default_factory=datetime.utcnow, description="When the node was created")
-    updated_at: datetime = Field(default_factory=datetime.utcnow, description="When the node was last updated")
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), description="When the node was created")
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), description="When the node was last updated")
     
     # Additional metadata
     metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
     
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
+    @field_serializer('created_at', 'updated_at')
+    def serialize_datetime(self, dt: datetime) -> str:
+        return dt.isoformat() if dt else None
 
 
 class TextNodeCreate(BaseModel):
@@ -115,12 +114,11 @@ class TextNodeSearchResult(BaseModel):
     
     node: TextNode
     score: float = Field(..., description="Similarity score from vector search")
-    retrieved_at: datetime = Field(default_factory=datetime.utcnow, description="When the result was retrieved")
+    retrieved_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), description="When the result was retrieved")
     
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
+    @field_serializer('retrieved_at')
+    def serialize_datetime(self, dt: datetime) -> str:
+        return dt.isoformat() if dt else None
 
 
 class TextNodeBatch(BaseModel):
@@ -129,11 +127,6 @@ class TextNodeBatch(BaseModel):
     nodes: List[TextNode] = Field(..., description="List of text nodes")
     total_count: int = Field(..., description="Total number of nodes in the batch")
     blueprint_id: str = Field(..., description="ID of the source blueprint")
-    
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
 
 
 def create_text_node_id(blueprint_id: str, locus_id: str, chunk_index: int) -> str:

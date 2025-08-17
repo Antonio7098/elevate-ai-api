@@ -1,0 +1,137 @@
+ELEVATE AI API - PRODUCTION READINESS TEST REPORT
+============================================================
+
+Test Date: 2025-08-15 09:11:19
+Duration: 15.54 seconds
+
+Module: Blueprint Services
+Status: FAILED
+Return Code: 1
+Errors:
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/test_blueprint_services.py", line 21, in <module>
+    from app.core.blueprint_lifecycle import BlueprintLifecycleManager
+ImportError: cannot import name 'BlueprintLifecycleManager' from 'app.core.blueprint_lifecycle' (/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/app/core/blueprint_lifecycle.py). Did you mean: 'BlueprintLifecycleService'?
+
+----------------------------------------
+
+Module: Mastery & Learning Services
+Status: FAILED
+Return Code: 1
+Errors:
+/home/antonio/anaconda3/lib/python3.12/site-packages/pydantic/_internal/_config.py:373: UserWarning: Valid config keys have changed in V2:
+* 'schema_extra' has been renamed to 'json_schema_extra'
+  warnings.warn(message, UserWarning)
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/test_mastery_services.py", line 22, in <module>
+    from app.core.criterion_question_generation import CriterionQuestionGenerationService
+ImportError: cannot import name 'CriterionQuestionGenerationService' from 'app.core.criterion_question_generation' (/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/app/core/criterion_question_generation.py). Did you mean: 'CriterionQuestionGenerator'?
+
+----------------------------------------
+
+Module: Note Services
+Status: FAILED
+Return Code: 1
+Errors:
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/test_note_services.py", line 23, in <module>
+    from app.core.note_services.content_conversion_service import ContentConversionService
+ModuleNotFoundError: No module named 'app.core.note_services.content_conversion_service'
+
+----------------------------------------
+
+Module: RAG & Search Services
+Status: FAILED
+Return Code: 1
+Output:
+🚀 Starting RAG & SEARCH SERVICES Production Readiness Test
+================================================================================
+
+🔧 PHASE 1: Service Setup
+🔧 Setting up RAG & Search Services...
+   🚀 Setting up Gemini LLM service...
+   ✅ LLM service ready
+   🌲 Setting up vector store...
+   ✅ Pinecone store ready
+   🔤 Setting up Google embedding service...
+   ✅ Embedding service ready
+   🔍 Setting up RAG Engine...
+   ❌ Service setup failed: RAGSearchService.__init__() missing 2 required positional arguments: 'vector_store' and 'embedding_service'
+❌ Service setup failed. Cannot proceed with tests.
+
+❌ Some RAG service tests failed!
+
+Errors:
+/home/antonio/anaconda3/lib/python3.12/site-packages/pydantic/_internal/_config.py:373: UserWarning: Valid config keys have changed in V2:
+* 'schema_extra' has been renamed to 'json_schema_extra'
+  warnings.warn(message, UserWarning)
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/test_rag_services.py", line 77, in setup_services
+    self.rag_engine = RAGEngine()
+                      ^^^^^^^^^^^
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/app/core/rag_engine.py", line 23, in __init__
+    self.rag_search = RAGSearchService()
+                      ^^^^^^^^^^^^^^^^^^
+TypeError: RAGSearchService.__init__() missing 2 required positional arguments: 'vector_store' and 'embedding_service'
+
+----------------------------------------
+
+Module: Chat & Interaction Services
+Status: FAILED
+Return Code: 1
+Errors:
+/home/antonio/anaconda3/lib/python3.12/site-packages/pydantic/_internal/_config.py:373: UserWarning: Valid config keys have changed in V2:
+* 'schema_extra' has been renamed to 'json_schema_extra'
+  warnings.warn(message, UserWarning)
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/test_chat_services.py", line 19, in <module>
+    from app.core.chat import ChatService
+ImportError: cannot import name 'ChatService' from 'app.core.chat' (/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/app/core/chat.py)
+
+----------------------------------------
+
+Module: Integration Workflows
+Status: FAILED
+Return Code: 1
+Errors:
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/test_integration_workflows.py", line 24, in <module>
+    from app.core.blueprint_lifecycle import BlueprintLifecycleManager
+ImportError: cannot import name 'BlueprintLifecycleManager' from 'app.core.blueprint_lifecycle' (/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/app/core/blueprint_lifecycle.py). Did you mean: 'BlueprintLifecycleService'?
+
+----------------------------------------
+
+Module: Vector Store Operations
+Status: FAILED
+Return Code: 1
+Output:
+🚀 Starting VECTOR STORE OPERATIONS Production Readiness Test
+================================================================================
+
+🔧 PHASE 1: Service Setup
+🔧 Setting up Vector Store Services...
+   🚀 Setting up Gemini LLM service...
+   ✅ LLM service ready
+   🌲 Setting up Pinecone vector store...
+   ✅ Pinecone store ready
+   🏠 Setting up ChromaDB vector store...
+   ✅ ChromaDB store ready
+   🔤 Setting up Google embedding service...
+   ✅ Embedding service ready
+   🔍 Setting up RAG search service...
+   ✅ RAG search service ready
+   📥 Setting up indexing pipeline...
+   ❌ Service setup failed: IndexingPipeline.__init__() got an unexpected keyword argument 'vector_store'
+❌ Service setup failed. Cannot proceed with tests.
+
+❌ Some vector store operation tests failed!
+
+Errors:
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/test_vector_store_operations.py", line 86, in setup_services
+    self.indexing_pipeline = IndexingPipeline(
+                             ^^^^^^^^^^^^^^^^^
+TypeError: IndexingPipeline.__init__() got an unexpected keyword argument 'vector_store'
+
+----------------------------------------
+

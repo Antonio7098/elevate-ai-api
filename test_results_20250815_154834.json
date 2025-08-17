@@ -1,0 +1,18 @@
+{
+  "workflow_results": {
+    "session_id": "test_session_1755269218",
+    "start_time": "2025-08-15T15:46:58.911995",
+    "steps_completed": [
+      "session_started"
+    ],
+    "errors": [
+      "Blueprint generation failed: GenerationStep.BLUEPRINT_CREATION"
+    ],
+    "final_blueprint": null,
+    "total_time": 88.98560214042664,
+    "end_time": "2025-08-15T15:48:27.897618"
+  },
+  "editing_results": {
+    "edit_test_completed": true
+  }
+}

@@ -1,0 +1,342 @@
+ELEVATE AI API - PRODUCTION READINESS TEST REPORT
+============================================================
+
+Test Date: 2025-08-15 09:15:07
+Duration: 15.10 seconds
+
+Module: Blueprint Services
+Status: PASSED
+Return Code: 0
+Output:
+🚀 Starting BLUEPRINT SERVICES Production Readiness Test
+================================================================================
+
+🔧 PHASE 1: Service Setup
+🔧 Setting up Blueprint Services...
+   🚀 Setting up Gemini LLM service...
+   ✅ LLM service ready
+   🏗️  Setting up Blueprint Manager...
+   ✅ Blueprint Manager ready
+   📝 Setting up Blueprint Parser...
+   ✅ Blueprint Parser ready
+   🔄 Setting up Blueprint Lifecycle Service...
+   ✅ Blueprint Lifecycle Service ready
+   🔧 Setting up Primitive Transformation Service...
+   ✅ Primitive Transformation Service ready
+   🎉 All Blueprint Services set up successfully!
+
+🧪 PHASE 2: Running Tests
+
+🧪 Running: Primitive Generation
+
+🔧 Testing Primitive Generation
+------------------------------------------------------------
+   🚀 Testing primitive generation...
+      🔄 Testing primitive transformation...
+         ⚠️  Primitive transformation failed: 'PrimitiveTransformationService' object has no attribute 'transform_primitive'
+      ✅ Testing primitive validation...
+         ⚠️  Primitive validation failed: 'PrimitiveTransformationService' object has no attribute 'validate_primitive'
+   ✅ Primitive generation test completed
+   ✅ PASSED: Primitive Generation
+
+🧪 Running: Blueprint Section Creation
+
+📑 Testing Blueprint Section Creation
+------------------------------------------------------------
+   🚀 Testing blueprint section creation...
+      🆕 Testing blueprint creation...
+         ⚠️  Blueprint creation failed: 'LearningBlueprint' object has no attribute 'get'
+      📝 Testing blueprint parsing...
+         ⚠️  Blueprint parsing failed: 'dict' object has no attribute 'source_id'
+      🔄 Testing blueprint lifecycle...
+         ✅ Blueprint lifecycle status retrieved
+   ✅ Blueprint section creation test completed
+   ✅ PASSED: Blueprint Section Creation
+
+🧪 Running: Blueprint Parsing
+
+📝 Testing Blueprint Parsing
+------------------------------------------------------------
+   🚀 Testing blueprint parsing...
+      ✅ Testing blueprint validation...
+         ⚠️  Blueprint validation failed: 'BlueprintParser' object has no attribute 'validate_blueprint'
+      🏷️  Testing metadata extraction...
+         ⚠️  Metadata extraction failed: 'BlueprintParser' object has no attribute 'extract_metadata'
+   ✅ Blueprint parsing test completed
+   ✅ PASSED: Blueprint Parsing
+
+🧪 Running: Blueprint Lifecycle
+
+🔄 Testing Blueprint Lifecycle
+------------------------------------------------------------
+   🚀 Testing blueprint lifecycle...
+      🔄 Testing lifecycle operations...
+         ⚠️  Lifecycle operations failed: 'LearningBlueprint' object has no attribute 'get'
+   ✅ Blueprint lifecycle test completed
+   ✅ PASSED: Blueprint Lifecycle
+
+================================================================================
+📊 BLUEPRINT SERVICES TEST SUMMARY
+================================================================================
+✅ PASSED: Primitive Generation
+✅ PASSED: Blueprint Section Creation
+✅ PASSED: Blueprint Parsing
+✅ PASSED: Blueprint Lifecycle
+
+🎯 Overall: 4/4 tests passed
+🎉 ALL BLUEPRINT TESTS PASSED! Services are production-ready!
+
+🎉 Blueprint services test suite completed successfully!
+
+Errors:
+/home/antonio/anaconda3/lib/python3.12/site-packages/pydantic/_internal/_config.py:373: UserWarning: Valid config keys have changed in V2:
+* 'schema_extra' has been renamed to 'json_schema_extra'
+  warnings.warn(message, UserWarning)
+Failed to get indexing stats: Embedding service not initialized. Call initialize_embedding_service() first.
+Failed to get blueprint status for test_blueprint_123: Failed to get indexing stats: Embedding service not initialized. Call initialize_embedding_service() first.
+Traceback:
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/app/core/indexing_pipeline.py", line 481, in get_indexing_stats
+    await self._initialize_services()
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/app/core/indexing_pipeline.py", line 99, in _initialize_services
+    self.embedding_service = await get_embedding_service()
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/app/core/embeddings.py", line 332, in get_embedding_service
+    raise EmbeddingError("Embedding service not initialized. Call initialize_embedding_service() first.")
+app.core.embeddings.EmbeddingError: Embedding service not initialized. Call initialize_embedding_service() first.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/app/core/blueprint_lifecycle.py", line 312, in get_blueprint_status
+    stats = await self.indexing_pipeline.get_indexing_stats(blueprint_id)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/app/core/indexing_pipeline.py", line 511, in get_indexing_stats
+    raise IndexingPipelineError(f"Failed to get indexing stats: {e}")
+app.core.indexing_pipeline.IndexingPipelineError: Failed to get indexing stats: Embedding service not initialized. Call initialize_embedding_service() first.
+
+
+----------------------------------------
+
+Module: Mastery & Learning Services
+Status: FAILED
+Return Code: 1
+Output:
+🚀 Starting MASTERY & LEARNING SERVICES Production Readiness Test
+================================================================================
+
+🔧 PHASE 1: Service Setup
+🔧 Setting up Mastery & Learning Services...
+   🚀 Setting up Gemini LLM service...
+   ✅ LLM service ready
+   🎯 Setting up Mastery Criteria Service...
+   ✅ Mastery Criteria Service ready
+   ❓ Setting up Question Generation Service...
+   ✅ Question Generation Service ready
+   🗺️  Setting up Question Mapping Service...
+   ✅ Question Mapping Service ready
+   🔗 Setting up Criterion Question Generation Service...
+   ✅ Criterion Question Generation Service ready
+   🎉 All Mastery Services set up successfully!
+
+🧪 PHASE 2: Running Tests
+
+🧪 Running: Mastery Criteria Generation
+
+🎯 Testing Mastery Criteria Generation
+------------------------------------------------------------
+   🚀 Testing mastery criteria generation...
+      🎯 Generating mastery criteria...
+   ❌ Mastery criteria generation test failed: MasteryCriteriaService.generate_mastery_criteria() got an unexpected keyword argument 'content'
+   ❌ FAILED: Mastery Criteria Generation
+
+🧪 Running: Question Generation
+
+❓ Testing Question Generation
+------------------------------------------------------------
+   🚀 Testing question generation...
+      🔍 Testing multiple_choice questions...
+   ❌ Question generation test failed: 'QuestionGenerationService' object has no attribute 'generate_questions'
+   ❌ FAILED: Question Generation
+
+🧪 Running: Question Mapping
+
+🗺️  Testing Question Mapping
+------------------------------------------------------------
+   🚀 Testing question mapping...
+      🎯 Generating sample criteria...
+      ❓ Generating sample questions...
+      🔗 Testing question-to-criteria mapping...
+   ❌ Question mapping test failed: QuestionMappingService.map_questions_to_criteria() missing 2 required positional arguments: 'primitive' and 'source_content'
+   ❌ FAILED: Question Mapping
+
+🧪 Running: Criterion Question Generation
+
+🔗 Testing Criterion Question Generation
+------------------------------------------------------------
+   🚀 Testing criterion question generation...
+      ❓ Generating questions for criterion...
+   ❌ Criterion question generation test failed: CriterionQuestionGenerator.generate_questions_for_criterion() got an unexpected keyword argument 'count_per_type'
+   ❌ FAILED: Criterion Question Generation
+
+🧪 Running: Integrated Learning Workflow
+
+🔄 Testing Integrated Learning Workflow
+------------------------------------------------------------
+   🚀 Testing integrated workflow...
+      🎯 Step 1: Generating mastery criteria...
+   ❌ Integrated learning workflow test failed: MasteryCriteriaService.generate_mastery_criteria() got an unexpected keyword argument 'content'
+   ❌ FAILED: Integrated Learning Workflow
+
+================================================================================
+📊 MASTERY & LEARNING SERVICES TEST SUMMARY
+================================================================================
+❌ FAILED: Mastery Criteria Generation
+❌ FAILED: Question Generation
+❌ FAILED: Question Mapping
+❌ FAILED: Criterion Question Generation
+❌ FAILED: Integrated Learning Workflow
+
+🎯 Overall: 0/5 tests passed
+⚠️  Some mastery tests failed. Check the output above for details.
+
+❌ Some mastery service tests failed!
+
+Errors:
+/home/antonio/anaconda3/lib/python3.12/site-packages/pydantic/_internal/_config.py:373: UserWarning: Valid config keys have changed in V2:
+* 'schema_extra' has been renamed to 'json_schema_extra'
+  warnings.warn(message, UserWarning)
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/test_mastery_services.py", line 92, in test_mastery_criteria_generation
+    criteria = await self.mastery_service.generate_mastery_criteria(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: MasteryCriteriaService.generate_mastery_criteria() got an unexpected keyword argument 'content'
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/test_mastery_services.py", line 149, in test_question_generation
+    questions = await self.question_service.generate_questions(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'QuestionGenerationService' object has no attribute 'generate_questions'. Did you mean: 'generate_questions_batch'?
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/test_mastery_services.py", line 228, in test_question_mapping
+    mappings = await self.mapping_service.map_questions_to_criteria(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: QuestionMappingService.map_questions_to_criteria() missing 2 required positional arguments: 'primitive' and 'source_content'
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/test_mastery_services.py", line 274, in test_criterion_question_generation
+    criterion_questions = await self.criterion_question_service.generate_questions_for_criterion(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: CriterionQuestionGenerator.generate_questions_for_criterion() got an unexpected keyword argument 'count_per_type'
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/test_mastery_services.py", line 333, in test_integrated_learning_workflow
+    criteria = await self.mastery_service.generate_mastery_criteria(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: MasteryCriteriaService.generate_mastery_criteria() got an unexpected keyword argument 'content'
+
+----------------------------------------
+
+Module: Note Services
+Status: FAILED
+Return Code: 1
+Errors:
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/test_note_services.py", line 23, in <module>
+    from app.core.note_services.content_conversion_service import ContentConversionService
+ModuleNotFoundError: No module named 'app.core.note_services.content_conversion_service'
+
+----------------------------------------
+
+Module: RAG & Search Services
+Status: FAILED
+Return Code: 1
+Output:
+🚀 Starting RAG & SEARCH SERVICES Production Readiness Test
+================================================================================
+
+🔧 PHASE 1: Service Setup
+🔧 Setting up RAG & Search Services...
+   🚀 Setting up Gemini LLM service...
+   ✅ LLM service ready
+   🌲 Setting up vector store...
+   ✅ Pinecone store ready
+   🔤 Setting up Google embedding service...
+   ✅ Embedding service ready
+   🔍 Setting up RAG Engine...
+   ❌ Service setup failed: RAGSearchService.__init__() missing 2 required positional arguments: 'vector_store' and 'embedding_service'
+❌ Service setup failed. Cannot proceed with tests.
+
+❌ Some RAG service tests failed!
+
+Errors:
+/home/antonio/anaconda3/lib/python3.12/site-packages/pydantic/_internal/_config.py:373: UserWarning: Valid config keys have changed in V2:
+* 'schema_extra' has been renamed to 'json_schema_extra'
+  warnings.warn(message, UserWarning)
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/test_rag_services.py", line 77, in setup_services
+    self.rag_engine = RAGEngine()
+                      ^^^^^^^^^^^
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/app/core/rag_engine.py", line 23, in __init__
+    self.rag_search = RAGSearchService()
+                      ^^^^^^^^^^^^^^^^^^
+TypeError: RAGSearchService.__init__() missing 2 required positional arguments: 'vector_store' and 'embedding_service'
+
+----------------------------------------
+
+Module: Chat & Interaction Services
+Status: FAILED
+Return Code: 1
+Errors:
+/home/antonio/anaconda3/lib/python3.12/site-packages/pydantic/_internal/_config.py:373: UserWarning: Valid config keys have changed in V2:
+* 'schema_extra' has been renamed to 'json_schema_extra'
+  warnings.warn(message, UserWarning)
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/test_chat_services.py", line 19, in <module>
+    from app.core.chat import ChatService
+ImportError: cannot import name 'ChatService' from 'app.core.chat' (/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/app/core/chat.py)
+
+----------------------------------------
+
+Module: Integration Workflows
+Status: FAILED
+Return Code: 1
+Errors:
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/test_integration_workflows.py", line 24, in <module>
+    from app.core.blueprint_lifecycle import BlueprintLifecycleManager
+ImportError: cannot import name 'BlueprintLifecycleManager' from 'app.core.blueprint_lifecycle' (/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/app/core/blueprint_lifecycle.py). Did you mean: 'BlueprintLifecycleService'?
+
+----------------------------------------
+
+Module: Vector Store Operations
+Status: FAILED
+Return Code: 1
+Output:
+🚀 Starting VECTOR STORE OPERATIONS Production Readiness Test
+================================================================================
+
+🔧 PHASE 1: Service Setup
+🔧 Setting up Vector Store Services...
+   🚀 Setting up Gemini LLM service...
+   ✅ LLM service ready
+   🌲 Setting up Pinecone vector store...
+   ✅ Pinecone store ready
+   🏠 Setting up ChromaDB vector store...
+   ✅ ChromaDB store ready
+   🔤 Setting up Google embedding service...
+   ✅ Embedding service ready
+   🔍 Setting up RAG search service...
+   ✅ RAG search service ready
+   📥 Setting up indexing pipeline...
+   ❌ Service setup failed: IndexingPipeline.__init__() got an unexpected keyword argument 'vector_store'
+❌ Service setup failed. Cannot proceed with tests.
+
+❌ Some vector store operation tests failed!
+
+Errors:
+Traceback (most recent call last):
+  File "/home/antonio/programming/elevate/core_and_ai/elevate-ai-api/test_vector_store_operations.py", line 86, in setup_services
+    self.indexing_pipeline = IndexingPipeline(
+                             ^^^^^^^^^^^^^^^^^
+TypeError: IndexingPipeline.__init__() got an unexpected keyword argument 'vector_store'
+
+----------------------------------------
+

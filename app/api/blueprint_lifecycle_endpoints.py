@@ -77,7 +77,7 @@ class UpdateBlueprintRequest(BaseModel):
     strategy: Optional[str] = "incremental"  # or "full_reindex"
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "blueprint": {
                     "source_id": "python-basics-v2",
@@ -97,7 +97,7 @@ class ContentParseRequest(BaseModel):
     parse_options: Optional[Dict[str, Any]] = None
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "content": "# Title\n## Section A\nItem details...",
                 "user_id": "test-user-123",
@@ -199,7 +199,7 @@ class ContentValidationRequest(BaseModel):
     user_id: Optional[str] = None
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "content": "# Sample Content\nThis is an example of content to validate.",
                 "content_type": "text",
@@ -366,7 +366,7 @@ class UpdateBlueprintResponse(BaseModel):
     timestamp: str
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "blueprint_id": "python-basics-v2",
                 "status": "success",
@@ -390,7 +390,7 @@ class BlueprintStatusResponse(BaseModel):
     locus_types: Dict[str, int]
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "blueprint_id": "python-basics-v2",
                 "status": "indexed",
@@ -412,7 +412,7 @@ class ChangePreviewResponse(BaseModel):
     timestamp: str
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "blueprint_id": "python-basics-v2",
                 "has_changes": True,

@@ -1,6 +1,6 @@
 from pydantic_settings import BaseSettings
 from typing import Optional, List
-from pydantic import validator
+from pydantic import field_validator
 
 
 class Settings(BaseSettings):
@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     openai_api_key: Optional[str] = None
     google_api_key: Optional[str] = None
     openrouter_api_key: Optional[str] = None
+    tavily_api_key: Optional[str] = None
     
     # Vector Database Configuration
     vector_store_type: str = "pinecone"  # "pinecone" or "chromadb"
@@ -75,27 +76,28 @@ class Settings(BaseSettings):
     max_search_results: int = 20
     similarity_threshold: float = 0.7
     
-    @validator('vector_store_type')
+    @field_validator('vector_store_type')
     def validate_vector_store_type(cls, v):
         if v not in ['pinecone', 'chromadb']:
             raise ValueError('vector_store_type must be either "pinecone" or "chromadb"')
         return v
     
-    @validator('embedding_service_type')
+    @field_validator('embedding_service_type')
     def validate_embedding_service_type(cls, v):
         if v not in ['openai', 'google', 'local']:
             raise ValueError('embedding_service_type must be either "openai", "google", or "local"')
         return v
     
-    @validator('similarity_threshold')
+    @field_validator('similarity_threshold')
     def validate_similarity_threshold(cls, v):
         if not 0.0 <= v <= 1.0:
             raise ValueError('similarity_threshold must be between 0.0 and 1.0')
         return v
     
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
+    model_config = {
+        "env_file": ".env",
+        "case_sensitive": False
+    }
 
 
 # Global settings instance

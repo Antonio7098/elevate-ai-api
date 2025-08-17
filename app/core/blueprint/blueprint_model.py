@@ -4,7 +4,7 @@ Blueprint model for the blueprint lifecycle system.
 This module defines the core Blueprint model and related data structures.
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_serializer
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 
@@ -23,11 +23,9 @@ class Blueprint(BaseModel):
     version: str = Field(default="1.0.0", description="Blueprint version")
     status: str = Field(default="draft", description="Blueprint status")
     
-    class Config:
-        """Pydantic configuration."""
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
+    @field_serializer('created_at', 'updated_at')
+    def serialize_datetime(self, dt: datetime) -> str:
+        return dt.isoformat() if dt else None
 
 
 class BlueprintCreateRequest(BaseModel):

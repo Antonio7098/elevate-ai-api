@@ -1,6 +1,7 @@
 """
 Data models for the Note Creation Agent.
 Defines request/response schemas and data structures.
+Updated to align with new NoteSection schema.
 """
 
 from typing import List, Optional, Dict, Any, Literal
@@ -96,12 +97,48 @@ class InputConversionRequest(BaseModel):
 
 
 class NoteEditingRequest(BaseModel):
-    """Request for agentic note editing."""
-    note_id: str = Field(..., description="ID of note to edit")
+    """Request for agentic note editing with enhanced granularity."""
+    note_id: int = Field(..., description="ID of note to edit (integer from NoteSection)")
+    blueprint_section_id: int = Field(..., description="ID of blueprint section this note belongs to")
     edit_instruction: str = Field(..., description="Natural language editing instruction")
-    edit_type: Literal["rewrite", "expand", "condense", "restructure", "clarify"] = "rewrite"
+    
+    # Enhanced granularity options
+    edit_type: Literal[
+        # Note-level (existing)
+        "rewrite", "expand", "condense", "restructure", "clarify",
+        # Line-level (new)
+        "edit_line", "add_line", "remove_line", "replace_line",
+        # Section-level (new)
+        "edit_section", "add_section", "remove_section", "reorder_sections",
+        # Block-level (new)
+        "edit_block", "add_block", "remove_block", "move_block"
+    ] = "rewrite"
+    
+    # Granularity-specific fields
+    target_line_number: Optional[int] = Field(None, description="Target line number for line-level edits")
+    target_section_title: Optional[str] = Field(None, description="Target section title for section-level edits")
+    target_block_id: Optional[str] = Field(None, description="Target block ID for block-level edits")
+    insertion_position: Optional[int] = Field(None, description="Position for insertions (line number or section order)")
+    
+    # Content for additions/replacements
+    new_content: Optional[str] = Field(None, description="New content to add or replace")
+    
+    # General options
     preserve_original_structure: bool = Field(True, description="Keep original organization")
+    preserve_context: bool = Field(True, description="Maintain context with surrounding content")
     include_reasoning: bool = Field(False, description="Include AI reasoning for changes")
+    user_preferences: Optional[UserPreferences] = Field(None, description="User preferences for editing")
+
+
+class GranularEditResult(BaseModel):
+    """Result of a granular edit operation."""
+    edit_type: str
+    target_position: Optional[int] = None
+    target_identifier: Optional[str] = None  # line number, section title, or block ID
+    original_content: Optional[str] = None
+    new_content: Optional[str] = None
+    context_preserved: bool = True
+    surrounding_context: Optional[str] = None
 
 
 class NoteGenerationResponse(BaseModel):
@@ -109,7 +146,9 @@ class NoteGenerationResponse(BaseModel):
     success: bool
     note_content: Optional[str] = Field(None, description="Generated note content in BlockNote format")
     plain_text: Optional[str] = Field(None, description="Plain text version of note")
-    blueprint_id: Optional[str] = Field(None, description="ID of created/linked blueprint")
+    blueprint_id: Optional[int] = Field(None, description="ID of created/linked blueprint")
+    blueprint_section_id: Optional[int] = Field(None, description="ID of blueprint section")
+    note_section_id: Optional[int] = Field(None, description="ID of created note section")
     chunks_processed: Optional[List[SourceChunk]] = Field(None, description="Source chunks used")
     processing_time: Optional[float] = Field(None, description="Processing time in seconds")
     message: str = Field(..., description="Success/error message")
@@ -121,19 +160,27 @@ class ContentConversionResponse(BaseModel):
     success: bool
     converted_content: Optional[str] = Field(None, description="Content in BlockNote format")
     plain_text: Optional[str] = Field(None, description="Plain text version")
-    blueprint_id: Optional[str] = Field(None, description="ID of created blueprint")
+    blueprint_id: Optional[int] = Field(None, description="ID of created blueprint")
+    blueprint_section_id: Optional[int] = Field(None, description="ID of blueprint section")
+    note_section_id: Optional[int] = Field(None, description="ID of created note section")
     conversion_notes: Optional[str] = Field(None, description="Notes about conversion process")
     message: str = Field(..., description="Success/error message")
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Additional metadata")
 
 
 class NoteEditingResponse(BaseModel):
-    """Response from note editing."""
+    """Response from note editing with granular edit details."""
     success: bool
     edited_content: Optional[str] = Field(None, description="Edited note in BlockNote format")
     plain_text: Optional[str] = Field(None, description="Plain text version")
     edit_summary: Optional[str] = Field(None, description="Summary of changes made")
     reasoning: Optional[str] = Field(None, description="AI reasoning for changes")
+    content_version: Optional[int] = Field(None, description="New content version after editing")
+    
+    # Granular edit details
+    granular_edits: List[GranularEditResult] = Field(default_factory=list, description="Details of granular edits made")
+    edit_positions: List[int] = Field(default_factory=list, description="Positions where edits were made")
+    
     message: str = Field(..., description="Success/error message")
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Additional metadata")
 
@@ -152,7 +199,8 @@ class NoteEditingSuggestionsResponse(BaseModel):
     """Response with editing suggestions."""
     success: bool
     suggestions: List[EditingSuggestion]
-    note_id: str
+    note_id: int = Field(..., description="ID of note section")
+    blueprint_section_id: int = Field(..., description="ID of blueprint section")
     message: str
 
 
@@ -170,9 +218,20 @@ class ChunkingResult(BaseModel):
 class BlueprintCreationResult(BaseModel):
     """Result of blueprint creation process."""
     success: bool
-    blueprint_id: str
+    blueprint_id: int = Field(..., description="ID of created blueprint")
+    blueprint_section_id: Optional[int] = Field(None, description="ID of created blueprint section")
     blueprint_summary: str
     knowledge_primitives: List[str]
     cross_references: List[str]
     processing_time: float
     message: str
+
+
+class NoteSectionContext(BaseModel):
+    """Context information for a note section."""
+    note_section_id: int
+    blueprint_section_id: int
+    blueprint_id: int
+    section_hierarchy: List[Dict[str, Any]] = Field(default_factory=list, description="Parent sections hierarchy")
+    related_notes: List[Dict[str, Any]] = Field(default_factory=list, description="Related notes in same section")
+    knowledge_primitives: List[str] = Field(default_factory=list, description="Knowledge primitives in this section")
